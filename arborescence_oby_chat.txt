@@ -1,0 +1,490 @@
+├── .DS_Store
+├── Fonctionnement_run_full_indexing_pipeline.md
+├── LICENSE.txt
+├── arborescence_oby_chat.txt
+├── config
+│   ├── .env
+│   └── config.py
+├── constantes_sante.db
+├── docs
+│   ├── architecture.md
+│   ├── codebase
+│   │   ├── agent.md
+│   │   ├── overview.md
+│   │   └── tools.md
+│   ├── index.md
+│   ├── oby-ia_schema-Architecture_fonctionnelle_OBY_IA_15_07_2025.png
+│   ├── oby-ia_schema.puml
+│   └── style_sheet_documentation.css
+├── mkdocs.yml
+├── oby_ia_documentation_site.zip
+├── outputs
+│   └── chat_exports
+│       └── Deloin
+│           ├── 2025-06-05
+│           │   ├── Deloin_graph_1.png
+│           │   ├── Deloin_graph_2.png
+│           │   ├── Deloin_graph_3.png
+│           │   ├── Deloin_graph_4.png
+│           │   └── export_chat_Deloin.md
+│           ├── 2025-06-13
+│           │   ├── Deloin_graph_1.png
+│           │   ├── Deloin_graph_2.png
+│           │   ├── Deloin_graph_3.png
+│           │   ├── Deloin_graph_4.png
+│           │   └── export_chat_Deloin.md
+│           ├── 2025-07-07
+│           │   └── export_chat_Deloin.md
+│           └── 2025-07-11
+│               ├── Deloin_graph_1.png
+│               ├── Deloin_graph_2.png
+│               ├── Deloin_graph_3.png
+│               ├── Deloin_graph_4.png
+│               └── export_chat_Deloin.md
+├── pyproject.toml
+├── requirements.txt
+├── scripts
+│   ├── TODO.py
+│   ├── generate_overview_doc.py
+│   └── generate_tree.py
+├── site
+│   ├── 404.html
+│   ├── architecture
+│   │   └── index.html
+│   ├── assets
+│   │   ├── _mkdocstrings.css
+│   │   ├── images
+│   │   │   └── favicon.png
+│   │   ├── javascripts
+│   │   │   ├── bundle.56ea9cef.min.js
+│   │   │   ├── bundle.56ea9cef.min.js.map
+│   │   │   ├── glightbox.min.js
+│   │   │   ├── lunr
+│   │   │   │   ├── min
+│   │   │   │   │   ├── lunr.ar.min.js
+│   │   │   │   │   ├── lunr.da.min.js
+│   │   │   │   │   ├── lunr.de.min.js
+│   │   │   │   │   ├── lunr.du.min.js
+│   │   │   │   │   ├── lunr.el.min.js
+│   │   │   │   │   ├── lunr.es.min.js
+│   │   │   │   │   ├── lunr.fi.min.js
+│   │   │   │   │   ├── lunr.fr.min.js
+│   │   │   │   │   ├── lunr.he.min.js
+│   │   │   │   │   ├── lunr.hi.min.js
+│   │   │   │   │   ├── lunr.hu.min.js
+│   │   │   │   │   ├── lunr.hy.min.js
+│   │   │   │   │   ├── lunr.it.min.js
+│   │   │   │   │   ├── lunr.ja.min.js
+│   │   │   │   │   ├── lunr.jp.min.js
+│   │   │   │   │   ├── lunr.kn.min.js
+│   │   │   │   │   ├── lunr.ko.min.js
+│   │   │   │   │   ├── lunr.multi.min.js
+│   │   │   │   │   ├── lunr.nl.min.js
+│   │   │   │   │   ├── lunr.no.min.js
+│   │   │   │   │   ├── lunr.pt.min.js
+│   │   │   │   │   ├── lunr.ro.min.js
+│   │   │   │   │   ├── lunr.ru.min.js
+│   │   │   │   │   ├── lunr.sa.min.js
+│   │   │   │   │   ├── lunr.stemmer.support.min.js
+│   │   │   │   │   ├── lunr.sv.min.js
+│   │   │   │   │   ├── lunr.ta.min.js
+│   │   │   │   │   ├── lunr.te.min.js
+│   │   │   │   │   ├── lunr.th.min.js
+│   │   │   │   │   ├── lunr.tr.min.js
+│   │   │   │   │   ├── lunr.vi.min.js
+│   │   │   │   │   └── lunr.zh.min.js
+│   │   │   │   ├── tinyseg.js
+│   │   │   │   └── wordcut.js
+│   │   │   └── workers
+│   │   │       ├── search.d50fe291.min.js
+│   │   │       └── search.d50fe291.min.js.map
+│   │   └── stylesheets
+│   │       ├── glightbox.min.css
+│   │       ├── main.342714a4.min.css
+│   │       ├── main.342714a4.min.css.map
+│   │       ├── palette.06af60db.min.css
+│   │       └── palette.06af60db.min.css.map
+│   ├── codebase
+│   │   ├── agent
+│   │   │   └── index.html
+│   │   ├── overview
+│   │   │   └── index.html
+│   │   └── tools
+│   │       └── index.html
+│   ├── index.html
+│   ├── objects.inv
+│   ├── oby-ia_schema-Architecture_fonctionnelle_OBY_IA_15_07_2025.png
+│   ├── search
+│   │   └── search_index.json
+│   ├── sitemap.xml
+│   ├── sitemap.xml.gz
+│   └── style_sheet_documentation.css
+├── src
+│   ├── .DS_Store
+│   ├── __init__.py
+│   ├── app.py
+│   ├── assets
+│   │   ├── .DS_Store
+│   │   ├── fonts
+│   │   │   ├── .DS_Store
+│   │   │   └── dejavu-fonts-ttf-2.37
+│   │   │       ├── .DS_Store
+│   │   │       ├── AUTHORS
+│   │   │       ├── BUGS
+│   │   │       ├── LICENSE
+│   │   │       ├── NEWS
+│   │   │       ├── README.md
+│   │   │       ├── fontconfig
+│   │   │       │   ├── 20-unhint-small-dejavu-sans-mono.conf
+│   │   │       │   ├── 20-unhint-small-dejavu-sans.conf
+│   │   │       │   ├── 20-unhint-small-dejavu-serif.conf
+│   │   │       │   ├── 57-dejavu-sans-mono.conf
+│   │   │       │   ├── 57-dejavu-sans.conf
+│   │   │       │   └── 57-dejavu-serif.conf
+│   │   │       ├── langcover.txt
+│   │   │       ├── status.txt
+│   │   │       ├── ttf
+│   │   │       │   ├── DejaVuMathTeXGyre.ttf
+│   │   │       │   ├── DejaVuSans-Bold.cw127.pkl
+│   │   │       │   ├── DejaVuSans-Bold.pkl
+│   │   │       │   ├── DejaVuSans-Bold.ttf
+│   │   │       │   ├── DejaVuSans-BoldOblique.ttf
+│   │   │       │   ├── DejaVuSans-ExtraLight.ttf
+│   │   │       │   ├── DejaVuSans-Oblique.ttf
+│   │   │       │   ├── DejaVuSans.cw127.pkl
+│   │   │       │   ├── DejaVuSans.pkl
+│   │   │       │   ├── DejaVuSans.ttf
+│   │   │       │   ├── DejaVuSansCondensed-Bold.ttf
+│   │   │       │   ├── DejaVuSansCondensed-BoldOblique.ttf
+│   │   │       │   ├── DejaVuSansCondensed-Oblique.ttf
+│   │   │       │   ├── DejaVuSansCondensed.ttf
+│   │   │       │   ├── DejaVuSansMono-Bold.ttf
+│   │   │       │   ├── DejaVuSansMono-BoldOblique.ttf
+│   │   │       │   ├── DejaVuSansMono-Oblique.ttf
+│   │   │       │   ├── DejaVuSansMono.ttf
+│   │   │       │   ├── DejaVuSerif-Bold.ttf
+│   │   │       │   ├── DejaVuSerif-BoldItalic.ttf
+│   │   │       │   ├── DejaVuSerif-Italic.ttf
+│   │   │       │   ├── DejaVuSerif.ttf
+│   │   │       │   ├── DejaVuSerifCondensed-Bold.ttf
+│   │   │       │   ├── DejaVuSerifCondensed-BoldItalic.ttf
+│   │   │       │   ├── DejaVuSerifCondensed-Italic.ttf
+│   │   │       │   └── DejaVuSerifCondensed.ttf
+│   │   │       └── unicover.txt
+│   │   ├── images
+│   │   │   └── image_1_ia.jpg
+│   │   └── style.css
+│   ├── data
+│   │   ├── .DS_Store
+│   │   ├── __init__.py
+│   │   ├── constant_generator.py
+│   │   ├── fiches_documentaires_docx
+│   │   │   ├── .DS_Store
+│   │   │   └── Fiche_RBPP_regroupees_de_000_a _104_clean.docx
+│   │   ├── get_constants.py
+│   │   ├── indexation
+│   │   │   └── indexed_files.json
+│   │   ├── poa_patients
+│   │   │   ├── .DS_Store
+│   │   │   └── DELOIN_ALAIN_24_04_2025.json
+│   │   ├── to_json_fiches_documentaires
+│   │   │   ├── fiche_000.json
+│   │   │   ├── fiche_001.json
+│   │   │   ├── fiche_002.json
+│   │   │   ├── fiche_003.json
+│   │   │   ├── fiche_004.json
+│   │   │   ├── fiche_005.json
+│   │   │   ├── fiche_006.json
+│   │   │   ├── fiche_007.json
+│   │   │   ├── fiche_008.json
+│   │   │   ├── fiche_009.json
+│   │   │   ├── fiche_010.json
+│   │   │   ├── fiche_011.json
+│   │   │   ├── fiche_012.json
+│   │   │   ├── fiche_013.json
+│   │   │   ├── fiche_014.json
+│   │   │   ├── fiche_015.json
+│   │   │   ├── fiche_016.json
+│   │   │   ├── fiche_017.json
+│   │   │   ├── fiche_018.json
+│   │   │   ├── fiche_019.json
+│   │   │   ├── fiche_020.json
+│   │   │   ├── fiche_021.json
+│   │   │   ├── fiche_022.json
+│   │   │   ├── fiche_023.json
+│   │   │   ├── fiche_024.json
+│   │   │   ├── fiche_025.json
+│   │   │   ├── fiche_026.json
+│   │   │   ├── fiche_027.json
+│   │   │   ├── fiche_028.json
+│   │   │   ├── fiche_029.json
+│   │   │   ├── fiche_030.json
+│   │   │   ├── fiche_031.json
+│   │   │   ├── fiche_032.json
+│   │   │   ├── fiche_033.json
+│   │   │   ├── fiche_034.json
+│   │   │   ├── fiche_035.json
+│   │   │   ├── fiche_036.json
+│   │   │   ├── fiche_037.json
+│   │   │   ├── fiche_038.json
+│   │   │   ├── fiche_039.json
+│   │   │   ├── fiche_040.json
+│   │   │   ├── fiche_041.json
+│   │   │   ├── fiche_042.json
+│   │   │   ├── fiche_043.json
+│   │   │   ├── fiche_044.json
+│   │   │   ├── fiche_045.json
+│   │   │   ├── fiche_046.json
+│   │   │   ├── fiche_047.json
+│   │   │   ├── fiche_048.json
+│   │   │   ├── fiche_049.json
+│   │   │   ├── fiche_050.json
+│   │   │   ├── fiche_051.json
+│   │   │   ├── fiche_052.json
+│   │   │   ├── fiche_053.json
+│   │   │   ├── fiche_054.json
+│   │   │   ├── fiche_055.json
+│   │   │   ├── fiche_056.json
+│   │   │   ├── fiche_057.json
+│   │   │   ├── fiche_058.json
+│   │   │   ├── fiche_059.json
+│   │   │   ├── fiche_060.json
+│   │   │   ├── fiche_061.json
+│   │   │   ├── fiche_062.json
+│   │   │   ├── fiche_063.json
+│   │   │   ├── fiche_064.json
+│   │   │   ├── fiche_065.json
+│   │   │   ├── fiche_066.json
+│   │   │   ├── fiche_067.json
+│   │   │   ├── fiche_068.json
+│   │   │   ├── fiche_069.json
+│   │   │   ├── fiche_070.json
+│   │   │   ├── fiche_071.json
+│   │   │   ├── fiche_072.json
+│   │   │   ├── fiche_073.json
+│   │   │   ├── fiche_074.json
+│   │   │   ├── fiche_075.json
+│   │   │   ├── fiche_076.json
+│   │   │   ├── fiche_077.json
+│   │   │   ├── fiche_078.json
+│   │   │   ├── fiche_079.json
+│   │   │   ├── fiche_080.json
+│   │   │   ├── fiche_081.json
+│   │   │   ├── fiche_082.json
+│   │   │   ├── fiche_083.json
+│   │   │   ├── fiche_084.json
+│   │   │   ├── fiche_085.json
+│   │   │   ├── fiche_086.json
+│   │   │   ├── fiche_087.json
+│   │   │   ├── fiche_088.json
+│   │   │   ├── fiche_089.json
+│   │   │   ├── fiche_090.json
+│   │   │   ├── fiche_091.json
+│   │   │   ├── fiche_092.json
+│   │   │   ├── fiche_093.json
+│   │   │   ├── fiche_094.json
+│   │   │   ├── fiche_095.json
+│   │   │   ├── fiche_096.json
+│   │   │   ├── fiche_097.json
+│   │   │   ├── fiche_098.json
+│   │   │   ├── fiche_099.json
+│   │   │   ├── fiche_100.json
+│   │   │   ├── fiche_101.json
+│   │   │   ├── fiche_102.json
+│   │   │   └── fiche_104.json
+│   │   ├── to_json_web_sites
+│   │   │   ├── Actualites_Lancement-de-la-version-francaise-de-Lab-Tests-on-line.json
+│   │   │   ├── Nos-metiers_Les-metiers-soignants_Aide-a-domicile-Auxiliaire-de-vie-sociale.json
+│   │   │   ├── Nos-metiers_Les-metiers-soignants_Infirmier-anesthesiste.json
+│   │   │   ├── Nos-metiers_Les-metiers-soignants_Infirmier-de-bloc-operatoire.json
+│   │   │   ├── Nos-metiers_Les-metiers-soignants_Infirmier.json
+│   │   │   ├── UserFiles_File_spilf_recos_2019-argumentaire-infections-enterobacteries.pdf.json
+│   │   │   ├── UserFiles_File_spilf_recos_spilf-groupe-recos-infections-endo-ureterales.pptx.json
+│   │   │   ├── acces-annuaires.json
+│   │   │   ├── actualisation-des-recommandations-de-prise-en-charge-des-pneumonies-aigues-communautaires-chez-ladulte.json
+│   │   │   ├── actualites-covid-19_traitement.json
+│   │   │   ├── actualites_appels-a-participation-bourses-et-prix_2e-edition-du-prix-akinoha-en-partenariat-avec-la-sfgg-pour-lutter-contre-la-maltraitance-des-personnes-agees.json
+│   │   │   ├── agenda_je-vis-je-vieillis-on-sepanouit-journees-nationales-dediees-au-vieillissement-tours.json
+│   │   │   ├── annuaire-des-activites_France_Soins%20de%20suite%20et%20de%20r%C3%A9adaptation%20non%20sp%C3%A9cialis%C3%A9s.json
+│   │   │   ├── arthrose.json
+│   │   │   ├── atteinte-pulmonaire-du-deficit-en-alpha-1-antitrypsine-recommandations-pratiques-pour-le-diagnostic-et-la-prise-en-charge.json
+│   │   │   ├── cataracte.json
+│   │   │   ├── changer-de-logement_autres-solutions-de-logement.json
+│   │   │   ├── changer-de-logement_les-questions-a-se-poser.json
+│   │   │   ├── changer-de-logement_tout.json
+│   │   │   ├── changer-de-logement_vivre-chez-un-proche.json
+│   │   │   ├── changer-de-logement_vivre-dans-une-residence-avec-services-pour-seniors.json
+│   │   │   ├── changer-de-logement_vivre-en-accueil-familial.json
+│   │   │   ├── chute-chez-la-personne-agee.json
+│   │   │   ├── degenerescence-maculaire-liee-a-lage.json
+│   │   │   ├── demence-a-corps-de-lewy.json
+│   │   │   ├── demence-vasculaire.json
+│   │   │   ├── denutrition-chez-la-personne-agee.json
+│   │   │   ├── documents_archives-recommandations.json
+│   │   │   ├── documents_les-recommandations-splf.json
+│   │   │   ├── ecni-127-deficit-neurosensoriel-chez-le-sujet-age.json
+│   │   │   ├── espace-presse_communiques-de-presse_actes-des-printanieres-de-la-sfgg-25025-5-recommandations-pour-lutter-contre-lisolement-des-personnes-agees.json
+│   │   │   ├── espace-presse_interviews_troubles-de-lhumeur-anxiete-angoisse-chez-les-personnes-agees-lefficacite-des-therapies-tcc-par-anne-julie-vaillant-ciszewicz-psychologue-clinicienne-specialisee-en-geron.json
+│   │   │   ├── espace-presse_revue-de-presse-professionnelle_deprescription-quand-lordonnance-du-sujet-age-gagne-a-etre-allegee-itv-du-pr-jean-baptiste-beuscart.json
+│   │   │   ├── fr_accueil_fondamentaux_comment-tirer-le-meilleur-parti-des-soins-de-santé_comment-tirer-le-meilleur-parti-d-une-consultation.json
+│   │   │   ├── fr_accueil_fondamentaux_comment-tirer-le-meilleur-parti-des-soins-de-santé_gestion-des-dossiers-médicaux.json
+│   │   │   ├── fr_accueil_la-santé-des-personnes-âgées_dispenser-des-soins-aux-adultes-âgés.json
+│   │   │   ├── fr_accueil_la-santé-des-personnes-âgées_dispenser-des-soins-aux-adultes-âgés_continuité-des-soins-pour-les-adultes-âgés.json
+│   │   │   ├── fr_accueil_la-santé-des-personnes-âgées_dispenser-des-soins-aux-adultes-âgés_maisons-de-santé.json
+│   │   │   ├── fr_accueil_la-santé-des-personnes-âgées_dispenser-des-soins-aux-adultes-âgés_prestataires-de-soins-pour-les-adultes-âgés-professionnels-de-la-santé.json
+│   │   │   ├── fr_bon-usage-antibiotique-dans-les-infections-communautaires-graves-prises-en-charge-dans-les-services-de-soins-intensifs-et-en-reanimation.html.json
+│   │   │   ├── fr_bon-usage-des-antibiotiques-dans-la-prise-en-charge-des-infections-respiratoires.html.json
+│   │   │   ├── fr_cerba-flash-la-prescription-connectee.json
+│   │   │   ├── fr_diaporamas-recommandations.html.json
+│   │   │   ├── fr_nos-expertises.json
+│   │   │   ├── fr_outils-d-aide-a-la-prescription.html.json
+│   │   │   ├── fr_recommandations-1.html.json
+│   │   │   ├── fr_recommandations-archivees.html.json
+│   │   │   ├── fr_recommandations.html.json
+│   │   │   ├── groupes-de-travail-infirmier.json
+│   │   │   ├── guide-de-prise-en-charge-des-sequelles-respiratoires-post-infection-a-sars-cov-2.json
+│   │   │   ├── index.json
+│   │   │   ├── items-r2c_ecni-106-confusion-demences.json
+│   │   │   ├── items-r2c_ecni-119-vieillissement-normal-aspects-biologiques-fonctionnels-et-relationnels-donnees-epidemiologiques-et-sociologiques-prevention-du-vieillissement-pathologique.json
+│   │   │   ├── items-r2c_ecni-120-menopause-et-andropause.json
+│   │   │   ├── items-r2c_ecni-124-osteopathies-fragilisantes.json
+│   │   │   ├── items-r2c_ecni-126-la-personne-agee-malade-particularites-semiologiques-psychologiques-et-therapeutiques.json
+│   │   │   ├── items-r2c_ecni-128-troubles-de-la-marche-et-de-lequilibre.json
+│   │   │   ├── items-r2c_ecni-129-troubles-cognitifs-du-sujet-age.json
+│   │   │   ├── items-r2c_ecni-130-autonomie-et-dependance-chez-le-sujet-age.json
+│   │   │   ├── items-r2c_ecni-250-troubles-nutritionnels-chez-le-sujet-age.json
+│   │   │   ├── items-r2c_ecni-68-troubles-psychiques-du-sujet-age.json
+│   │   │   ├── items-r2c_ecni-79-alteration-de-la-fonction-visuelle.json
+│   │   │   ├── jcms_c_2028194_fr_prendre-en-charge-une-personne-agee-polypathologique-en-soins-primaires.json
+│   │   │   ├── la-sfgg_groupes-de-travail_biologie-du-vieillissement.json
+│   │   │   ├── la-sfgg_groupes-de-travail_choisir-avec-soin.json
+│   │   │   ├── la-sfgg_groupes-de-travail_groupe-dactions-en-nephrologie-des-personnes-agees-granpa.json
+│   │   │   ├── la-sfgg_groupes-de-travail_intergroupe-douleur-sfgg-sfetd.json
+│   │   │   ├── la-sfgg_groupes-de-travail_intergroupe-psychiatrie-de-la-personne-agee.json
+│   │   │   ├── la-sfgg_groupes-de-travail_prevention-des-chutes-et-des-fractures.json
+│   │   │   ├── la-sfgg_groupes-de-travail_ucc-et-dispositifs-de-soins-alzheimer.json
+│   │   │   ├── le-vieillissement-en-librairie.json
+│   │   │   ├── le-vieillissement-en-librairie_vieillissement-et-cancer-coordonnee-par-laure-de-decker-et-pierre-soubeyran-editions-john-libbey-eurotext.json
+│   │   │   ├── les-groupes-de-travail-de-la-splf.json
+│   │   │   ├── les-recommandations-splf.json
+│   │   │   ├── maladie-dalzheimer.json
+│   │   │   ├── maladie-de-parkinson.json
+│   │   │   ├── member_content_actualites-covid-19_optimisation-du-parcours-de-soin-du-patient-insuffisant-cardiaque.json
+│   │   │   ├── member_content_actualites-covid-19_traitement.json
+│   │   │   ├── menopause.json
+│   │   │   ├── nos-publications_recommandations-esc.json
+│   │   │   ├── optimisation-du-traitement-medicamenteux-des-patients-atteints-de-bpco-en-etat-stable-position-de-la-splf-actualisation-2021.json
+│   │   │   ├── osteoporose.json
+│   │   │   ├── place-et-gestion-de-la-tracheotomie-dans-la-prise-en-charge-de-la-dependance-ventilatoire-des-patients-atteints-de-maladies-neuromusculaires-lentement-evolutives.json
+│   │   │   ├── preserver-son-autonomie_a-qui-s-adresser.json
+│   │   │   ├── preserver-son-autonomie_amenager-son-logement-et-s-equiper.json
+│   │   │   ├── preserver-son-autonomie_les-mesures-de-protection.json
+│   │   │   ├── preserver-son-autonomie_les-obligations-de-la-famille.json
+│   │   │   ├── preserver-son-autonomie_les-politiques-du-grand-age.json
+│   │   │   ├── preserver-son-autonomie_organiser-a-l-avance-sa-propre-protection.json
+│   │   │   ├── preserver-son-autonomie_perte-d-autonomie-evaluation-et-droits.json
+│   │   │   ├── preserver-son-autonomie_perte-d-autonomie-evaluation-et-droits_comment-fonctionne-la-grille-aggir.json
+│   │   │   ├── preserver-son-autonomie_preserver-son-autonomie-et-sa-sante.json
+│   │   │   ├── preserver-son-autonomie_tout.json
+│   │   │   ├── prise-en-charge-du-sommeil-et-de-la-vigilance-en-periode-epidemique-covid-19.json
+│   │   │   ├── professionnels_internat-geriatrique_autres-formations-diu_masters-biologie-du-vieillissement.json
+│   │   │   ├── rappels-reglementaires-et-techniques-pour-loxygenotherapie-de-courte-duree-au-domicile-dans-le-contexte-de-patients-atteints-de-covid19-grave-hors-milieu-pneumologique.json
+│   │   │   ├── recherche_les-differents-types-de-projets-sfc_etudes-interventionnelles.json
+│   │   │   ├── recommandation-de-la-sp2a-prise-en-charge-lasthme-de-lenfant-de-6-a-12-ans.json
+│   │   │   ├── recommandation-du-golf-pour-la-vaccination-contre-le-sarscov2-des-patients-atteints-de-cancers-pulmonaires-tumeurs-solides-de-la-plevre-et-mediastin.json
+│   │   │   ├── recommandations-de-la-splf-sur-la-fpi-version-2021.json
+│   │   │   ├── recommandations-de-la-splf-sur-les-pneumothorax-spontanes-primaires.json
+│   │   │   ├── recommandations-de-lintergroupe-francophone-de-cancerologie-thoracique-de-la-societe-de-pneumologie-de-langue-francaise-et-de-la-societe-dimagerie-thoracique-sur-le-depistage-du-cancer-bronchopu.json
+│   │   │   ├── recommandations-de-prise-en-charge-de-la-toux-chronique-de-ladulte-2023.json
+│   │   │   ├── recommandations-eso.json
+│   │   │   ├── recommandations-pour-la-prise-en-charge-de-lencombrement-des-voies-aeriennes-par-les-techniques-de-desencombrement.json
+│   │   │   ├── recommandations-pour-la-prise-en-charge-et-le-suivi-des-patients-asthmatiques-adultes-2021.json
+│   │   │   ├── recommandations.json
+│   │   │   ├── recommandations_anti-grippe-le-vaccin-haute-dose-efluelda.json
+│   │   │   ├── recommandations_canicule-les-bons-reflexes-a-adopter-pour-les-personnes-agees-ehpad-et-domicile.json
+│   │   │   ├── recommandations_confusion-aigue-chez-la-personne-agee.json
+│   │   │   ├── recommandations_degenerescence-maculaire-liee-a-lage.json
+│   │   │   ├── recommandations_denutrition-chez-la-personne-agee.json
+│   │   │   ├── recommandations_depression-chez-la-personne-agee.json
+│   │   │   ├── recommandations_elections-2022-recommandations-de-la-communaute-geriatrique_interet-general.json
+│   │   │   ├── recommandations_maladie-alzheimer.json
+│   │   │   ├── recommandations_maladie-de-parkinson.json
+│   │   │   ├── recommandations_notre-dossier-le-vieillissement-chez-la-femme.json
+│   │   │   ├── recommandations_parcours-des-personnes-agees-ayant-des-troubles-cognitifs.json
+│   │   │   ├── recommandations_prevention-des-chutes-accidentelles-chez-la-personne-agee.json
+│   │   │   ├── recommandations_prevention-et-prise-en-charge-des-effets-indesirables-pouvant-survenir-apres-une-ponction-lombaire.json
+│   │   │   ├── recommandations_prise-en-charge-des-personnes-agees-atteintes-de-diabete-de-type-2.json
+│   │   │   ├── recommandations_services-daide-et-de-soins-a-domicile-accompagnement-des-personnes-atteintes-de-maladie-neurodegenerative.json
+│   │   │   ├── reponse-rapide-dans-le-cadre-du-covid-19-prise-en-charge-precoce-de-medecine-physique-et-de-readaptation-mpr-en-reanimation-en-soins-continus-ou-en-service-de-reeducation-post-reanimation-srpr.json
+│   │   │   ├── syndrome-post-chute.json
+│   │   │   ├── toute-l-information-sur-les-cancers_prevenir-les-risques-de-cancers_comment-prevenir-au-mieux-les-risques-de-cancers.json
+│   │   │   ├── traitement-de-1ere-ligne-du-cbnc-metastatique-sans-addiction-oncogenique.json
+│   │   │   ├── traitement-de-la-maladie-veineuse-thromboembolique-au-cours-du-cancer-mis-a-jour-mars-2021.json
+│   │   │   ├── vivre-a-domicile_aides-financieres.json
+│   │   │   ├── vivre-a-domicile_beneficier-d-aide-a-domicile.json
+│   │   │   ├── vivre-a-domicile_beneficier-de-soins-a-domicile.json
+│   │   │   ├── vivre-a-domicile_etre-hospitalise.json
+│   │   │   ├── vivre-a-domicile_fin-de-vie-a-domicile.json
+│   │   │   ├── vivre-a-domicile_partager-son-logement.json
+│   │   │   ├── vivre-a-domicile_solutions-d-accueil-temporaire.json
+│   │   │   ├── vivre-a-domicile_tout.json
+│   │   │   ├── vivre-a-domicile_vivre-a-domicile-avec-une-maladie-ou-un-handicap.json
+│   │   │   ├── vivre-dans-un-ehpad_aides-financieres-en-ehpad.json
+│   │   │   ├── vivre-dans-un-ehpad_les-differents-etablissements-medicalises.json
+│   │   │   ├── vivre-dans-un-ehpad_preparer-l-entree-en-ehpad.json
+│   │   │   └── vivre-dans-un-ehpad_prevention-accompagnement-et-soins.json
+│   │   └── trusted_web_sites
+│   │       └── trusted_web_sites_list.py
+│   ├── func
+│   │   ├── __init__.py
+│   │   ├── anonymizer.py
+│   │   ├── auto_index_documents.py
+│   │   ├── detect_genre.py
+│   │   ├── detect_poa_file_path.py
+│   │   ├── extract_patient_name.py
+│   │   ├── extract_user_intent.py
+│   │   ├── generate_ppa_from_poa.py
+│   │   ├── generate_structured_medical_plan.py
+│   │   ├── get_chroma_stats.py
+│   │   ├── get_patient_constants_graphs.py
+│   │   ├── index_documents_chromadb.py
+│   │   ├── indexed_health_related_files.py
+│   │   ├── llm_prompts.py
+│   │   ├── poa_cleaning.py
+│   │   ├── poa_loader.py
+│   │   ├── retrieve_relevant_chunks.py
+│   │   ├── run_full_indexing_pipeline.py
+│   │   ├── scrape_trusted_sites.py
+│   │   └── serialize_figs.py
+│   ├── llm_user_session
+│   │   ├── __init__.py
+│   │   ├── model.py
+│   │   ├── session_manager.py
+│   │   └── session_manager_instance.py
+│   ├── pages
+│   │   ├── __init__.py
+│   │   ├── chatbot_ui.py
+│   │   └── home.py
+│   ├── utils
+│   │   ├── __init__.py
+│   │   ├── chroma_client.py
+│   │   ├── convert_fiches_docx_to_json.py
+│   │   ├── convert_json_text.py
+│   │   ├── export_chat_response.py
+│   │   ├── reset_data.py
+│   │   └── scheduler.py
+│   └── vector_db
+│       └── chromadb
+│           ├── 18fa0ac2-3c6e-4efd-b760-11cd39dc3d09
+│           │   ├── data_level0.bin
+│           │   ├── header.bin
+│           │   ├── length.bin
+│           │   └── link_lists.bin
+│           ├── 950496a6-1be7-4949-b9ca-b90a9ca162bc
+│           │   ├── data_level0.bin
+│           │   ├── header.bin
+│           │   ├── index_metadata.pickle
+│           │   ├── length.bin
+│           │   └── link_lists.bin
+│           └── chroma.sqlite3
+└── synthese_DELOIN_ALAIN_24042025.docx

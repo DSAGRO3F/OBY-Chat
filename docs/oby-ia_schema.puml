@@ -1,0 +1,135 @@
+@startuml
+title Architecture fonctionnelle OBY-IA
+
+skinparam componentStyle rectangle
+skinparam handwritten false
+skinparam rectangle {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam package {
+  BackgroundColor White
+  BorderColor Gray
+}
+skinparam note {
+  BackgroundColor #FFFACD
+  BorderColor Black
+}
+skinparam stereotypeCBackgroundColor #FFE599
+skinparam stereotypeCBorderColor Black
+
+' --- POINT D’ENTRÉE ---
+component "app.py\n<<EntryPoint>>" as app #FFE599
+note right of app
+  Point d'entrée principal (Dash + scheduler)
+  - Lance l'application Dash
+  - Active la surveillance automatique des fichiers
+end note
+
+' --- GROUPES DE COMPOSANTS ---
+package "Interface Utilisateur (Dash)" #E3F2FD {
+  [home.py]
+  [chatbot_ui.py]
+}
+
+package "Traitements IA / Génération" #E8F5E9 {
+  [generate_ppa_from_poa]
+  [generate_structured_medical_plan]
+  [get_patient_constants_graphs]
+  [analyze_constants]
+  [serialize_figs]
+}
+
+package "Accès Données Patient" #FFF3E0 {
+  [poa_loader]
+  [poa_cleaning]
+  [anonymizer]
+  [detect_genre]
+  [detect_poa_file_path]
+  [extract_patient_name]
+  [extract_relevant_info]
+}
+
+package "Prétraitements et conversion" #F3E5F5 {
+  [convert_json_to_text]
+  [deanonymize_fields]
+}
+
+package "Génération de prompt et LLM" #FCE4EC {
+  [llm_prompts]
+  [llm_prompt_template_medical_plan]
+  [medical_prompt_template]
+  [rag_llm_prompt_template_medical_plan]
+  [medical_response_from_llm]
+  [rag_medical_response_from_llm]
+}
+
+package "RAG & Recherche documentaire" #E0F7FA {
+  [retrieve_relevant_chunks]
+  [index_documents_chromadb]
+  [auto_index_documents]
+  [indexed_health_related_files]
+  [scrape_trusted_sites]
+}
+
+package "Pipeline d’indexation" #FFF9C4 {
+  [run_full_indexing_pipeline]
+  [scheduler]
+}
+
+package "Session utilisateur" #EDE7F6 {
+  [llm_user_session/model]
+  [llm_user_session/session_manager]
+  [export_chat_response]
+}
+
+' --- FLUX PRINCIPAUX ---
+app --> [home.py]
+app --> [chatbot_ui.py]
+app --> [scheduler]
+[scheduler] --> [run_full_indexing_pipeline]
+
+[chatbot_ui.py] --> [extract_user_intent]
+[chatbot_ui.py] --> [generate_ppa_from_poa]
+[chatbot_ui.py] --> [generate_structured_medical_plan]
+[chatbot_ui.py] --> [get_patient_constants_graphs]
+[chatbot_ui.py] --> [serialize_figs]
+[chatbot_ui.py] --> [export_chat_response]
+
+[generate_ppa_from_poa] --> [extract_patient_name]
+[generate_ppa_from_poa] --> [extract_relevant_info]
+[generate_ppa_from_poa] --> [poa_loader]
+[generate_ppa_from_poa] --> [poa_cleaning]
+[generate_ppa_from_poa] --> [anonymizer]
+[generate_ppa_from_poa] --> [convert_json_to_text]
+[generate_ppa_from_poa] --> [llm_prompt_template_medical_plan]
+[generate_ppa_from_poa] --> [medical_prompt_template]
+[generate_ppa_from_poa] --> [medical_response_from_llm]
+[generate_ppa_from_poa] --> [deanonymize_fields]
+
+[generate_structured_medical_plan] --> [extract_patient_name]
+[generate_structured_medical_plan] --> [extract_relevant_info]
+[generate_structured_medical_plan] --> [poa_cleaning]
+[generate_structured_medical_plan] --> [anonymizer]
+[generate_structured_medical_plan] --> [convert_json_to_text]
+[generate_structured_medical_plan] --> [rag_llm_prompt_template_medical_plan]
+[generate_structured_medical_plan] --> [rag_medical_response_from_llm]
+[generate_structured_medical_plan] --> [deanonymize_fields]
+
+[llm_prompt_template_medical_plan] --> [llm_prompts]
+[rag_llm_prompt_template_medical_plan] --> [llm_prompts]
+[medical_prompt_template] --> [llm_prompts]
+[medical_response_from_llm] --> [llm_prompts]
+[rag_medical_response_from_llm] --> [retrieve_relevant_chunks]
+
+[get_patient_constants_graphs] --> [analyze_constants]
+[get_patient_constants_graphs] --> [serialize_figs]
+
+[retrieve_relevant_chunks] --> [index_documents_chromadb]
+[index_documents_chromadb] --> [auto_index_documents]
+[auto_index_documents] --> [indexed_health_related_files]
+[auto_index_documents] --> [scrape_trusted_sites]
+
+[export_chat_response] --> [llm_user_session/session_manager]
+
+@enduml

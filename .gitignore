@@ -1,0 +1,22 @@
+# Fichiers sensibles
+.env
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+
+# Export
+outputs/
+site/
+
+# Base chroma
+src/vector_db/chromadb/
+
+# Base des constantes
+constantes_sante.db
+
+

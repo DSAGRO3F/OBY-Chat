@@ -1,0 +1,79 @@
+[project]
+name = "python_oby_ia"
+version = "0.1.0"
+description = "Application IA pour la synthèse de santé et les plans d'accompagnement personnalisés."
+authors = [{ name="Olivier de beyssac", email="olivier.debeyssac@gmail.com" }]
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+
+dependencies = [
+    "dash>=2.15.0",
+    "dash-bootstrap-components>=1.5.0",
+    "plotly>=5.18.0",
+    "kaleido>=0.2.1",
+    "pandas>=2.2.0",
+    "numpy>=1.26.0",
+    "langchain>=0.1.14",
+    "mistralai>=0.1.7",
+    "fpdf2>=2.7.8",
+    "reportlab>=4.0.4",
+    "python-docx>=1.1.0",
+    "sqlalchemy>=2.0.0",
+    "openpyxl>=3.1.2",
+    "matplotlib>=3.8.0",
+    "pydantic>=2.6.0",
+    "python-dotenv~=0.21.0",
+    "requests>=2.31.0",
+    "flask>=3.0.0",
+    "langchain-core~=0.3.63",
+    "unidecode~=1.4.0",
+    "beautifulsoup4~=4.13.4",
+    "tiktoken~=0.9.0",
+    "chromadb~=1.0.13",
+    "dash-core-components~=2.0.0",
+    "dash-html-components~=2.0.0",
+    "dash-table~=5.0.0",
+    "tabulate~=0.9.0",
+    "markdown~=3.8",
+    "schedule~=1.2.2",
+    "watchdog~=6.0.0",
+    "langchain-openai~=0.3.18",
+    "langchain-mistralai",
+    "langchain-community>=0.0.30",
+    "sentence-transformers"
+]
+
+[tool.setuptools]
+packages = ["src"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+
+#dependencies = [
+#    "dash>=2.15.0",
+#    "dash-bootstrap-components>=1.5.0",
+#    "plotly>=5.18.0",
+#    "kaleido>=0.2.1",
+#    "pandas>=2.2.0",
+#    "numpy>=1.26.0",
+#    "langchain>=0.1.14",
+#    "mistralai>=0.1.7",
+#    "fpdf2>=2.7.8",
+#    "reportlab>=4.0.4",
+#    "python-docx>=1.1.0",
+#    "sqlalchemy>=2.0.0",
+#    "openpyxl>=3.1.2",
+#    "matplotlib>=3.8.0",
+#    "pydantic>=2.6.0",
+#    "python-dotenv>=1.0.1",
+#    "requests>=2.31.0",
+#    "flask>=3.0.0",
+#    "pymupdf>=1.23.20",
+#    "tabulate>=0.8.10",
+#    "google-search-results>=2.4.2",
+#    "langchain-community>=0.0.30",
+#]
+

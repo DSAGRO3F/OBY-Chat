@@ -1,0 +1,36 @@
+# Ce fichier est automatiquement appliqué en complément de docker-compose.yml. Il est local à ton environnement de développement et ne sera pas utilisé par l’agence (sauf si elle le souhaite explicitement).
+#
+# ✅ Objectifs pour le développement local :
+#Monter les fichiers de ton hôte (Mac) dans le conteneur pour que :
+#tu puisses éditer le code, les scripts, les données, etc.,
+#et que le conteneur voit ces changements immédiatement.
+#Ajouter éventuellement des outils supplémentaires (ex: bash interactif, volume de logs...).
+
+# ✅ Explication des volumes :
+#Volume	                  → But
+#./src:/app/src	          → Monte le code source
+#./config:/app/config	  → Monte la config (config.py, .env...)
+#./scripts:/app/scripts	  → Pour utiliser les outils comme generate_tree.py
+#./docs:/app/docs	      → Pour documenter et vérifier visuellement
+#./src/data:/app/src/data → Monte les données en lecture/écriture
+
+
+
+services:
+  obyia-app:
+    volumes:
+      - ./src:/app/src
+      - ./config:/app/config
+      - ./scripts:/app/scripts
+      - ./docs:/app/docs
+      - ./src/data:/app/src/data
+    ports:
+      - "8050:8050"
+    env_file:
+      - .env
+    environment:
+      - ENV=dev
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+    command: python src/app.py
+

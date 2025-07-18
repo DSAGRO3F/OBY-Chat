@@ -1,0 +1,70 @@
+site_name: OBY-IA
+site_description: Documentation technique et fonctionnelle du module d’IA intégré dans l’application OBY
+site_author: Équipe IA OBY
+site_url: https://oby-ia-doc.local/
+repo_url: https://github.com/bvidf/oby-ia
+repo_name: oby-ia
+
+theme:
+  name: material
+  language: fr
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+  palette:
+    scheme: default
+    primary: indigo
+    accent: blue
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.snippets
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [src]
+          options:
+            show_source: true
+            docstring_style: google
+            merge_init_into_class: true
+  - glightbox
+  # (Optionnel - pour exporter en PDF si tu ajoutes le plugin)
+  # - pdf-export:
+  #     media_type: print
+
+extra_javascript:
+  - https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js
+
+extra_css:
+  - style_sheet_documentation.css
+
+nav:
+  - Accueil: index.md
+  - Architecture fonctionnelle: architecture.md
+  - Code source:
+      #- Agent Conversationnel: codebase/agent.md
+      - Outils IA & Traitement: codebase/tools.md
+      - Vue d'ensemble: codebase/overview.md
+  - Déploiement Docker: deploiement.md

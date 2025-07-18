@@ -1,0 +1,31 @@
+# Ce fichier décrit la base commune du service OBY-IA.
+#On va définir ici :
+#
+#le service principal (nommé ici obyia-app)
+#la façon de construire l'image (à partir du Dockerfile)
+#le port sur lequel ton application écoute (8050 pour Dash)
+
+# ✅Explication :
+#Élément	Rôle
+#version	Version de syntaxe de Docker Compose
+#services	Définit les conteneurs à lancer
+#build.context: .	Le dossier où se trouve le Dockerfile et tout le projet
+#build.dockerfile	Nom du Dockerfile à utiliser
+#container_name	Nom visible du conteneur (facultatif mais lisible)
+#ports	Lie le port 8050 du conteneur à celui de ta machine
+#command	Commande à exécuter au lancement du conteneur
+
+
+
+
+services:
+  obyia-app:
+    volumes:
+      - ./outputs:/app/outputs
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: obyia-container
+    ports:
+      - "8050:8050"
+    command: python src/app.py
