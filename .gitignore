@@ -10,11 +10,11 @@ __pycache__/
 .idea/
 
 # Export
-outputs/
+# outputs/
 site/
 
 # Base chroma
-src/vector_db/chromadb/
+# src/vector_db/chromadb/
 
 # Base des constantes
 constantes_sante.db
