@@ -58,6 +58,9 @@ INDEXED_FILES_JOURNAL_PATH = BASE_DIR/ "src" / "data" / "output" / "indexation" 
 # Patient files directory (src/data/poa_patients)
 PATIENT_FILES_DIR = BASE_DIR / "src"/"data" / "input"/"poa_patients"
 
+# Path to the ChromaDB "index ready" flag
+INDEX_READY_FLAG_PATH = BASE_DIR / "src" / "vector_db" / "index_ready.flag"
+
 # Exports des fichiers markdown
 MARKDOWN_CHAT_EXPORTS = BASE_DIR / "outputs"/"chat_exports"
 

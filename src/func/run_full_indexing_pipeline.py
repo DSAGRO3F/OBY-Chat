@@ -19,6 +19,7 @@ from src.func.indexed_health_related_files import (
 from src.func.scrape_trusted_sites import scrape_all_trusted_sites
 from src.func.index_documents_chromadb import index_documents
 from src.utils.chroma_client import get_chroma_client
+from src.utils.vector_db_utils import mark_index_ready_flag
 
 
 def run_full_indexing_pipeline():
@@ -95,6 +96,10 @@ def run_full_indexing_pipeline():
     print("✅ Pipeline terminé avec succès !")
 
 
+mark_index_ready_flag()
+
+
 # Exécution directe possible
 if __name__ == "__main__":
     run_full_indexing_pipeline()
+    mark_index_ready_flag()

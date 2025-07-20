@@ -22,6 +22,7 @@ from dash import dcc, html, callback, ctx
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import markdown
+from dash import MATCH
 
 
 
@@ -36,6 +37,8 @@ from src.func.get_patient_constants_graphs import analyze_constants
 from src.func.extract_patient_name import extract_patient_name_llm
 from src.utils.export_chat_response import export_llm_responses
 from src.func.serialize_figs import serialize_figs, deserialize_figs
+from src.utils.vector_db_utils import is_chroma_index_ready
+
 from config.config import USER_DATABASE
 
 
@@ -50,6 +53,15 @@ layout = dbc.Container([
     dcc.Store(id="constants_graphs_store", data=None),
     dcc.Store(id="chat_history", data=[], storage_type="session"),
 
+dcc.Interval(id="index_check_interval", interval=2000, n_intervals=0),
+
+html.Div(children=[
+    dbc.Alert("Initialisation en cours... L'index de recherche est en cours de préparation.",
+              color="warning",
+              className="mt-4",
+              style={"textAlign": "center"})
+], style={"display": "block"}, id="index_banner_container"),
+
     dbc.Row([
         # Colonne gauche : Chat principal
         dbc.Col([
@@ -58,9 +70,9 @@ layout = dbc.Container([
             html.Div([
                 html.P("Bonjour, comment puis-je vous aider ?", style={"fontStyle": "italic", "color": "#555"}),
 
-                dbc.Input(id="user_input", placeholder="Posez votre question...", type="text", className="mb-2"),
+                dbc.Input(id="user_input", placeholder="Posez votre question...", type="text", className="mb-2", disabled=True),
 
-                dbc.Button("Envoyer", id="send_button", color="success", className="mb-2", style={"marginRight": "10px"}),
+                dbc.Button("Envoyer", id="send_button", color="success", className="mb-2", style={"marginRight": "10px"}, disabled=True),
                 dbc.Button("Déconnexion", id="logout_button", color="danger", className="mb-2", style={"float": "right"}),
 
                 dcc.Loading(
@@ -378,4 +390,30 @@ def export_chat_response(n_clicks, session_data, current_patient, serialized_fig
         return f"❌ Erreur lors de l’export : {e}"
 
 
+@callback(
+    Output("index_banner_container", "style"),
+    Output("user_input", "disabled"),
+    Output("send_button", "disabled"),
+    Input("index_check_interval", "n_intervals"),
+)
+def check_index_status(n):
+    """
+    Callback périodique pour vérifier la disponibilité de l'index ChromaDB.
+
+    Ce callback est déclenché toutes les 2 secondes via `dcc.Interval`.
+    Il vérifie si le fichier `index_ready.flag` est présent.
+    Lorsque l'index est prêt, il :
+    - Cache la bannière d'attente
+    - Active les composants d’entrée utilisateur
+
+    Args:
+        n (int) : Nombre d’intervalles écoulés.
+
+    Returns:
+        tuple : Styles de la bannière, état des composants d’entrée.
+    """
+    if is_chroma_index_ready():
+        return {"display": "none"}, False, False
+    else:
+        return {"display": "block"}, True, True
 
