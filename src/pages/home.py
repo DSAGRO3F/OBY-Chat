@@ -36,9 +36,18 @@ layout = dbc.Container([
             html.H2("AUTHENTIFICATION", className="text-center mb-4"),
             html.Hr(),
             html.P("Pour continuer, veuillez vous authentifier."),
-            html.Label("👤 Identifiant utilisateur :", className="mt-2"),
+            html.Label([
+                html.Img(src="/assets/icons/user.svg", className="icon-inline"),
+                "Identifiant utilisateur :"
+            ], className="label-with-icon"),
+
             dbc.Input(id="user_id_input", type="text", placeholder="Entrez votre identifiant", className="mb-2"),
-            html.Label("🔑 Mot de passe :", className="mt-2"),
+
+            html.Label([
+                html.Img(src="/assets/icons/lock-alt.svg", className="icon-inline"),
+                "Mot de passe :"
+            ], className="label-with-icon"),
+
             dbc.Input(id="password_input", type="password", placeholder="Mot de passe", className="mb-2"),
             dbc.Button("Valider", id="login_button", color="primary", className="mb-2 w-100"),
             html.Div(id="auth_feedback", style={"color": "red", "marginBottom": "10px"}),

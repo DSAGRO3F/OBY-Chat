@@ -136,3 +136,20 @@ p, li {
     background-color: #0056b3;
     transform: translateY(-2px);
 }
+
+/* === Icônes SVG placées à gauche des titres ou inputs === */
+.icon-inline {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+.label-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    color: #333;
+    font-size: 16px;
+}

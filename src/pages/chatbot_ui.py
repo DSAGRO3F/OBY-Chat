@@ -72,8 +72,15 @@ html.Div(children=[
 
                 dbc.Input(id="user_input", placeholder="Posez votre question...", type="text", className="mb-2", disabled=True),
 
-                dbc.Button("Envoyer", id="send_button", color="success", className="mb-2", style={"marginRight": "10px"}, disabled=True),
-                dbc.Button("Déconnexion", id="logout_button", color="danger", className="mb-2", style={"float": "right"}),
+                dbc.Button([
+                    html.Img(src="/assets/icons/message.svg", className="icon-inline"),
+                    "Envoyer"
+                ], id="send_button", color="success", className="me-2", disabled=True),
+
+                dbc.Button([
+                    html.Img(src="/assets/icons/signout.svg", className="icon-inline"),
+                    "Déconnexion"
+                ], id="logout-btn", color="danger", className="me-2", disabled=True),
 
                 dcc.Loading(
                     id="loading_spinner",
