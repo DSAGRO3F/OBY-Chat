@@ -25,13 +25,12 @@ def is_chroma_index_ready() -> bool:
     return INDEX_READY_FLAG_PATH.exists()
 
 
-def mark_index_ready_flag() -> None:
+def mark_index_ready_flag():
     """
-    Crée un fichier 'index_ready.flag' pour signaler que l'indexation est terminée.
-
-    Ce fichier sert de témoin pour indiquer à l'application que les bases vectorielles
-    sont prêtes à être interrogées.
+    Crée un fichier flag indiquant que l'indexation ChromaDB est terminée.
+    Si le répertoire n'existe pas, il est créé.
     """
+    INDEX_READY_FLAG_PATH.parent.mkdir(parents=True, exist_ok=True)
     INDEX_READY_FLAG_PATH.touch(exist_ok=True)
 
 
