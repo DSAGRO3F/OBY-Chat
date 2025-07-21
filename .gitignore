@@ -14,9 +14,9 @@ __pycache__/
 site/
 
 # Base chroma
-# src/vector_db/chromadb/
+src/vector_db/chromadb/
 
 # Base des constantes
-constantes_sante.db
+# constantes_sante.db
 
 
