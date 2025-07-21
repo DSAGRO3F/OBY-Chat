@@ -22,6 +22,7 @@ services:
   obyia-app:
     volumes:
       - ./outputs:/app/outputs
+      - ./assets:/app/assets
     build:
       context: .
       dockerfile: Dockerfile

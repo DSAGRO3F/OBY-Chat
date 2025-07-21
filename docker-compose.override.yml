@@ -24,6 +24,7 @@ services:
       - ./scripts:/app/scripts
       - ./docs:/app/docs
       - ./src/data:/app/src/data
+      - ./assets:/app/assets
     ports:
       - "8050:8050"
     env_file:

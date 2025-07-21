@@ -19,9 +19,10 @@ COPY config/ ./config/
 COPY docs/ ./docs/
 COPY scripts/ ./scripts/
 COPY outputs/ ./outputs/
+COPY assets/ ./assets/
 
 # Étape 7 : Copier les données si nécessaire (optionnel, utile en prod)
 # COPY data/input/ ./data/input/
 
 # Étape 8 : Définir le point d’entrée (à ajuster selon besoin)
-CMD ["python", "src/app.py"]
+CMD ["python", "-m", "src.app"]
