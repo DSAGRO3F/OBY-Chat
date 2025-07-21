@@ -117,21 +117,21 @@ html.Div(children=[
             dbc.Accordion([
                 dbc.AccordionItem(
                     children=html.Div(id="constants_graphs"),
-                    title=html.Span([
+                    title=html.Div([
                         html.Img(src="/assets/icons/arrow_green.png", className="icon-inline me-2"),
                         "GRAPHIQUE DES CONSTANTES"
                     ])
                 ),
                 dbc.AccordionItem(
                     children=html.Div(id="constants_table"),
-                    title=html.Span([
+                    title=html.Div([
                         html.Img(src="/assets/icons/arrow_green.png", className="icon-inline me-2"),
                         "TABLEAU DES CONSTANTES"
                     ])
                 ),
                 dbc.AccordionItem(
                     children=html.Div(id="anomalies_summary"),
-                    title=html.Span([
+                    title=html.Div([
                         html.Img(src="/assets/icons/arrow_green.png", className="icon-inline me-2"),
                         "ANOMALIES POTENTIELLES DETECTEES"
                     ])
