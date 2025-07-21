@@ -69,14 +69,18 @@ check_and_generate_database()
 
 # Dash App
 CURRENT_DIR = Path(__file__).resolve().parent
+from config.config import ASSETS_PATH
 
 app = dash.Dash(
     __name__,
     use_pages=True,
     pages_folder=str(CURRENT_DIR / "pages"),
     suppress_callback_exceptions=True,
-    external_stylesheets=[dbc.themes.LUX,
-                          dbc.icons.FONT_AWESOME],
+    external_stylesheets=[
+        dbc.themes.LUX,
+        dbc.icons.FONT_AWESOME,
+    ],
+    assets_folder=str(ASSETS_PATH),
 )
 
 app.layout = html.Div([

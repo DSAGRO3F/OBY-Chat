@@ -61,6 +61,9 @@ PATIENT_FILES_DIR = BASE_DIR / "src"/"data" / "input"/"poa_patients"
 # Path to the ChromaDB "index ready" flag
 INDEX_READY_FLAG_PATH = BASE_DIR / "src" / "vector_db" / "index_ready.flag"
 
+# Path to assets directory
+ASSETS_PATH = Path(__file__).parent.parent / "assets"
+
 # Exports des fichiers markdown
 MARKDOWN_CHAT_EXPORTS = BASE_DIR / "outputs"/"chat_exports"
 
