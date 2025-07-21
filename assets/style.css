@@ -1,0 +1,155 @@
+/* === Titres élégants === */
+h1, h2, h3 {
+    color: #007BFF;
+    font-family: 'Arial', sans-serif;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* === Textes standards === */
+p, li {
+    color: #333;
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* === Chat History Styling === */
+.chat-history {
+    display: flex;
+    flex-direction: column;         /* Empile les éléments verticalement */
+    align-items: stretch;            /* Prend toute la largeur disponible */
+    justify-content: flex-start;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 15px;
+    height: 700px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-top: 15px;
+    background-color: #f8f9fa;
+    font-family: "Arial", sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+    white-space: normal;
+    word-wrap: break-word;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* === User Message === */
+.user-message {
+    background-color: #e9f7ef;
+    color: #155724;
+    padding: 10px 15px;
+    border-radius: 10px;
+    margin: 5px 0;
+    align-self: flex-end;            /* Aligne à droite */
+    max-width: 80%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.user-message:hover {
+    background-color: #d4edda;
+    transform: translateY(-2px);
+}
+
+/* === Bot Response === */
+.bot-response {
+    background-color: #e8f0fe;
+    color: #0c5460;
+    padding: 10px 15px;
+    border-radius: 10px;
+    margin: 5px 0;
+    align-self: flex-start;          /* Aligne à gauche */
+    max-width: 100%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.bot-response:hover {
+    background-color: #d0e2ff;
+    transform: translateY(-2px);
+}
+
+/* === Icon Styling === */
+.user-message i, .bot-response i {
+    margin-right: 8px;
+    font-size: 18px;
+    color: #6c757d;
+}
+
+/* === Scrollbar Customization === */
+.chat-history::-webkit-scrollbar {
+    width: 8px;
+}
+.chat-history::-webkit-scrollbar-thumb {
+    background-color: #adb5bd;
+    border-radius: 4px;
+}
+.chat-history::-webkit-scrollbar-thumb:hover {
+    background-color: #868e96;
+}
+
+/* === Tables Markdown Styling === */
+.bot-response table {
+    width: 100%;                /* Utilise toute la largeur disponible */
+    border-collapse: collapse;  /* Fusionne les bordures pour un rendu plus net */
+    table-layout: fixed;        /* Force les colonnes à se répartir équitablement */
+}
+
+.bot-response th, .bot-response td {
+    border: 1px solid #dee2e6;  /* Bordures légères */
+    padding: 8px;               /* Espacement interne */
+    text-align: left;           /* Texte aligné à gauche */
+    vertical-align: top;        /* Texte en haut des cellules */
+    word-wrap: break-word;      /* Retour à la ligne si le texte est long */
+}
+
+.bot-response th {
+    background-color: #f2f2f2;  /* Fond clair pour l’en-tête */
+    font-weight: bold;
+}
+
+.bot-response td {
+    background-color: #ffffff;  /* Fond blanc pour le contenu */
+}
+
+
+/* === Bouton Reset Stylisé === */
+.custom-reset-button {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-family: 'Arial', sans-serif;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: background-color 0.3s, transform 0.2s;
+    margin-top: 15px;
+}
+
+.custom-reset-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* === Icônes SVG placées à gauche des titres ou inputs === */
+.icon-inline {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+.label-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    color: #333;
+    font-size: 16px;
+}
