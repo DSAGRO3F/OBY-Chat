@@ -153,3 +153,37 @@ p, li {
     color: #333;
     font-size: 16px;
 }
+
+/* === Responsive pour petits écrans (smartphones) === */
+@media (max-width: 768px) {
+    .chat-history {
+        height: 400px;
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .user-message, .bot-response {
+        font-size: 14px;
+        max-width: 100%;
+    }
+
+    .custom-reset-button {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .icon-inline {
+        width: 18px;
+        height: 18px;
+        margin-right: 6px;
+    }
+
+    h4 {
+        font-size: 18px;
+    }
+
+    .label-with-icon {
+        font-size: 14px;
+    }
+}
+
