@@ -73,12 +73,12 @@ html.Div(children=[
                 dbc.Input(id="user_input", placeholder="Posez votre question...", type="text", className="mb-2", disabled=True),
 
                 dbc.Button([
-                    html.Img(src="/assets/icons/message.svg", className="icon-inline"),
+                    html.Img(src="/assets/icons/message.png", className="icon-inline"),
                     "Envoyer"
                 ], id="send_button", color="success", className="me-2", disabled=True),
 
                 dbc.Button([
-                    html.Img(src="/assets/icons/signout.svg", className="icon-inline"),
+                    html.Img(src="/assets/icons/signout.png", className="icon-inline"),
                     "Déconnexion"
                 ], id="logout-btn", color="danger", className="me-2", disabled=True),
 

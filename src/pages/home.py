@@ -37,14 +37,14 @@ layout = dbc.Container([
             html.Hr(),
             html.P("Pour continuer, veuillez vous authentifier."),
             html.Label([
-                html.Img(src="/assets/icons/user.svg", className="icon-inline"),
+                html.Img(src="/assets/icons/user.png", className="icon-inline"),
                 "Identifiant utilisateur :"
             ], className="label-with-icon"),
 
             dbc.Input(id="user_id_input", type="text", placeholder="Entrez votre identifiant", className="mb-2"),
 
             html.Label([
-                html.Img(src="/assets/icons/lock-alt.svg", className="icon-inline"),
+                html.Img(src="/assets/icons/lock.png", className="icon-inline"),
                 "Mot de passe :"
             ], className="label-with-icon"),
 
