@@ -297,15 +297,30 @@ def open_docs_site(n_clicks):
 def update_chroma_stats(_):
     stats = get_chroma_index_stats()
     return html.Div([
-        html.H4("📊 Statistiques de l'indexation ChromaDB"),
-        html.Ul([
-            html.Li(f"📝 Fichiers DOCX indexés : {stats['docx_files']} fichiers – {stats['docx_chunks']} sections"),
-            html.Li(f"🌐 Pages web indexées : {stats['web_files']} URLs – {stats['web_chunks']} sections"),
-            html.Li(f"📂 Fichiers JSON issus de DOCX : {stats['docx_json_files']}"),
-            html.Li(f"📂 Fichiers JSON issus du web : {stats['web_json_files']}"),
-        ])
-        ])
+        html.Div([
+            html.Img(src="/assets/icons/statistics.png?v=1", className="icon-inline"),
+            html.H4("Statistiques de l'indexation ChromaDB", className="d-inline-block ms-2")
+        ], className="d-flex align-items-center mb-3"),
 
+        html.Ul([
+            html.Li([
+                html.Img(src="/assets/icons/message.png?v=1", className="icon-inline me-2"),
+                f"Fichiers DOCX indexés : {stats['docx_files']} fichiers – {stats['docx_chunks']} sections"
+            ]),
+            html.Li([
+                html.Img(src="/assets/icons/robot.png?v=1", className="icon-inline me-2"),
+                f"Pages web indexées : {stats['web_files']} URLs – {stats['web_chunks']} sections"
+            ]),
+            html.Li([
+                html.Img(src="/assets/icons/table.png?v=1", className="icon-inline me-2"),
+                f"Fichiers JSON issus de DOCX : {stats['docx_json_files']}"
+            ]),
+            html.Li([
+                html.Img(src="/assets/icons/table.png?v=1", className="icon-inline me-2"),
+                f"Fichiers JSON issus du web : {stats['web_json_files']}"
+            ]),
+        ])
+    ])
 
 
 

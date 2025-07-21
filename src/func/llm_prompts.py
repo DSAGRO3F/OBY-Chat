@@ -667,8 +667,9 @@ def rag_medical_response_from_llm(prompt_template, user_input, poa_content):
 "Fais une recherche sur les aides financières pour les patients GIR 4"
 
 # Lanement Docker: reconstruction image + construction container
-# docker compose down
-# docker compose up --build
+# 1. docker compose down
+# 2. docker compose up --build ou docker compose build --no-cache
+# 3. docker compose up
 
 # Lancement site doc
 # mkdocs serve
