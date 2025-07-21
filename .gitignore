@@ -16,6 +16,12 @@ site/
 # Base chroma
 src/vector_db/chromadb/
 
+# Fichiers générés par ChromaDB
+src/vector_db/chromadb/
+*.bin
+*.pickle
+*.sqlite3
+
 # Base des constantes
 # constantes_sante.db
 
