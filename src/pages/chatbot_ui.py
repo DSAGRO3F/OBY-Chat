@@ -112,7 +112,10 @@ html.Div(children=[
 
         # Colonne droite : Données médicales
         dbc.Col([
-            html.H4("-- SUIVI MEDICAL --", className="text-center mb-3"),
+            html.Div([
+                html.Img(src="/assets/icons/medical_aid.png", className="icon-inline me-2"),
+                html.H4("-- SUIVI MEDICAL --", className="mb-0")
+            ], className="d-flex align-items-center justify-content-center mb-3"),
 
             dbc.Accordion([
                 dbc.AccordionItem(
