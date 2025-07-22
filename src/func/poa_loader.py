@@ -1,6 +1,5 @@
 """
 Module de chargement des fichiers POA (Plan d’Objectifs et d’Actions) au format JSON.
-
 Ce module permet de localiser et lire un fichier patient stocké dans le dossier `data/poa_patients/`.
 """
 

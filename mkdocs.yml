@@ -37,6 +37,8 @@ markdown_extensions:
   - pymdownx.snippets
   - pymdownx.tasklist:
       custom_checkbox: true
+  - pymdownx.mark  # ← texte surligné (utile en schéma)
+  - pymdownx.emoji # ← emojis dans les schémas
 
 plugins:
   - search

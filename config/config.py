@@ -67,6 +67,10 @@ ASSETS_PATH = Path(__file__).parent.parent / "assets"
 # Exports des fichiers markdown
 MARKDOWN_CHAT_EXPORTS = BASE_DIR / "outputs"/"chat_exports"
 
+# Documentation projet:
+# TOOLS_MD_PATH: fichier input; OVERVIEW_MD_PATH: fichier output
+TOOLS_MD_PATH = BASE_DIR/"docs"/"codebase"/"tools.md"
+OVERVIEW_MD_PATH = BASE_DIR/"docs"/"codebase"/"overview.md"
 
 # DB_CONSTANTES_SANTE
 DB_CONSTANTES_SANTE = 'constantes_sante.db'

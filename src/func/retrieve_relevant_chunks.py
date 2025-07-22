@@ -1,6 +1,5 @@
 """
 Module de récupération des extraits pertinents depuis une base ChromaDB.
-
 Ce module interroge une collection vectorielle Chroma (via LangChain)
 et retourne les passages les plus similaires à une requête, pour enrichir un prompt.
 """

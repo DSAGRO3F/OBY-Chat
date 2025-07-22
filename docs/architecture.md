@@ -76,8 +76,11 @@ L’architecture repose sur les briques suivantes :
 4. Selon l’intention, un pipeline spécifique est exécuté :
    - 🔎 Génération d’un PPA personnalisé
    - 📈 Analyse de constantes
-   - 📚 Génération d’un plan structuré avec recommandations
-5. Les résultats sont affichés à l’écran et peuvent être exportés (`export_chat_response.py`)
+   - 📚 Génération d’un plan structuré avec recommandations de soins, conduite à tenir face à un évènement, etc...
+5. Les résultats (l'ensemble de l'historique du chat pour un patient donné) sont affichés à l’écran et peuvent être exportés (`export_chat_response.py`)
+6. L'interaction entre l'utilisateur et OBY-Chat est conditionné par l'obtention d'une session par l'utilisateur.
+   - L'obtention d'une session est, elle, conditionnée par un couple "user_id"-"password" valable.
+   - Si l'utilisateur s'intéresse à un nouveau patient, l'ensemble de l'historique lié au patient précédent est effacé.
 
 ---
 
