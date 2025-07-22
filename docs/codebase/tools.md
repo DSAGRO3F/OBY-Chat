@@ -181,6 +181,13 @@ Ce chapitre regroupe la documentation technique des modules qui assurent le trai
 
 ---
 
+---
+
+::: utils.vector_db_utils
+    options:
+      show_source: true
+      heading_level: 2
+
 ## 📁 Module : `llm_user_session`
 
 ::: llm_user_session.model
