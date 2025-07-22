@@ -63,4 +63,4 @@ flowchart TD
     classDef process fill:#bbf,stroke:#333,stroke-width:1px;
     class pdf_output,markdown_log file;
     class poa_loader,poa_cleaning,generate_ppa_from_poa,llm_prompts,generate_structured_medical_plan,serialize_figs,chatbot_ui,get_constants,analyze_constants,get_patient_constants_graphs,scrape_trusted_sites,run_full_indexing_pipeline,index_documents_chromadb,retrieve_relevant_chunks process;
-``
+```

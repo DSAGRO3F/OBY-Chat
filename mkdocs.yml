@@ -28,7 +28,11 @@ markdown_extensions:
   - toc:
       permalink: true
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.highlight
@@ -66,7 +70,6 @@ nav:
   - Accueil: index.md
   - Architecture fonctionnelle: architecture.md
   - Code source:
-      #- Agent Conversationnel: codebase/agent.md
       - Outils IA & Traitement: codebase/tools.md
       - Vue d'ensemble: codebase/overview.md
   - Déploiement Docker: deploiement.md
