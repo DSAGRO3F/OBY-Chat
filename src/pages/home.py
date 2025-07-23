@@ -33,6 +33,7 @@ import dash_bootstrap_components as dbc
 from src.llm_user_session.session_manager_instance import session_manager_instance
 from config.config import USER_DATABASE
 from src.func.get_chroma_stats import get_chroma_index_stats
+from src.utils.vector_db_utils import is_chroma_index_ready
 
 dash.register_page(__name__, path="/")
 

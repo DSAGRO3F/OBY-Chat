@@ -15,14 +15,20 @@ from config.config import INDEX_READY_FLAG_PATH
 # Chemin du fichier flag
 # INDEX_READY_FLAG_PATH = Path("src/vector_db/index_ready.flag")
 
-def is_chroma_index_ready() -> bool:
+def is_chroma_index_ready(verbose: bool = False) -> bool:
     """
     Vérifie si le fichier 'index_ready.flag' existe dans le dossier vectoriel.
+
+    Args:
+        verbose (bool): Si True, affiche le chemin du flag pour le debug.
 
     Returns:
         bool: True si les bases ChromaDB ont été indexées, False sinon.
     """
-    return INDEX_READY_FLAG_PATH.exists()
+    exists = INDEX_READY_FLAG_PATH.exists()
+    if verbose:
+        print(f"[INFO] Vérification de l'indexation : {INDEX_READY_FLAG_PATH} => {exists}")
+    return exists
 
 
 def mark_index_ready_flag():

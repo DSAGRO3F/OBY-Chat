@@ -73,13 +73,27 @@ layout = dbc.Container([
 
 dcc.Interval(id="index_check_interval", interval=2000, n_intervals=0),
 
-html.Div(children=[
-    dbc.Alert("Initialisation en cours... L'index de recherche est en cours de préparation.",
-              color="warning",
-              className="mt-4",
-              style={"textAlign": "center"})
-], style={"display": "block"}, id="index_banner_container"),
-
+html.Div(
+    id="index_banner_container",
+    children=html.Span(
+        id="index_banner_text",
+        children=[
+            html.Span("●", id="index_status_dot", style={"marginRight": "5px"}),
+            "Vérification de l'état..."
+        ],
+        style={"fontWeight": "bold", "fontSize": "14px"}
+    ),
+    style={
+        "position": "absolute",
+        "top": "10px",
+        "right": "20px",
+        "zIndex": "1000",
+        "padding": "6px 12px",
+        "borderRadius": "12px",
+        "backgroundColor": "#f8f9fa",
+        "boxShadow": "0 1px 3px rgba(0,0,0,0.2)",
+    }
+),
     dbc.Row([
         # Colonne gauche : Chat principal
         dbc.Col([
@@ -427,7 +441,7 @@ def export_chat_response(n_clicks, session_data, current_patient, serialized_fig
         return f"❌ Erreur lors de l’export : {e}"
 
 
-@callback(
+@callback(Output("index_banner_text", "children"),
     Output("index_banner_container", "style"),
     Output("user_input", "disabled"),
     Output("send_button", "disabled"),
@@ -435,22 +449,41 @@ def export_chat_response(n_clicks, session_data, current_patient, serialized_fig
 )
 def check_index_status(n):
     """
-    Callback périodique pour vérifier la disponibilité de l'index ChromaDB.
+        Met à jour dynamiquement l'indicateur visuel d'indexation ChromaDB.
 
-    Ce callback est déclenché toutes les 2 secondes via `dcc.Interval`.
-    Il vérifie si le fichier `index_ready.flag` est présent.
-    Lorsque l'index est prêt, il :
-    - Cache la bannière d'attente
-    - Active les composants d’entrée utilisateur
+        Ce callback est déclenché périodiquement via un composant dcc.Interval pour vérifier
+        si les bases vectorielles ChromaDB sont prêtes à être interrogées.
 
-    Args:
-        n (int) : Nombre d’intervalles écoulés.
+        Lorsque l'indexation est encore en cours :
+            - Affiche un point orange accompagné du texte "En cours d'indexation".
+            - Désactive les champs d'entrée utilisateur et le bouton d'envoi.
 
-    Returns:
-        tuple : Styles de la bannière, état des composants d’entrée.
-    """
+        Lorsque l'indexation est terminée :
+            - Affiche un point vert avec le texte "Prêt".
+            - Active les champs d'entrée utilisateur et le bouton d'envoi.
+
+        Args:
+            n (int): Nombre d'intervalles écoulés depuis le démarrage de l'application.
+
+        Returns:
+            tuple:
+                - children (list): Contenu HTML du texte de la bannière.
+                - style (dict): Style CSS du point d'état (couleur).
+                - user_input.disabled (bool): True si l'entrée doit être désactivée.
+                - send_button.disabled (bool): True si le bouton doit être désactivé.
+        """
+
     if is_chroma_index_ready():
-        return {"display": "none"}, False, False
+        return (
+            [html.Span("●", id="index_status_dot", style={"marginRight": "5px"}), "Prêt"],
+            {"color": "green", "marginRight": "5px"},
+            False,
+            False
+        )
     else:
-        return {"display": "block"}, True, True
-
+        return (
+            [html.Span("●", id="index_status_dot", style={"marginRight": "5px"}), "En cours d'indexation"],
+            {"color": "orange", "marginRight": "5px"},
+            True,
+            True
+        )
