@@ -1,9 +1,34 @@
 """
-Module principal pour exécuter le pipeline complet d’indexation documentaire.
+Module `run_full_indexing_pipeline.py` – Pipeline principal d’indexation documentaire pour OBY-IA.
 
-Ce pipeline détecte les fichiers DOCX et les pages web modifiés, les convertit en JSON,
-et les indexe dans ChromaDB via LangChain. Il peut être lancé automatiquement
-(avec un scheduler) ou manuellement.
+Ce module exécute l’ensemble du processus de préparation de la base documentaire utilisée
+par les agents RAG de OBY-IA, en assurant une indexation vectorielle actualisée dans ChromaDB.
+
+Fonctionnalités couvertes :
+1. **Détection de modifications** :
+   - Identification des fichiers DOCX ou pages web récemment modifiés via calcul de hashs.
+   - Détection des changements dans la définition des sites de confiance (`trusted_sites.py`).
+
+2. **Conversion en JSON structuré** :
+   - Transformation des fichiers DOCX en fichiers JSON exploitables.
+   - Scraping et structuration des nouvelles pages web selon les règles définies.
+
+3. **Indexation vectorielle dans ChromaDB** :
+   - Indexation incrémentale ou complète des données selon les changements détectés.
+   - Séparation des sources DOCX et web (`source_type`).
+
+4. **Journalisation des indexations** :
+   - Mise à jour du fichier de suivi (`indexed_files.json`) pour éviter les réindexations inutiles.
+
+5. **Signalement de disponibilité** :
+   - Écriture d’un fichier `index_ready.flag` permettant aux autres modules de savoir si l’index est prêt.
+
+Ce pipeline peut être lancé :
+- automatiquement (via un scheduler ou watchdog),
+- ou manuellement (en exécutant ce fichier en tant que script).
+
+Il constitue un composant critique du système OBY-IA pour garantir la fraîcheur et la cohérence
+des bases documentaires utilisées dans les interactions LLM + RAG.
 """
 
 

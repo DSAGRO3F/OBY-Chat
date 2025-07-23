@@ -1,16 +1,34 @@
 """
-Interface utilisateur du chatbot OBY-IA (page Dash `/chatbot`).
+Module `chatbot_ui.py` – Interface conversationnelle de l'application OBY-IA (page `/chatbot`)
 
-Ce module définit l’interface graphique de la page chatbot de l’application OBY-IA.
-Il gère :
-- l’affichage des constantes médicales du patient (graphique, tableau, anomalies),
-- la détection de l’intention utilisateur à partir d’une saisie libre,
-- la génération automatique de contenu (PPA, plan de soins, recommandations),
-- l’enregistrement et l’affichage de l’historique des échanges avec le LLM,
-- l’export de la session au format Markdown,
-- l’affichage des détails dans une fenêtre modale.
+Ce module Dash définit la page chatbot de OBY-IA, qui permet aux professionnels de santé
+d’interagir avec un agent intelligent pour obtenir :
 
-Ce module repose sur Dash, Dash Bootstrap Components et une logique centralisée via `session_manager_instance`.
+1. **Analyse des constantes médicales du patient** :
+   - Extraction et affichage des constantes sous forme de graphiques et tableaux.
+   - Détection automatique des anomalies.
+   - Sérialisation et désérialisation des graphiques pour l’exportation.
+
+2. **Interaction en langage naturel avec le LLM** :
+   - Détection de l’intention utilisateur (consultation, génération de PPA, recommandations).
+   - Extraction du nom du patient à partir de la requête.
+   - Génération de contenu médical structuré via des prompts spécialisés.
+   - Historisation des messages utilisateur/LLM et affichage dynamique.
+
+3. **Export des résultats** :
+   - Génération d’un fichier Markdown résumant la session (réponses LLM + graphiques).
+
+4. **Contrôle de disponibilité de l’index ChromaDB** :
+   - Affichage d’une bannière d’attente tant que l’index n’est pas prêt.
+   - Activation différée des composants de saisie utilisateur.
+
+Composants techniques :
+- Utilise `session_manager_instance` pour la gestion d’état (session, mapping, historique).
+- Repose sur les modules fonctionnels : `extract_user_intent`, `generate_ppa_from_poa`,
+  `generate_structured_medical_plan`, `get_patient_constants_graphs`, `export_chat_response`, etc.
+
+Cette page est au cœur de l’expérience utilisateur de OBY-IA, combinant interface conviviale
+et logique métier intelligente.
 """
 
 

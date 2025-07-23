@@ -1,13 +1,29 @@
 """
-Page d'accueil et d'authentification de l'application OBY-IA.
+Module `home.py` – Page d'accueil, authentification et interface d'administration de OBY-IA.
 
-Ce module Dash permet :
-- l'authentification des utilisateurs via un identifiant et un mot de passe,
-- la gestion des sessions (création, suppression),
-- l'accès conditionnel aux fonctions d'administration (comme la réinitialisation des bases de données),
-- l'affichage dynamique de l'interface en fonction du rôle de l'utilisateur (admin ou utilisateur classique).
+Ce module Dash gère les fonctionnalités suivantes :
+1. **Authentification utilisateur** :
+   - Vérification des identifiants via une base interne (`USER_DATABASE`).
+   - Création et stockage de la session via `dcc.Store` et `session_manager_instance`.
+   - Affichage conditionnel de l'interface selon le rôle (utilisateur ou admin).
 
-La session est stockée via `dcc.Store`, et la sécurité repose sur `session_manager_instance`.
+2. **Déconnexion et gestion de session** :
+   - Suppression propre de la session en cours.
+   - Réinitialisation du mappage d’anonymisation à la connexion.
+
+3. **Contrôles d'administration (admin uniquement)** :
+   - Réinitialisation des bases : ChromaDB, fichiers JSON extraits du web, index de suivi.
+   - Interface de déclenchement réservée aux administrateurs.
+
+4. **Accès à la documentation du projet** :
+   - Vérification en temps réel de la disponibilité du serveur MkDocs (`http://127.0.0.1:8000`).
+   - Redirection automatique vers la documentation si disponible.
+
+5. **Visualisation des statistiques d’indexation ChromaDB** :
+   - Affichage du nombre de fichiers indexés (DOCX, web), de chunks, et de fichiers JSON associés.
+   - Rafraîchissement manuel ou automatique de ces statistiques à l’ouverture.
+
+Ce module constitue la page d’accueil et d’entrée principale de l’application OBY-IA.
 """
 
 

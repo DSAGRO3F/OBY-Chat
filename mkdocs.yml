@@ -32,7 +32,7 @@ markdown_extensions:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
+          format: !!python/name:pymdownx.superfences.fence_div_format
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.highlight
@@ -41,8 +41,9 @@ markdown_extensions:
   - pymdownx.snippets
   - pymdownx.tasklist:
       custom_checkbox: true
-  - pymdownx.mark  # ← texte surligné (utile en schéma)
-  - pymdownx.emoji # ← emojis dans les schémas
+  - pymdownx.mark
+  - pymdownx.emoji
+  - plantuml_markdown
 
 plugins:
   - search
@@ -62,11 +63,13 @@ plugins:
 
 extra_javascript:
   - https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js
+  - js/init-mermaid.js
 
 extra_css:
   - style_sheet_documentation.css
 
 nav:
+  - Test: test.md
   - Accueil: index.md
   - Architecture fonctionnelle: architecture.md
   - Code source:

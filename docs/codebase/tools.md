@@ -284,10 +284,36 @@ et retourne les passages les plus similaires à une requête, pour enrichir un p
 ---
 
 <!---
-Module principal pour exécuter le pipeline complet d’indexation documentaire.
-Ce pipeline détecte les fichiers DOCX et les pages web modifiés, les convertit en JSON,
-et les indexe dans ChromaDB via LangChain. Il peut être lancé automatiquement
-(avec un scheduler) ou manuellement.
+Module `run_full_indexing_pipeline.py` – Pipeline principal d’indexation documentaire pour OBY-IA.
+
+Ce module exécute l’ensemble du processus de préparation de la base documentaire utilisée
+par les agents RAG de OBY-IA, en assurant une indexation vectorielle actualisée dans ChromaDB.
+
+Fonctionnalités couvertes :
+1. **Détection de modifications** :
+   - Identification des fichiers DOCX ou pages web récemment modifiés via calcul de hashs.
+   - Détection des changements dans la définition des sites de confiance (`trusted_sites.py`).
+
+2. **Conversion en JSON structuré** :
+   - Transformation des fichiers DOCX en fichiers JSON exploitables.
+   - Scraping et structuration des nouvelles pages web selon les règles définies.
+
+3. **Indexation vectorielle dans ChromaDB** :
+   - Indexation incrémentale ou complète des données selon les changements détectés.
+   - Séparation des sources DOCX et web (`source_type`).
+
+4. **Journalisation des indexations** :
+   - Mise à jour du fichier de suivi (`indexed_files.json`) pour éviter les réindexations inutiles.
+
+5. **Signalement de disponibilité** :
+   - Écriture d’un fichier `index_ready.flag` permettant aux autres modules de savoir si l’index est prêt.
+
+Ce pipeline peut être lancé :
+- automatiquement (via un scheduler ou watchdog),
+- ou manuellement (en exécutant ce fichier en tant que script).
+
+Il constitue un composant critique du système OBY-IA pour garantir la fraîcheur et la cohérence
+des bases documentaires utilisées dans les interactions LLM + RAG.
 --->
 
 ::: func.run_full_indexing_pipeline
@@ -521,16 +547,36 @@ différents modules sans créer plusieurs objets SessionManager.
 ## 📁 Module : `pages`
 
 <!---
-Interface utilisateur du chatbot OBY-IA (page Dash `/chatbot`).
-Ce module définit l’interface graphique de la page chatbot de l’application OBY-IA.
-Il gère :
-- l’affichage des constantes médicales du patient (graphique, tableau, anomalies),
-- la détection de l’intention utilisateur à partir d’une saisie libre,
-- la génération automatique de contenu (PPA, plan de soins, recommandations),
-- l’enregistrement et l’affichage de l’historique des échanges avec le LLM,
-- l’export de la session au format Markdown,
-- l’affichage des détails dans une fenêtre modale.
-Ce module repose sur Dash, Dash Bootstrap Components et une logique centralisée via `session_manager_instance`.
+Module `chatbot_ui.py` – Interface conversationnelle de l'application OBY-IA (page `/chatbot`)
+
+Ce module Dash définit la page chatbot de OBY-IA, qui permet aux professionnels de santé
+d’interagir avec un agent intelligent pour obtenir :
+
+1. **Analyse des constantes médicales du patient** :
+   - Extraction et affichage des constantes sous forme de graphiques et tableaux.
+   - Détection automatique des anomalies.
+   - Sérialisation et désérialisation des graphiques pour l’exportation.
+
+2. **Interaction en langage naturel avec le LLM** :
+   - Détection de l’intention utilisateur (consultation, génération de PPA, recommandations).
+   - Extraction du nom du patient à partir de la requête.
+   - Génération de contenu médical structuré via des prompts spécialisés.
+   - Historisation des messages utilisateur/LLM et affichage dynamique.
+
+3. **Export des résultats** :
+   - Génération d’un fichier Markdown résumant la session (réponses LLM + graphiques).
+
+4. **Contrôle de disponibilité de l’index ChromaDB** :
+   - Affichage d’une bannière d’attente tant que l’index n’est pas prêt.
+   - Activation différée des composants de saisie utilisateur.
+
+Composants techniques :
+- Utilise `session_manager_instance` pour la gestion d’état (session, mapping, historique).
+- Repose sur les modules fonctionnels : `extract_user_intent`, `generate_ppa_from_poa`,
+  `generate_structured_medical_plan`, `get_patient_constants_graphs`, `export_chat_response`, etc.
+
+Cette page est au cœur de l’expérience utilisateur de OBY-IA, combinant interface conviviale
+et logique métier intelligente.
 --->
 
 ::: pages.chatbot_ui
@@ -541,15 +587,31 @@ Ce module repose sur Dash, Dash Bootstrap Components et une logique centralisée
 ---
 
 <!---
-Page d'accueil et d'authentification de l'application OBY-IA.
+Module `home.py` – Page d'accueil, authentification et interface d'administration de OBY-IA.
 
-Ce module Dash permet :
-- l'authentification des utilisateurs via un identifiant et un mot de passe,
-- la gestion des sessions (création, suppression),
-- l'accès conditionnel aux fonctions d'administration (comme la réinitialisation des bases de données),
-- l'affichage dynamique de l'interface en fonction du rôle de l'utilisateur (admin ou utilisateur classique).
+Ce module Dash gère les fonctionnalités suivantes :
+1. **Authentification utilisateur** :
+   - Vérification des identifiants via une base interne (`USER_DATABASE`).
+   - Création et stockage de la session via `dcc.Store` et `session_manager_instance`.
+   - Affichage conditionnel de l'interface selon le rôle (utilisateur ou admin).
 
-La session est stockée via `dcc.Store`, et la sécurité repose sur `session_manager_instance`.
+2. **Déconnexion et gestion de session** :
+   - Suppression propre de la session en cours.
+   - Réinitialisation du mappage d’anonymisation à la connexion.
+
+3. **Contrôles d'administration (admin uniquement)** :
+   - Réinitialisation des bases : ChromaDB, fichiers JSON extraits du web, index de suivi.
+   - Interface de déclenchement réservée aux administrateurs.
+
+4. **Accès à la documentation du projet** :
+   - Vérification en temps réel de la disponibilité du serveur MkDocs (`http://127.0.0.1:8000`).
+   - Redirection automatique vers la documentation si disponible.
+
+5. **Visualisation des statistiques d’indexation ChromaDB** :
+   - Affichage du nombre de fichiers indexés (DOCX, web), de chunks, et de fichiers JSON associés.
+   - Rafraîchissement manuel ou automatique de ces statistiques à l’ouverture.
+
+Ce module constitue la page d’accueil et d’entrée principale de l’application OBY-IA.
 --->
 
 ::: pages.home

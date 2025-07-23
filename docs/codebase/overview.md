@@ -472,45 +472,85 @@ _Cette page fournit une description concise des principaux modules Python du pro
 """
 # 🧠 Architecture fonctionnelle de OBY-IA
 
-Ce schéma présente les flux de données et l'organisation des modules techniques d'OBY-IA.
+Ce schéma présente l'organisation des modules techniques d'OBY-IA.
+```plantuml
+@startuml
+title Architecture fonctionnelle de OBY-IA
 
-```mermaid
-flowchart TD
-    %% Entrées
-    POA[📄 Document POA (.docx)] -->|Chargement| poa_loader
-    poa_loader -->|Nettoyage| poa_cleaning
-    poa_cleaning -->|Texte nettoyé| generate_ppa_from_poa
-    generate_ppa_from_poa -->|Plan structuré| llm_prompts
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam package {
+  BorderColor black
+  BackgroundColor white
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam defaultTextAlignment center
 
-    %% Constantes patients
-    DB[(🧬 Base SQLite constantes)] --> get_constants
-    get_constants --> analyze_constants
-    analyze_constants --> get_patient_constants_graphs
+' Légende des couleurs
+legend left
+|= Couleur |= Bloc fonctionnel |
+| <back:FFF2CC>     | Interface utilisateur |
+| <back:D9EAD3>     | Traitement LLM / Intentions |
+| <back:CFE2F3>     | Génération de PPA |
+| <back:F4CCCC>     | Recommandations médicales |
+| <back:EAD1DC>     | Analyse des constantes |
+| <back:D9D2E9>     | Indexation documentaire |
+endlegend
 
-    %% IA / Génération médicale
-    llm_prompts --> generate_structured_medical_plan
-    generate_structured_medical_plan --> serialize_figs
+' === Interface utilisateur ===
+package "Interface utilisateur" #FFF2CC {
+  rectangle "home.py" as home
+  note right of home
+    authenticate_user()
+    logout_user()
+    trigger_reset()
+    display_admin_controls()
+    check_mkdocs_status()
+    open_docs_site()
+    update_chroma_stats()
+  end note
 
-    %% Indexation documentaire
-    scrape_trusted_sites --> run_full_indexing_pipeline
-    run_full_indexing_pipeline --> index_documents_chromadb
-    index_documents_chromadb --> retrieve_relevant_chunks
-    retrieve_relevant_chunks --> generate_structured_medical_plan
+  rectangle "chatbot_ui.py" as chatbot
+  note right of chatbot
+    handle_user_input_or_logout()
+    export_chat_response()
+    check_index_status()
+  end note
+}
+' === Traitement LLM / Intentions ===
+package "Traitement LLM / Intentions" #D9EAD3 {
+  rectangle "extract_user_intent.py\n––––––––––––––––\ndetect_user_intent()\nllm_intent_classification()" as intent
+}
 
-    %% Interface utilisateur
-    generate_structured_medical_plan --> chatbot_ui
-    get_patient_constants_graphs --> chatbot_ui
-    chatbot_ui --> app[🎛️ Interface Dash]
+' === Génération de PPA ===
+package "Génération de PPA" #CFE2F3 {
+  rectangle "generate_ppa_from_poa.py\n––––––––––––––––\nprocess_ppa_request()" as ppa
+}
 
-    %% Exports
-    serialize_figs --> pdf_output[📄 PDF Synthèse]
-    chatbot_ui --> markdown_log[📝 Journal Markdown]
+' === Recommandations médicales ===
+package "Recommandations médicales" #F4CCCC {
+  rectangle "generate_structured_medical_plan.py\n––––––––––––––––\ngenerate_structured_medical_plan()" as reco
+}
 
-    %% Styles
-    classDef file fill:#f9f,stroke:#333,stroke-width:1px;
-    classDef process fill:#bbf,stroke:#333,stroke-width:1px;
-    class pdf_output,markdown_log file;
-    class poa_loader,poa_cleaning,generate_ppa_from_poa,llm_prompts,generate_structured_medical_plan,serialize_figs,chatbot_ui,get_constants,analyze_constants,get_patient_constants_graphs,scrape_trusted_sites,run_full_indexing_pipeline,index_documents_chromadb,retrieve_relevant_chunks process;
+' === Analyse des constantes ===
+package "Analyse des constantes" #EAD1DC {
+  rectangle "get_patient_constants_graphs.py\n––––––––––––––––\nprocess_patient_request_with_constants()" as const
+}
+
+' === Indexation documentaire ===
+package "Indexation documentaire" #D9D2E9 {
+  rectangle "run_full_indexing_pipeline.py\n––––––––––––––––\nrun_full_indexing_pipeline()" as indexer
+}
+
+' === Relations principales ===
+chatbot --> ppa
+chatbot --> reco
+chatbot --> const
+chatbot --> intent
+home --> indexer
+@enduml
 ```
-"""
-

@@ -15,12 +15,6 @@ L’architecture repose sur les briques suivantes :
 
 ---
 
-## 📌 Schéma fonctionnel (PlantUML)
-
-![Schéma fonctionnel](oby-ia_schema-Architecture_fonctionnelle_OBY_IA_15_07_2025.png)
-
----
-
 ## 📂 Fichiers clés par bloc fonctionnel
 
 ### 🎛️ Interface Utilisateur (Dash)
@@ -87,9 +81,9 @@ L’architecture repose sur les briques suivantes :
 ## 🔗 Liens utiles
 
 - [Documentation technique des modules](./codebase/tools.md)
-- [Guide de l’agent conversationnel](./codebase/agent.md)
 - [Page d’accueil de la documentation](./index.md)
+- [Modules et fonctions](./documentation_oby_ia.md)
 
 ---
 ## Schéma fonctionnel de l'application OBY-IA
-![Schéma fonctionnel](oby-ia_schema-Architecture_fonctionnelle_OBY_IA_15_07_2025.png)
+![Schéma fonctionnel](oby-ia_schema-Architecture_fonctionnelle_de_OBY_IA_23_07_2025.png)
