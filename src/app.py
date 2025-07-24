@@ -68,13 +68,13 @@ def check_and_generate_database():
 check_and_generate_database()
 
 # Dash App
-CURRENT_DIR = Path(__file__).resolve().parent
-from config.config import ASSETS_PATH
+from config.config import ASSETS_PATH, PAGES_DIR
+
 
 app = dash.Dash(
     __name__,
     use_pages=True,
-    pages_folder=str(CURRENT_DIR / "pages"),
+    pages_folder=str(PAGES_DIR),
     suppress_callback_exceptions=True,
     external_stylesheets=[
         dbc.themes.LUX,
@@ -82,6 +82,7 @@ app = dash.Dash(
     ],
     assets_folder=str(ASSETS_PATH),
 )
+
 
 app.layout = html.Div([
     dbc.NavbarSimple(
@@ -100,6 +101,29 @@ app.layout = html.Div([
 
 print("📄 Pages enregistrées :", dash.page_registry.keys())
 
+from dash.development.base_component import Component
+
+def collect_ids(component):
+    """Récupère récursivement tous les IDs d'un layout Dash."""
+    ids = []
+    if isinstance(component, Component):
+        if hasattr(component, 'id') and component.id is not None:
+            ids.append(component.id)
+        if hasattr(component, 'children') and component.children:
+            children = component.children
+            if isinstance(children, list):
+                for child in children:
+                    ids.extend(collect_ids(child))
+            else:
+                ids.extend(collect_ids(children))
+    return ids
+
+# Lister tous les IDs dans le layout global
+ids_in_layout = collect_ids(app.layout)
+print("📋 ID présents dans le layout global :", ids_in_layout)
+
+
+
 
 if __name__ == "__main__":
     import threading
@@ -110,7 +134,6 @@ if __name__ == "__main__":
     scheduler_thread.start()
 
     time.sleep(1)
-    print("📋 Callbacks enregistrés :", list(app.callback_map.keys()))
 
     # Lancer le serveur Dash
     port = int(os.environ.get("PORT", 8050))  # 8050 fallback pour usage local

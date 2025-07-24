@@ -57,11 +57,8 @@ from src.utils.export_chat_response import export_llm_responses
 from src.func.serialize_figs import serialize_figs, deserialize_figs
 from src.utils.vector_db_utils import is_chroma_index_ready
 
-from config.config import USER_DATABASE
-
 
 dash.register_page(__name__, path="/chatbot")
-
 
 # Layout
 layout = dbc.Container([
@@ -71,16 +68,16 @@ layout = dbc.Container([
     dcc.Store(id="constants_graphs_store", data=None),
     dcc.Store(id="chat_history", data=[], storage_type="session"),
 
-dcc.Interval(id="index_check_interval", interval=2000, n_intervals=0),
+    dcc.Interval(id="index_check_interval", interval=2000, n_intervals=0),
 
-html.Div(
-    id="index_banner_container",
-    children=html.Span(
-        id="index_banner_text",
-        children=[
-            html.Span("●", id="index_status_dot", style={"marginRight": "5px"}),
-            "Vérification de l'état..."
-        ],
+    html.Div(
+        id="index_banner_container",
+        children=html.Span(
+            id="index_banner_text",
+            children=[
+                html.Span("●", id="index_status_dot", style={"marginRight": "5px"}),
+                "Vérification de l'état..."
+            ],
         style={"fontWeight": "bold", "fontSize": "14px"}
     ),
     style={
@@ -102,17 +99,17 @@ html.Div(
             html.Div([
                 html.P("Bonjour, comment puis-je vous aider ?", style={"fontStyle": "italic", "color": "#555"}),
 
-                dbc.Input(id="user_input", placeholder="Posez votre question...", type="text", className="mb-2", disabled=True),
+                dbc.Input(id="user_input", placeholder="Posez votre question...", type="text", className="mb-2", disabled=False),
 
                 dbc.Button([
                     html.Img(src="/assets/icons/message.png", className="icon-inline"),
                     "Envoyer"
-                ], id="send_button", color="success", className="me-2", disabled=True),
+                ], id="send_button", color="success", className="me-2", disabled=False, n_clicks=0),
 
                 dbc.Button([
                     html.Img(src="/assets/icons/signout.png", className="icon-inline"),
                     "Déconnexion"
-                ], id="logout-btn", color="danger", className="me-2", disabled=True),
+                ], id="logout_button", color="danger", className="me-2", disabled=False, n_clicks=0),
 
                 dcc.Loading(
                     id="loading_spinner",
@@ -177,6 +174,26 @@ html.Div(
 ],
 fluid=True)
 
+from dash.development.base_component import Component
+
+def collect_ids(component):
+    ids = []
+    if isinstance(component, Component):
+        if hasattr(component, 'id') and component.id is not None:
+            ids.append(component.id)
+        if hasattr(component, 'children') and component.children:
+            children = component.children
+            if isinstance(children, list):
+                for child in children:
+                    ids.extend(collect_ids(child))
+            else:
+                ids.extend(collect_ids(children))
+    return ids
+
+ids_in_chatbot_layout = collect_ids(layout)
+print("🧩 ID présents dans le layout chatbot :", ids_in_chatbot_layout)
+
+
 @callback(
     Output("chat_history", "data"),
     Output("constants_graphs", "children"),
@@ -186,19 +203,17 @@ fluid=True)
     Output("constants_graphs_store", "data"),
     Output("chat_history_display", "children"),
 
-
     Input("send_button", "n_clicks"),
-    State("user_input", "value"),
-
-
     Input("logout_button", "n_clicks"),
-    State("chat_history", "data"),
 
+    State("user_input", "value"),
+    State("chat_history", "data"),
     State("session_data", "data"),
     State("current_patient", "data"),
     prevent_initial_call=True
 )
-def handle_user_input_or_logout(send_clicks, user_input, logout_clicks, chat_history, session_data, current_patient):
+def handle_user_input_or_logout(send_clicks, logout_clicks,user_input, chat_history, session_data, current_patient):
+
     """
     Callback principal de gestion des interactions utilisateur.
 
@@ -225,9 +240,12 @@ def handle_user_input_or_logout(send_clicks, user_input, logout_clicks, chat_his
             - les figures sérialisées,
             - l’affichage du chat.
     """
+    if send_clicks is None or send_clicks == 0:
+        raise dash.exceptions.PreventUpdate
 
     triggered = ctx.triggered_id
     print(f"📌 Callback triggered by: {triggered}")
+    print("✅ Bouton cliqué")
 
     # --- Gestion de la déconnexion ---
     if triggered == "logout_button":
@@ -243,6 +261,7 @@ def handle_user_input_or_logout(send_clicks, user_input, logout_clicks, chat_his
         return "❌ Session non authentifiée. Veuillez vous reconnecter.", "", "", "", dash.no_update
 
     print("🚀 chatbot_ui.py chargé !")
+    print(f'requête utilisateur {user_input}')
 
     # --- Initialisation des blocs d'affichage et variables de retour ---
     figs_list = []
@@ -325,6 +344,12 @@ def handle_user_input_or_logout(send_clicks, user_input, logout_clicks, chat_his
             # Quand le LLM a donné une réponse (bot_response), ajout de la réponse dans la session
             session_manager_instance.append_llm_response(session_id, bot_response)
 
+            # ✅ Ajouter l’échange complet (question + réponse)
+            session = session_manager_instance.get_session(session_id)
+            session_obj = session.get("session_obj")
+            if session_obj:
+                session_obj.add_message(user_input, bot_response)
+
             figs_list, table_html, anomaly_block = [], "", ""
 
         except Exception as e:
@@ -346,6 +371,12 @@ def handle_user_input_or_logout(send_clicks, user_input, logout_clicks, chat_his
 
             # Quand le LLM a donné une réponse (bot_response), ajout de la réponse dans la session
             session_manager_instance.append_llm_response(session_id, bot_response)
+
+            # ✅ Ajouter l’échange complet (question + réponse)
+            session = session_manager_instance.get_session(session_id)
+            session_obj = session.get("session_obj")
+            if session_obj:
+                session_obj.add_message(user_input, bot_response)
 
             figs_list, table_html, anomaly_block = [], "", ""
 
@@ -394,6 +425,7 @@ def handle_user_input_or_logout(send_clicks, user_input, logout_clicks, chat_his
     # 💡 Retour de l'ensemble : un seul historique pour affichage + store
     return chat_history, constants_graphs, constants_table, anomaly_graphs, current_patient, serialized_figs, chat_history_display
 
+print("✅ Callback handle_chat_request enregistré")
 
 
 
@@ -472,6 +504,9 @@ def check_index_status(n):
                 - user_input.disabled (bool): True si l'entrée doit être désactivée.
                 - send_button.disabled (bool): True si le bouton doit être désactivé.
         """
+    print(f"⏱️ Callback check_index_status déclenché avec n = {n}")
+    print("🔁 Vérification de l'état de l'indexation ChromaDB...")
+    print("📦 Index prêt ?", is_chroma_index_ready())
 
     if is_chroma_index_ready():
         return (
@@ -487,3 +522,59 @@ def check_index_status(n):
             True,
             True
         )
+
+# ============================
+# Autre solution
+# ============================
+# BANNER_STYLE = {
+#     "position": "absolute",
+#     "top": "10px",
+#     "right": "20px",
+#     "zIndex": "1000",
+#     "padding": "6px 12px",
+#     "borderRadius": "12px",
+#     "backgroundColor": "#f8f9fa",
+#     "boxShadow": "0 1px 3px rgba(0,0,0,0.2)",
+#     "display": "block"
+# }
+#
+# @callback(
+#     Output("index_banner_text", "children"),
+#     Output("index_banner_container", "style"),
+#     Output("user_input", "disabled"),
+#     Output("send_button", "disabled"),
+#     Input("index_check_interval", "n_intervals"),
+# )
+# def check_index_status(n):
+#     print("🔁 Vérification de l'état de l'indexation ChromaDB...")
+#     print("📦 Index prêt ?", is_chroma_index_ready())
+#
+#     base_style = BANNER_STYLE.copy()
+#
+#     if is_chroma_index_ready():
+#         dot = html.Span("●", id="index_status_dot", style={"color": "green", "marginRight": "5px"})
+#         return (
+#             [dot, "Prêt"],
+#             base_style,
+#             False,
+#             False
+#         )
+#     else:
+#         dot = html.Span("●", id="index_status_dot", style={"color": "orange", "marginRight": "5px"})
+#         return (
+#             [dot, "En cours d'indexation"],
+#             base_style,
+#             True,
+#             True
+#         )
+#
+print("✅ chatbot_ui.py chargé et exécuté")
+
+# @callback(
+#     Output("chat_history_display", "children"),
+#     Input("send_button", "n_clicks"),
+#     prevent_initial_call=True
+# )
+# def test_button(n_clicks):
+#     print("✅ Callback test déclenché.")
+#     return f"Bouton cliqué {n_clicks} fois"

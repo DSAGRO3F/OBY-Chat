@@ -41,11 +41,6 @@ print(f"📄 Chargement du module : {__name__}")
 
 
 
-# 🔒 Simuler la base utilisateurs (en vrai, à externaliser et sécuriser)
-# USER_DATABASE = {
-#     "admin": "1234",
-#     "test": "abcd"
-# }
 
 layout = dbc.Container([
     dbc.Row([

@@ -21,43 +21,54 @@ from config.config import MARKDOWN_CHAT_EXPORTS
 
 def export_llm_responses(session_manager_instance, session_id, patient_name, figs_list=None):
     """
-        Exporte les réponses du LLM pour un patient donné dans un fichier Markdown.
+    Exporte l'historique complet des échanges (utilisateur + LLM) d'une session
+    vers un fichier Markdown, avec option d'inclure des graphiques.
 
-        Cette fonction extrait l'ensemble des réponses associées à une session utilisateur
-        via le gestionnaire de sessions, puis les enregistre dans un fichier `.md`
-        dans un dossier structuré par patient et date. Elle peut également inclure
-        des graphiques (figures Plotly) si fournis.
+    Chaque interaction est formatée sous forme :
+    - **Utilisateur** : question
+    - **OBY-Chat** : réponse
 
-        Args:
-            session_manager_instance : Instance de SessionManager utilisée pour accéder aux réponses.
-            session_id (str) : Identifiant unique de la session.
-            patient_name (str) : Nom du patient concerné par l'export.
-            figs_list (list, optionnel) : Liste de graphiques (objets Plotly) à inclure dans le fichier.
+    Args:
+        session_manager_instance: Instance du gestionnaire de sessions.
+        session_id (str): Identifiant unique de la session.
+        patient_name (str): Nom du patient pour nommer le fichier exporté.
+        figs_list (list, optional): Liste de chemins vers des fichiers image à inclure.
 
-        Returns:
-            str : Chemin absolu du fichier Markdown généré.
+    Raises:
+        ValueError: Si aucun historique n'est disponible à exporter.
+    """
 
-        Raises:
-            ValueError : Si aucune réponse du LLM n'est disponible pour la session donnée.
-        """
-    # Vérifications des arguments
-    print("🔍 DÉMARRAGE EXPORT")
-    print(f"📌 session_id: {session_id}")
-    print(f"📌 patient_name: {patient_name}")
+    session = session_manager_instance.get_session(session_id)
+    if not session:
+        raise ValueError("❌ Session introuvable pour l’export.")
 
 
-    # Récupérer toutes les réponses
-    llm_responses = session_manager_instance.get_llm_responses(session_id)
-    print(f"🧠 Nombre de réponses récupérées : {len(llm_responses)}")
+    chat_history = session_manager_instance.get_chat_history(session_id)
+    if not chat_history:
+        raise ValueError("❌ Aucun échange enregistré dans cette session.")
 
-    if not llm_responses:
-        print("❌ Aucune réponse à exporter.")
-        raise ValueError("Aucune réponse du LLM à exporter pour ce patient.")
+    print(f"🧠 Nombre d’échanges récupérés : {len(chat_history)}")
 
+    icon_user = "🧑‍⚕️"
+    icon_llm = "🤖"
+    formatted_exchanges = []
 
-    # Concatène les réponses avec des séparateurs pour plus de lisibilité
-    final_text = "\n\n---\n\n".join(llm_responses)
+    final_text = ""
+    for user_msg, llm_msg in chat_history:
+        formatted = (
+            f"{icon_user} **Utilisateur :**\n"
+            f"<span style='color:#2ecc71'>{user_msg.strip()}</span>\n\n"
+            f"{icon_llm} **Réponse OBY :**\n"
+            f"{llm_msg.strip()}"
+        )
+        formatted_exchanges.append(formatted)
 
+    final_text = "\n\n---\n\n".join(formatted_exchanges)
+
+    # for user_input, model_response in chat_history:
+    #     final_text += f"**Utilisateur** : {user_input}\n\n"
+    #     final_text += f"**OBY-Chat** : {model_response}\n\n"
+    #     final_text += "---\n\n"
 
     # Chemin d'export
     today = datetime.today().strftime("%Y-%m-%d")

@@ -12,8 +12,6 @@ vectorielles sont prêtes à être interrogées par les utilisateurs.
 from pathlib import Path
 from config.config import INDEX_READY_FLAG_PATH
 
-# Chemin du fichier flag
-# INDEX_READY_FLAG_PATH = Path("src/vector_db/index_ready.flag")
 
 def is_chroma_index_ready(verbose: bool = False) -> bool:
     """
@@ -48,3 +46,8 @@ def clear_index_ready_flag() -> None:
     """
     if INDEX_READY_FLAG_PATH.exists():
         INDEX_READY_FLAG_PATH.unlink()
+
+
+if __name__ == "__main__":
+    print("🔍 Test de is_chroma_index_ready()")
+    print("📦 Flag présent :", is_chroma_index_ready(verbose=True))

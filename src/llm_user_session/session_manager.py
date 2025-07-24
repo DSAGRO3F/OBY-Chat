@@ -156,7 +156,8 @@ class SessionManager:
         self.sessions[session_id] = {
             "user_id": user_id,
             "current_patient": None,
-            "anonymization_mapping": {}  # Ajouté pour l'anonymisation
+            "anonymization_mapping": {}, # Ajouté pour l'anonymisation
+            "session_obj": Session(user_id, session_id),
         }
 
 
@@ -172,6 +173,29 @@ class SessionManager:
         sinon None.
     """
         return self.sessions.get(session_id, None)
+
+
+
+    def get_chat_history(self, session_id):
+        """
+        Retourne l'historique des échanges utilisateur-LLM pour une session donnée.
+
+        Args:
+            session_id (str): Identifiant de la session.
+
+        Returns:
+            list of tuples: Liste des paires (user_input, model_response).
+        """
+
+        session_data = self.get_session(session_id)
+        if not session_data:
+            return []
+
+        # session_data: dict = session_data or {} Pour typer la variable
+        session_obj = session_data.get("session_obj")
+        if session_obj:
+            return session_obj.get_history()
+        return []
 
 
     def end_session(self, user_id, session_id):

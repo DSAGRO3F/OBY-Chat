@@ -29,6 +29,9 @@ FONTS_DIR = ASSETS_DIR / 'fonts' / 'dejavu-fonts-ttf-2.37' / 'ttf'
 # Convert to string only when necessary
 FONT_FILES_DIR = str(FONTS_DIR)
 
+# Pages directory
+PAGES_DIR = BASE_DIR/'src'/'pages'
+
 # Documentary base (ensemble de fiches ou documents de référence transmis par BVIDF,
 # format .docx)
 docx_files_path = 'src/data/input/fiches_documentaires_docx/'

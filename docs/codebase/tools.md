@@ -415,7 +415,7 @@ de synthèse ou de recommandations.
 <!---
 Module d'export des réponses générées par le modèle LLM pour un patient donné.
 
-Ce module permet de récupérer toutes les réponses associées à une session,
+Ce module permet de récupérer toutes les réponses associées à une session (requête utilisateur + réponse LLM),
 de les concaténer proprement, et de les exporter dans un fichier Markdown.
 Il peut également intégrer des graphiques de constantes si fournis.
 
