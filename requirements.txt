@@ -37,3 +37,4 @@ mkdocs-material
 pymdown-extensions
 mkdocs-mermaid2-plugin
 mkdocs-minify-plugin
+plantuml-markdown
