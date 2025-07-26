@@ -22,8 +22,8 @@ COPY outputs/ ./outputs/
 COPY assets/ ./assets/
 
 # 8050 pour Dash (mose app), 8080 pour MkDocs (mode doc)
-EXPOSE 8050  # pour Dash
-EXPOSE 8080  # pour MkDocs (mode doc)
+EXPOSE 8050
+EXPOSE 8080
 
 # Étape 7 : Copier les données si nécessaire (optionnel, utile en prod)
 # COPY data/input/ ./data/input/
