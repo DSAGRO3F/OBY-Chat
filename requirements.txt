@@ -32,3 +32,8 @@ langchain-openai~=0.3.18
 langchain-mistralai
 langchain-community>=0.0.30
 sentence-transformers
+mkdocs
+mkdocs-material
+pymdown-extensions
+mkdocs-mermaid2-plugin
+mkdocs-minify-plugin
