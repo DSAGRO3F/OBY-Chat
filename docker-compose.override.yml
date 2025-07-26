@@ -27,6 +27,7 @@ services:
       - ./assets:/app/assets
     ports:
       - "8050:8050"
+      - "8080:8080"
     env_file:
       - .env
     environment:

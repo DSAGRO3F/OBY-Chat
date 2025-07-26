@@ -29,4 +29,5 @@ services:
     container_name: obyia-container
     ports:
       - "8050:8050"
+      - "8080:8080"
     command: ./start.sh
