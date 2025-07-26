@@ -29,4 +29,4 @@ services:
     container_name: obyia-container
     ports:
       - "8050:8050"
-    command: python src/app.py
+    command: ./start.sh

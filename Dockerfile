@@ -24,5 +24,10 @@ COPY assets/ ./assets/
 # Étape 7 : Copier les données si nécessaire (optionnel, utile en prod)
 # COPY data/input/ ./data/input/
 
-# Étape 8 : Définir le point d’entrée (à ajuster selon besoin)
-CMD ["python", "-m", "src.app"]
+# Étape 8 Script de démarrage
+COPY scripts/start.sh ./start.sh
+RUN chmod +x ./start.sh
+
+# Étape 9 : Définir le point d’entrée (à ajuster selon besoin)
+# CMD ["python", "-m", "src.app"] plus utilisé, géré par start.sh
+CMD ["./start.sh"]
