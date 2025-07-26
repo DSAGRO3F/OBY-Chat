@@ -21,6 +21,9 @@ COPY scripts/ ./scripts/
 COPY outputs/ ./outputs/
 COPY assets/ ./assets/
 
+# Étape 6 bis : Copier la config de MkDocs
+COPY mkdocs.yml ./mkdocs.yml
+
 # 8050 pour Dash (mose app), 8080 pour MkDocs (mode doc)
 EXPOSE 8050
 EXPOSE 8080
