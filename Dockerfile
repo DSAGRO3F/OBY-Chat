@@ -7,6 +7,9 @@ WORKDIR /app
 # Étape 3 : Rendre src/ importable en tant que module
 ENV PYTHONPATH=/app
 
+# Étape 3 bis : variable d'environnement fichier plantuml.jar
+ENV PLANTUML_JAR_PATH=/usr/local/bin/plantuml.jar
+
 # Étape 4 : Copier les fichiers de dépendances
 COPY pyproject.toml requirements.txt ./
 
@@ -21,20 +24,28 @@ COPY scripts/ ./scripts/
 COPY outputs/ ./outputs/
 COPY assets/ ./assets/
 
-# Étape 6 bis : Copier la config de MkDocs
+# Étape 7: Installer Java (nécessaire pour PlantUML)
+RUN apt-get update && apt-get install -y default-jre curl && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Étape 8: Télécharger plantuml.jar (dans /usr/local/bin/plantuml.jar)
+RUN curl -o /usr/local/bin/plantuml.jar https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar
+
+# Étape 9 : Copier la config de MkDocs
 COPY mkdocs.yml ./mkdocs.yml
 
-# 8050 pour Dash (mose app), 8080 pour MkDocs (mode doc)
+
+# Étape 10: 8050 pour Dash (mose app), 8080 pour MkDocs (mode doc)
 EXPOSE 8050
 EXPOSE 8080
 
-# Étape 7 : Copier les données si nécessaire (optionnel, utile en prod)
+# Étape 11 : Copier les données si nécessaire (optionnel, utile en prod)
 # COPY data/input/ ./data/input/
 
-# Étape 8 Script de démarrage
+# Étape 12 Script de démarrage
 COPY scripts/start.sh ./start.sh
 RUN chmod +x ./start.sh
 
-# Étape 9 : Définir le point d’entrée (à ajuster selon besoin)
+# Étape 13 : Définir le point d’entrée (à ajuster selon besoin)
 # CMD ["python", "-m", "src.app"] plus utilisé, géré par start.sh
 CMD ["./start.sh"]

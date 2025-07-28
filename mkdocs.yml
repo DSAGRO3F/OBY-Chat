@@ -43,7 +43,9 @@ markdown_extensions:
       custom_checkbox: true
   - pymdownx.mark
   - pymdownx.emoji
-  - plantuml_markdown
+  - plantuml_markdown:
+      server: false
+      jar_path: !ENV ${PLANTUML_JAR_PATH}
 
 plugins:
   - search
