@@ -47,7 +47,12 @@ dependencies = [
     "pymdown-extensions",
     "mkdocs-mermaid2-plugin",
     "mkdocs-minify-plugin",
-    "plantuml-markdown"
+    "mkdocs-section-index",
+    "mkdocstrings[python]",
+    "mkdocs-glightbox",
+    "plantuml-markdown",
+
+
 ]
 
 [tool.setuptools]
