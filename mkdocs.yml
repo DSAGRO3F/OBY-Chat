@@ -45,7 +45,7 @@ markdown_extensions:
   - pymdownx.emoji
   - plantuml_markdown:
       server: false
-      jar_path: !ENV ${PLANTUML_JAR_PATH}
+      jar_path: /usr/local/bin/plantuml.jar
 
 plugins:
   - search
