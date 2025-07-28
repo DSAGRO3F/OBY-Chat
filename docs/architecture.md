@@ -85,5 +85,3 @@ L’architecture repose sur les briques suivantes :
 - [Modules et fonctions](./documentation_oby_ia.md)
 
 ---
-## Schéma fonctionnel de l'application OBY-IA
-![Schéma fonctionnel](oby-ia_schema-Architecture_fonctionnelle_de_OBY_IA_23_07_2025.png)
