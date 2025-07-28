@@ -43,9 +43,10 @@ markdown_extensions:
       custom_checkbox: true
   - pymdownx.mark
   - pymdownx.emoji
+
+  # ✅ MODIFICATION : passage en mode serveur public (au lieu du .jar local)
   - plantuml_markdown:
-      server: false
-      jar_path: /usr/local/bin/plantuml.jar
+      server: http://www.plantuml.com/plantuml
 
 plugins:
   - search
