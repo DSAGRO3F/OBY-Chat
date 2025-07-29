@@ -43,7 +43,7 @@ Ici, si file_path n’est pas présent du tout dans le indexed_files.json, alors
 
 ### 2.3. Conclusion
 
-Oui, le pipeline détecte bien les nouveaux fichiers .docx de manière implicite, car ils n’ont pas encore de hash enregistré dans indexed_files.json.
+Le pipeline détecte bien les nouveaux fichiers .docx de manière implicite, car ils n’ont pas encore de hash enregistré dans indexed_files.json.
 
 Il n’y a pas besoin d’un test explicite « si fichier nouveau », car l’absence de clé file_path dans le dictionnaire indexed_files est suffisante pour le déclencher.
 
