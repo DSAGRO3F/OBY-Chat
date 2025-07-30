@@ -62,7 +62,8 @@ INDEXED_FILES_JOURNAL_PATH = BASE_DIR/ "src" / "data" / "output" / "indexation" 
 PATIENT_FILES_DIR = BASE_DIR / "src"/"data" / "input"/"poa_patients"
 
 # Path to the ChromaDB "index ready" flag
-INDEX_READY_FLAG_PATH = BASE_DIR / "src" / "vector_db" / "index_ready.flag"
+# INDEX_READY_FLAG_PATH = BASE_DIR / "src" / "vector_db" / "index_ready.flag" -> fonctionne pas sur Render
+INDEX_READY_FLAG_PATH = Path("/tmp/oby-chat/index_ready.flag")
 
 # Path to assets directory
 ASSETS_PATH = Path(__file__).parent.parent / "assets"
