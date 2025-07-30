@@ -508,7 +508,7 @@ def check_index_status(n):
     print("🔁 Vérification de l'état de l'indexation ChromaDB...")
     print("📦 Index prêt ?", is_chroma_index_ready())
 
-    if is_chroma_index_ready():
+    if is_chroma_index_ready(verbose=True):
         return (
             [html.Span("●", id="index_status_dot", style={"marginRight": "5px"}), "Prêt"],
             {"color": "green", "marginRight": "5px"},
