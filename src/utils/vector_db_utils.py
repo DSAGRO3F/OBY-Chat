@@ -37,6 +37,7 @@ def mark_index_ready_flag():
     """
     INDEX_READY_FLAG_PATH.parent.mkdir(parents=True, exist_ok=True)
     INDEX_READY_FLAG_PATH.touch(exist_ok=True)
+    print(f"[DEBUG ✅] Flag écrit à : {INDEX_READY_FLAG_PATH.resolve()}")
 
 
 def clear_index_ready_flag() -> None:

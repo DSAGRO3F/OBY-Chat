@@ -62,6 +62,7 @@ def run_full_indexing_pipeline():
     """
 
     clear_index_ready_flag()
+    print("[DEBUG ✅] clear_index_ready_flag() appelé")
 
     print("🚀 1.Lancement du pipeline d'indexation...")
     print(f"📂 2. Dossier d'entrée DOCX : {INPUT_DOCX}")
@@ -123,7 +124,8 @@ def run_full_indexing_pipeline():
     print("✅ Pipeline terminé avec succès !")
 
 
-mark_index_ready_flag()
+    mark_index_ready_flag()
+    print("[DEBUG ✅] mark_index_ready_flag() appelé")
 
 
 # Exécution directe possible
