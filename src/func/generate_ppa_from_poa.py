@@ -115,7 +115,7 @@ def process_ppa_request(user_input, system_prompt):
     enc = tiktoken.get_encoding("cl100k_base")  # ou adapte selon ton tokenizer
     num_tokens = len(enc.encode(final_prompt))
 
-    print("🧠 Nombre réel de tokens envoyés au LLM :", num_tokens)
+    print(" 🟢Nombre réel de tokens envoyés au LLM :", num_tokens)
 
     # ============================
 
@@ -123,6 +123,18 @@ def process_ppa_request(user_input, system_prompt):
     # response = llm_model.invoke(final_prompt)
     print(f"🟢 Réponse brute du modèle : {response}")
     deanonymized_response, reverse_mapping = deanonymize_fields(response, dict_mapping)
+
+
+
+    # ============================
+
+    # NOMBRE TOKENS RECUS DU LLM
+    # Comptage des tokens dans la réponse du LLM
+    num_output_tokens = len(enc.encode(response))
+    print(" 🟢Nombre réel de tokens reçus du LLM :", num_output_tokens)
+
+    # ============================
+
 
     # 9. Extraction propre du contenu
     return deanonymized_response.strip(), dict_mapping
