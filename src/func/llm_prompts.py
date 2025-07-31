@@ -488,8 +488,20 @@ def llm_prompt_template_medical_plan():
 """
 -------------------------------
 """
+# ==============================================================================
+# Imports
+# ==============================================================================
 
+from langchain_core.output_parsers import StrOutputParser
+from src.llm_user_session.model import llm_model
+from src.func.retrieve_relevant_chunks import retrieve_relevant_chunks
+import traceback
 
+# /////////////////////////////////////////////////////////////////////////////
+
+# ==============================================================================
+# Def. messages + appel LLM -- cas génération PPA
+# ==============================================================================
 
 def medical_prompt_template(system_prompt, user_prompt_template):
     """
@@ -506,8 +518,6 @@ def medical_prompt_template(system_prompt, user_prompt_template):
 -------------------------------
 """
 
-from langchain_core.output_parsers import StrOutputParser
-from src.llm_user_session.model import llm_model
 
 def medical_response_from_llm(prompt_template, user_input, poa_content):
     """
@@ -529,11 +539,19 @@ def medical_response_from_llm(prompt_template, user_input, poa_content):
     })
     return response
 
+# /////////////////////////////////////////////////////////////////////////////
+
+
 
 """
 ------------------------------- Fonctions utilisées appelées par module src/func/generate_structured_medical_plan.py
 ------------------------------- Recherche de contenu associé au patient
 """
+
+
+# ==============================================================================
+# Def. messages + appel LLM -- cas recommandations soins contexte patient
+# ==============================================================================
 
 
 def rag_llm_prompt_template_medical_plan():
@@ -591,11 +609,6 @@ def rag_llm_prompt_template_medical_plan():
 -------------------------------
 """
 
-from langchain_core.output_parsers import StrOutputParser
-from src.llm_user_session.model import llm_model
-from src.func.retrieve_relevant_chunks import retrieve_relevant_chunks
-
-import traceback
 
 def rag_medical_response_from_llm(prompt_template, user_input, poa_content):
     """
@@ -648,6 +661,7 @@ def rag_medical_response_from_llm(prompt_template, user_input, poa_content):
         return "❌ Erreur lors de l'appel au modèle LLM (invoke)."
 
 
+# /////////////////////////////////////////////////////////////////////////////
 
 
 
