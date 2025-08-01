@@ -274,8 +274,6 @@ def handle_user_input_or_logout(send_clicks, logout_clicks,user_input, chat_hist
     bot_msg = None
 
 
-
-
         # --- Initialisation demande ---
     bot_response = "🤖 Je traite votre demande..."
 
@@ -288,107 +286,274 @@ def handle_user_input_or_logout(send_clicks, logout_clicks,user_input, chat_hist
 
     intent = intent_dict.get("intent", "unknown")
 
-    ppa_requested = intent == "generate_ppa"
-    constantes_requested = intent == "get_constants"
-    recommandations_requested = intent == "generate_recommendations"
 
-    print(f"🎯 Intentions détectées : "
-          f"recommandations: {recommandations_requested},"
-          f"constantes={constantes_requested}, "
-          f"ppa={ppa_requested}, "
-          f"nom patient={nom}")
-    if ppa_requested or constantes_requested or recommandations_requested:
-        print(f'✅détection intention réussie')
+    # --- Étape confirmation de l’intention ---
+    session_id = session_data.get("session_id")
+    session = session_manager_instance.get_session(session_id)
+
+    if session.get("intent_confirmation_pending"):
+        answer = user_input.strip().lower()
+        if answer in ["oui", "yes", "ok", "c'est bien ça"]:
+            confirmed_intent = session.get("intent_candidate", {}).get("intent")
+            nom = session.get("intent_candidate", {}).get("nom", "Nom patient inconnu")
+
+            # Nettoyage post-confirmation
+            session["intent_confirmation_pending"] = False
+            session["intent_candidate"] = {}
+
+            # Définition des flags
+            ppa_requested = confirmed_intent == "generate_ppa"
+            constantes_requested = confirmed_intent == "get_constants"
+            recommandations_requested = confirmed_intent == "generate_recommendations"
+            print(f"✅ Intention confirmée par l’utilisateur : {confirmed_intent}")
+        else:
+            # Refus utilisateur → proposition de reformulation
+            session["intent_confirmation_pending"] = False
+            session["intent_candidate"] = {}
+            bot_response = "Compris. Voici quelques exemples de requêtes que vous pouvez utiliser :\n" \
+                           "- *Prépare-moi le plan d’aide pour Madame Dupont*\n" \
+                           "- *Montre-moi les constantes du patient Martin sur le dernier mois*\n" \
+                           "- *Quelles sont les recommandations en cas d’AVC ?*"
+            user_msg = html.Div(f"👤 {user_input.strip()}", className="user-message")
+            chat_history.append(user_msg)
+            chat_history.append(html.Div(dcc.Markdown(bot_response), className="bot-response"))
+
+    if session_data:
+        session = session_manager_instance.get(session_data["session_id"])
+        # Informer session_data de l'intention détectée
+        session["intent_confirmation_pending"] = True
+        session["intent_candidate"] = {"intent": intent, "nom": nom}
+        # Insérer l'intention détectée dans bot_response
+        if intent == "generate_ppa":
+            text = "demande de génération de PPA"
+        if intent == "get_constants":
+            text = "demande de constantes patient"
+        # if intent == "generate_recommendations":
+        else: text = "demande de recommandations patient"
+        bot_response = f"Je comprends que vous souhaitez une {text}, est ce que vous confirmez ?"
+
+        user_input_str = user_input.strip().lower()
+
+        if user_input_str in ["oui", "ok", "yes", "c'est bien ça"]:
+            # Confirmation acceptée → on récupère l’intention et on continue
+            ppa_requested = intent == "generate_ppa"
+            constantes_requested = intent == "get_constants"
+            recommandations_requested = intent == "generate_recommendations"
+
+            print(f"🎯 Intentions détectées : "
+                  f"recommandations: {recommandations_requested},"
+                  f"constantes={constantes_requested}, "
+                  f"ppa={ppa_requested}, "
+                  f"nom patient={nom}")
+            if ppa_requested or constantes_requested or recommandations_requested:
+                print(f'✅détection intention réussie')
 
 
-    # --- Réinitialisation si changement de patient ---
-    if nom and (ppa_requested or constantes_requested or recommandations_requested):
-        if nom and nom != current_patient:
-            print(f"🆕 Changement de patient détecté : {current_patient} ➡️ {nom}")
-            chat_history = []
-            figs_list = []
-            table_html = ""
-            anomaly_block = ""
-            current_patient = nom
-            # Remet à zéro le mapping d’anonymisation
-            session_manager_instance.reset_anonymization_mapping(user_id)
-            session_manager_instance.set_current_patient(session_id, nom)
+            # On déclenche l'un des pipelines suivants selin l'intention détectée
+            # --- Réinitialisation si changement de patient ---
+            if nom and (ppa_requested or constantes_requested or recommandations_requested):
+                if nom and nom != current_patient:
+                    print(f"🆕 Changement de patient détecté : {current_patient} ➡️ {nom}")
+                    chat_history = []
+                    figs_list = []
+                    table_html = ""
+                    anomaly_block = ""
+                    current_patient = nom
+                    # Remet à zéro le mapping d’anonymisation
+                    session_manager_instance.reset_anonymization_mapping(user_id)
+                    session_manager_instance.set_current_patient(session_id, nom)
+
+                else:
+                    print(f"✅ Patient conservé : {current_patient}")
+
+            # --- Traitement des constantes ---
+            if constantes_requested:
+                try:
+                    print("📊 Appel à process_patient_request_with_constants()")
+                    bot_response, figs_list, table_html, anomaly_block = process_patient_request_with_constants(nom)
+                    serialized_figs = serialize_figs(figs_list)
+                except Exception as e:
+                    print(f"❌ Erreur dans process_patient_request_with_constants : {e}")
+                    bot_response = "Une erreur est survenue pendant le traitement des constantes."
+                    figs_list, table_html, anomaly_block = [], "", ""
+
+
+            # --- Traitement demande PPA ---
+            elif ppa_requested:
+                print("📄 Appel à process_ppa_request() pour le PPA")
+                try:
+                    bot_response, dict_mapping = process_ppa_request(user_input, system_prompt)
+
+                    # Enregistrer le mapping renvoyé par la fonction dans la session
+                    # Le récupérer proprement via session_manager.get_anonymization_mapping()
+                    session_manager_instance.set_anonymization_mapping(session_id, dict_mapping)
+
+                    # Quand le LLM a donné une réponse (bot_response), ajout de la réponse dans la session
+                    session_manager_instance.append_llm_response(session_id, bot_response)
+
+                    # ✅ Ajouter l’échange complet (question + réponse)
+                    session = session_manager_instance.get_session(session_id)
+                    session_obj = session.get("session_obj")
+                    if session_obj:
+                        session_obj.add_message(user_input, bot_response)
+
+                    figs_list, table_html, anomaly_block = [], "", ""
+
+                except Exception as e:
+                    print(f"❌ Erreur dans process_ppa_request : {e}")
+                    bot_response = "Une erreur est survenue pendant la génération du PPA."
+                    figs_list, table_html, anomaly_block = "", "", ""
+
+
+
+            # --- Traitement demande plan de soins ---
+            elif recommandations_requested:
+                print("📄 Appel à generate_structured_medical_plan() pour plan de soins")
+                try:
+                    bot_response, dict_mapping = generate_structured_medical_plan(user_input,
+                                                                                  system_prompt_medical_plan)
+
+                    # Enregistrer le mapping renvoyé par la fonction dans la session
+                    # Le récupérer proprement via session_manager.get_anonymization_mapping()
+                    session_manager_instance.set_anonymization_mapping(session_id, dict_mapping)
+
+                    # Quand le LLM a donné une réponse (bot_response), ajout de la réponse dans la session
+                    session_manager_instance.append_llm_response(session_id, bot_response)
+
+                    # ✅ Ajouter l’échange complet (question + réponse)
+                    session = session_manager_instance.get_session(session_id)
+                    session_obj = session.get("session_obj")
+                    if session_obj:
+                        session_obj.add_message(user_input, bot_response)
+
+                    figs_list, table_html, anomaly_block = [], "", ""
+
+                except Exception as e:
+                    print(f"❌ Erreur dans generate_structured_medical_plan : {e}")
+                    bot_response = "Une erreur est survenue pendant l'extraction des recommandations de soins."
+                    figs_list, table_html, anomaly_block = [], "", ""
+
+            if not any([ppa_requested, constantes_requested, recommandations_requested]):
+                print("❗ Aucune intention détectée dans la requête utilisateur.")
+
 
         else:
-            print(f"✅ Patient conservé : {current_patient}")
+            # L’utilisateur a refusé → proposer de reformuler
+
+            session["intent_confirmation_pending"] = False
+            session["intent_candidate"] = {}
+            bot_response = "Compris. Voici quelques exemples de requêtes que vous pouvez utiliser :\n" \
+                           "- *Prépare-moi le plan d’aide pour Madame Dupont*\n" \
+                           "- *Montre-moi les constantes du patient Martin sur le dernier mois*\n" \
+                           "- *Quelles sont les recommandations en cas d’AVC ?*"
 
 
 
-    # --- Traitement des constantes ---
-    if constantes_requested:
-        try:
-            print("📊 Appel à process_patient_request_with_constants()")
-            bot_response, figs_list, table_html, anomaly_block = process_patient_request_with_constants(nom)
-            serialized_figs = serialize_figs(figs_list)
-        except Exception as e:
-            print(f"❌ Erreur dans process_patient_request_with_constants : {e}")
-            bot_response = "Une erreur est survenue pendant le traitement des constantes."
-            figs_list, table_html, anomaly_block = [], "", ""
-
-
-    # --- Traitement demande PPA ---
-    elif ppa_requested:
-        print("📄 Appel à process_ppa_request() pour le PPA")
-        try:
-            bot_response, dict_mapping= process_ppa_request(user_input, system_prompt)
-
-            # Enregistrer le mapping renvoyé par la fonction dans la session
-            # Le récupérer proprement via session_manager.get_anonymization_mapping()
-            session_manager_instance.set_anonymization_mapping(session_id, dict_mapping)
-
-            # Quand le LLM a donné une réponse (bot_response), ajout de la réponse dans la session
-            session_manager_instance.append_llm_response(session_id, bot_response)
-
-            # ✅ Ajouter l’échange complet (question + réponse)
-            session = session_manager_instance.get_session(session_id)
-            session_obj = session.get("session_obj")
-            if session_obj:
-                session_obj.add_message(user_input, bot_response)
-
-            figs_list, table_html, anomaly_block = [], "", ""
-
-        except Exception as e:
-            print(f"❌ Erreur dans process_ppa_request : {e}")
-            bot_response = "Une erreur est survenue pendant la génération du PPA."
-            figs_list, table_html, anomaly_block = "", "", ""
 
 
 
-    # --- Traitement demande plan de soins ---
-    elif recommandations_requested:
-        print("📄 Appel à generate_structured_medical_plan() pour plan de soins")
-        try:
-            bot_response, dict_mapping= generate_structured_medical_plan(user_input, system_prompt_medical_plan)
 
-            # Enregistrer le mapping renvoyé par la fonction dans la session
-            # Le récupérer proprement via session_manager.get_anonymization_mapping()
-            session_manager_instance.set_anonymization_mapping(session_id, dict_mapping)
 
-            # Quand le LLM a donné une réponse (bot_response), ajout de la réponse dans la session
-            session_manager_instance.append_llm_response(session_id, bot_response)
 
-            # ✅ Ajouter l’échange complet (question + réponse)
-            session = session_manager_instance.get_session(session_id)
-            session_obj = session.get("session_obj")
-            if session_obj:
-                session_obj.add_message(user_input, bot_response)
 
-            figs_list, table_html, anomaly_block = [], "", ""
 
-        except Exception as e:
-            print(f"❌ Erreur dans generate_structured_medical_plan : {e}")
-            bot_response = "Une erreur est survenue pendant l'extraction des recommandations de soins."
-            figs_list, table_html, anomaly_block = [], "", ""
+
+
+
+
+
+
+
+
+
+
+
+    # # --- Réinitialisation si changement de patient ---
+    # if nom and (ppa_requested or constantes_requested or recommandations_requested):
+    #     if nom and nom != current_patient:
+    #         print(f"🆕 Changement de patient détecté : {current_patient} ➡️ {nom}")
+    #         chat_history = []
+    #         figs_list = []
+    #         table_html = ""
+    #         anomaly_block = ""
+    #         current_patient = nom
+    #         # Remet à zéro le mapping d’anonymisation
+    #         session_manager_instance.reset_anonymization_mapping(user_id)
+    #         session_manager_instance.set_current_patient(session_id, nom)
+    #
+    #     else:
+    #         print(f"✅ Patient conservé : {current_patient}")
+    #
+    #
+    #
+    # # --- Traitement des constantes ---
+    # if constantes_requested:
+    #     try:
+    #         print("📊 Appel à process_patient_request_with_constants()")
+    #         bot_response, figs_list, table_html, anomaly_block = process_patient_request_with_constants(nom)
+    #         serialized_figs = serialize_figs(figs_list)
+    #     except Exception as e:
+    #         print(f"❌ Erreur dans process_patient_request_with_constants : {e}")
+    #         bot_response = "Une erreur est survenue pendant le traitement des constantes."
+    #         figs_list, table_html, anomaly_block = [], "", ""
+    #
+    #
+    # # --- Traitement demande PPA ---
+    # elif ppa_requested:
+    #     print("📄 Appel à process_ppa_request() pour le PPA")
+    #     try:
+    #         bot_response, dict_mapping= process_ppa_request(user_input, system_prompt)
+    #
+    #         # Enregistrer le mapping renvoyé par la fonction dans la session
+    #         # Le récupérer proprement via session_manager.get_anonymization_mapping()
+    #         session_manager_instance.set_anonymization_mapping(session_id, dict_mapping)
+    #
+    #         # Quand le LLM a donné une réponse (bot_response), ajout de la réponse dans la session
+    #         session_manager_instance.append_llm_response(session_id, bot_response)
+    #
+    #         # ✅ Ajouter l’échange complet (question + réponse)
+    #         session = session_manager_instance.get_session(session_id)
+    #         session_obj = session.get("session_obj")
+    #         if session_obj:
+    #             session_obj.add_message(user_input, bot_response)
+    #
+    #         figs_list, table_html, anomaly_block = [], "", ""
+    #
+    #     except Exception as e:
+    #         print(f"❌ Erreur dans process_ppa_request : {e}")
+    #         bot_response = "Une erreur est survenue pendant la génération du PPA."
+    #         figs_list, table_html, anomaly_block = "", "", ""
+    #
+    #
+    #
+    # # --- Traitement demande plan de soins ---
+    # elif recommandations_requested:
+    #     print("📄 Appel à generate_structured_medical_plan() pour plan de soins")
+    #     try:
+    #         bot_response, dict_mapping= generate_structured_medical_plan(user_input, system_prompt_medical_plan)
+    #
+    #         # Enregistrer le mapping renvoyé par la fonction dans la session
+    #         # Le récupérer proprement via session_manager.get_anonymization_mapping()
+    #         session_manager_instance.set_anonymization_mapping(session_id, dict_mapping)
+    #
+    #         # Quand le LLM a donné une réponse (bot_response), ajout de la réponse dans la session
+    #         session_manager_instance.append_llm_response(session_id, bot_response)
+    #
+    #         # ✅ Ajouter l’échange complet (question + réponse)
+    #         session = session_manager_instance.get_session(session_id)
+    #         session_obj = session.get("session_obj")
+    #         if session_obj:
+    #             session_obj.add_message(user_input, bot_response)
+    #
+    #         figs_list, table_html, anomaly_block = [], "", ""
+    #
+    #     except Exception as e:
+    #         print(f"❌ Erreur dans generate_structured_medical_plan : {e}")
+    #         bot_response = "Une erreur est survenue pendant l'extraction des recommandations de soins."
+    #         figs_list, table_html, anomaly_block = [], "", ""
 
 
     # Test
-    if not any([ppa_requested, constantes_requested, recommandations_requested]):
-        print("❗ Aucune intention détectée dans la requête utilisateur.")
 
 
     # --- Correspondance avec Output() du layout ---

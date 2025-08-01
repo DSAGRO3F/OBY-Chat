@@ -137,4 +137,5 @@ if __name__ == "__main__":
 
     # Lancer le serveur Dash
     port = int(os.environ.get("PORT", 8050))  # 8050 fallback pour usage local
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host="0.0.0.0", port=port, debug=True)
+    # app.run(debug=True)

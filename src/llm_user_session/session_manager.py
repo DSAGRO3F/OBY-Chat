@@ -158,6 +158,8 @@ class SessionManager:
             "current_patient": None,
             "anonymization_mapping": {}, # Ajouté pour l'anonymisation
             "session_obj": Session(user_id, session_id),
+            "intent_confirmation_pending": False,
+            "intent_candidate": {},
         }
 
 

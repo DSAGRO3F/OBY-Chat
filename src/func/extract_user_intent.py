@@ -22,17 +22,28 @@ IntentType = Literal["generate_ppa", "get_constants", "generate_recommendations"
 intent_keywords = {
     "generate_ppa": [
         "plan d'accompagnement", "ppa", "générer un ppa", "objectifs et actions", "proposer un plan",
-        "élaborer un ppa", "plan personnalisé"
+        "élaborer un ppa", "plan personnalisé", "préparer le plan", "faire un plan pour le patient",
+        "créer un plan", "rédiger le plan", "plan à mettre en place", "plan à faire",
+        "prévois un accompagnement", "plan du patient", "mettre en place le suivi",
+        "organiser le plan de soins", "définir un plan", "construire le plan"
     ],
+
     "get_constants": [
         "constantes", "tension", "poids", "température", "fréquence cardiaque", "graphique",
-        "affiche les constantes", "évolution", "valeurs biologiques"
+        "affiche les constantes", "évolution", "valeurs biologiques", "données de santé",
+        "historique médical", "voir les courbes", "montre moi les constantes", "valeurs mesurées",
+        "graphique du patient", "état de santé", "résumé médical", "suivi des constantes",
+        "affiche les mesures", "statistiques de santé", "courbe de poids", "tendance médicale"
     ],
+
     "generate_recommendations": [
         "conduite à tenir", "prise en charge", "recommandations", "quoi faire", "traitement",
         "agir", "soins à apporter", "prévention", "risque", "urgence", "aide pour un cas",
-        "prise de décision", "avis médical", "diagnostic"
-    ],
+        "prise de décision", "avis médical", "diagnostic", "que faire", "quelle démarche suivre",
+        "comment réagir", "que dois-je faire", "orientation médicale", "décision médicale",
+        "protocole à suivre", "réponse adaptée", "conseils de soins", "suggestion d’action",
+        "mesures à prendre", "plan d’action à suivre"
+    ]
 }
 
 # ⚖️ Priorité des intentions (plus haut = plus prioritaire)
@@ -41,6 +52,53 @@ intent_priority = {
     "generate_ppa": 2,
     "generate_recommendations": 3
 }
+
+
+# Fonction de normalisation du texte
+import unicodedata
+import re
+
+def normalize_text(text: str) -> str:
+    """
+    Nettoie et standardise une chaîne de texte en français pour faciliter la détection d’intention.
+
+    Étapes :
+    - Passage en minuscules
+    - Remplacement des apostrophes typographiques
+    - Suppression des accents
+    - Suppression des caractères non alphanumériques utiles
+    - Nettoyage des espaces multiples
+
+    Args:
+        text (str): Texte à normaliser
+
+    Returns:
+        str: Texte nettoyé et standardisé
+    """
+    if not text:
+        return ""
+
+    # Minuscule
+    text = text.lower()
+
+    # Uniformisation des apostrophes et caractères typographiques
+    text = text.replace("’", "'").replace("‘", "'").replace("`", "'")
+
+    # Suppression des accents (ex : é → e)
+    text = ''.join(
+        c for c in unicodedata.normalize('NFD', text)
+        if unicodedata.category(c) != 'Mn'
+    )
+
+    # Suppression des caractères spéciaux inutiles sauf apostrophes et chiffres
+    text = re.sub(r"[^a-z0-9' ]", " ", text)
+
+    # Remplacement des espaces multiples par un seul
+    text = re.sub(r"\s+", " ", text)
+
+    # Trim final
+    return text.strip()
+
 
 
 def detect_user_intent(user_input: str) -> Dict[str, str]:
@@ -61,13 +119,13 @@ def detect_user_intent(user_input: str) -> Dict[str, str]:
     if not user_input:
         return {"intent": "unknown"}
 
-    user_input_lower = user_input.lower().strip()
+    user_input_norm = normalize_text(user_input)
 
     # 🔍 Étape 1 : Recherche des intentions par mots-clés
     matched_intents = []
     for intent, keywords in intent_keywords.items():
         for keyword in keywords:
-            if keyword in user_input_lower:
+            if keyword in user_input_norm:
                 matched_intents.append(intent)
                 break  # Un seul mot-clé suffit à activer une intention
 
@@ -89,33 +147,45 @@ def detect_user_intent(user_input: str) -> Dict[str, str]:
     return {"intent": "unknown"}
 
 
+
 def llm_intent_classification(user_input: str, llm: BaseLanguageModel = None) -> IntentType:
     """
     Utilise un modèle de langage (LLM) pour inférer l’intention utilisateur si aucun mot-clé ne correspond.
 
     Args:
-        user_input (str): Texte de l’utilisateur.
-        llm (BaseLanguageModel, optional): Modèle à utiliser. Si None, un modèle local est chargé.
+        user_input (str): Requête de l’utilisateur.
+        llm (BaseLanguageModel, optional): Modèle LLM. Si None, le modèle par défaut est utilisé.
 
     Returns:
-        IntentType: Intention détectée, ou "unknown".
+        IntentType: Intention détectée ("generate_ppa", "get_constants", "generate_recommendations", ou "unknown").
     """
     if llm is None:
-        llm = llm_model()
+        llm = llm_model
 
-    # 🧾 Prompt système pour le classificateur d’intentions
+    # 🔧 Prompt système renforcé pour guider le modèle
     system_prompt = """
-Tu es un classificateur d'intentions. Ton travail est de lire une phrase d'utilisateur et de déterminer l’intention parmi les choix suivants :
-- generate_ppa
-- get_constants
-- generate_recommendations
+Tu es un assistant expert en classification d’intentions pour une application appelée OBY-IA.
 
-Si aucune intention ne correspond, retourne "unknown".
+L’utilisateur peut écrire en langage naturel comme s’il s’adressait à ChatGPT. Ta tâche est de lire sa requête et de déterminer l’intention principale à déclencher.
 
-Réponds uniquement avec le mot-clé de l’intention.
-"""
+Voici les intentions disponibles :
 
-    prompt = f"{system_prompt}\n\nPhrase utilisateur : {user_input}\n\nIntention :"
+- generate_ppa : si l’utilisateur veut générer un Plan Personnalisé d’Accompagnement (PPA) à partir d’un document patient.
+- get_constants : si l’utilisateur veut afficher les constantes médicales (ex : tension, température, poids, fréquence cardiaque, graphiques…).
+- generate_recommendations : si l’utilisateur veut obtenir des recommandations médicales, une conduite à tenir, un traitement, ou savoir comment agir.
+- unknown : si la requête est trop floue ou ne correspond à aucun de ces cas.
+
+Tu dois répondre **uniquement** avec le mot-clé correspondant, sans ponctuation, sans phrase, sans commentaire.
+
+Exemples valides : generate_ppa / get_constants / generate_recommendations / unknown
+
+Phrase utilisateur :
+{user_input}
+
+Intention :
+""".strip()
+
+    prompt = system_prompt.format(user_input=user_input.strip())
 
     try:
         response = llm.invoke(prompt).content.strip().lower()
@@ -125,6 +195,52 @@ Réponds uniquement avec le mot-clé de l’intention.
         print(f"⚠️ Erreur LLM dans la détection d’intention : {e}")
         return "unknown"
 
+
+
+
+
+
+
+
+# ==================================================
+# Code insuffisant pour détection intention correcte
+# ==================================================
+# def llm_intent_classification(user_input: str, llm: BaseLanguageModel = None) -> IntentType:
+#     """
+#     Utilise un modèle de langage (LLM) pour inférer l’intention utilisateur si aucun mot-clé ne correspond.
+#
+#     Args:
+#         user_input (str): Texte de l’utilisateur.
+#         llm (BaseLanguageModel, optional): Modèle à utiliser. Si None, un modèle local est chargé.
+#
+#     Returns:
+#         IntentType: Intention détectée, ou "unknown".
+#     """
+#     if llm is None:
+#         llm = llm_model
+#
+#     # 🧾 Prompt système pour le classificateur d’intentions
+#     system_prompt = """
+# Tu es un classificateur d'intentions. Ton travail est de lire une phrase d'utilisateur et de déterminer l’intention parmi les choix suivants :
+# - generate_ppa
+# - get_constants
+# - generate_recommendations
+#
+# Si aucune intention ne correspond, retourne "unknown".
+#
+# Réponds uniquement avec le mot-clé de l’intention.
+# """
+#
+#     prompt = f"{system_prompt}\n\nPhrase utilisateur : {user_input}\n\nIntention :"
+#
+#     try:
+#         response = llm.invoke(prompt).content.strip().lower()
+#         print(f"🤖 Intention détectée via LLM : {response}")
+#         return response if response in intent_priority else "unknown"
+#     except Exception as e:
+#         print(f"⚠️ Erreur LLM dans la détection d’intention : {e}")
+#         return "unknown"
+#
 
 
 
