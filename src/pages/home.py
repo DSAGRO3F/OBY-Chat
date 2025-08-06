@@ -138,41 +138,41 @@ def authenticate_user(n_clicks, user_id_input, password_input):
     return "❌ Veuillez remplir tous les champs.", dash.no_update
 
 
-# ===============================================#
-# Callback pour la déconnexion
-# ===============================================#
-@dash.callback(
-    Output("auth_feedback", "children", allow_duplicate=True),
-    Output("session_data", "data", allow_duplicate=True),
-    Input("logout_button", "n_clicks"),
-    State("session_data", "data"),
-    prevent_initial_call=True
-)
-def logout_user(n_clicks, session_data):
-    """
-    Met fin à la session utilisateur en cours.
-
-    Supprime la session active à partir des informations enregistrées,
-    et réinitialise les données côté client.
-
-    Args:
-        n_clicks (int) : Nombre de clics sur le bouton "Déconnexion".
-        session_data (dict) : Données de session utilisateur en cours.
-
-    Returns:
-        tuple :
-            - Message de confirmation (str),
-            - None pour réinitialiser `session_data`.
-    """
-
-    if session_data:
-        user_id = session_data.get("user_id")
-        session_id = session_data.get("session_id")
-        session_manager_instance.end_session(user_id, session_id)
-        print(f"🔒 Session terminée pour {user_id} - ID: {session_id}")
-        return "✅ Déconnexion réussie.", None
-    return "❌ Aucune session active.", None
-
+# # ===============================================#
+# # Callback pour la déconnexion
+# # ===============================================#
+# @dash.callback(
+#     Output("auth_feedback", "children", allow_duplicate=True),
+#     Output("session_data", "data", allow_duplicate=True),
+#     Input("logout_button", "n_clicks"),
+#     State("session_data", "data"),
+#     prevent_initial_call=True
+# )
+# def logout_user(n_clicks, session_data):
+#     """
+#     Met fin à la session utilisateur en cours.
+#
+#     Supprime la session active à partir des informations enregistrées,
+#     et réinitialise les données côté client.
+#
+#     Args:
+#         n_clicks (int) : Nombre de clics sur le bouton "Déconnexion".
+#         session_data (dict) : Données de session utilisateur en cours.
+#
+#     Returns:
+#         tuple :
+#             - Message de confirmation (str),
+#             - None pour réinitialiser `session_data`.
+#     """
+#
+#     if session_data:
+#         user_id = session_data.get("user_id")
+#         session_id = session_data.get("session_id")
+#         session_manager_instance.end_session(user_id, session_id)
+#         print(f"🔒 Session terminée pour {user_id} - ID: {session_id}")
+#         return "✅ Déconnexion réussie.", None
+#     return "❌ Aucune session active.", None
+#
 
 
 

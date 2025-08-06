@@ -30,6 +30,7 @@ def extract_patient_name_llm(user_input):
     # TODO: Modifier NOM/VERSUS NOM + PRENOM
     pass
 
+
     template = """Tu es un extracteur de données.  
 À partir de la phrase ci-dessous, tu dois EXTRAIRE UNIQUEMENT le nom de famille du patient, sans aucune autre phrase ni explication.
 
@@ -43,6 +44,8 @@ Phrase :
 
 
 """
+    print(f'extract_patient_name/user_input: {user_input}')
+
     prompt_template = ChatPromptTemplate.from_template(template)
     prompt_value = prompt_template.format_messages(phrase=user_input)
     response = llm_model.invoke(prompt_value)

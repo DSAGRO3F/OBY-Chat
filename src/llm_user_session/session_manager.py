@@ -159,7 +159,7 @@ class SessionManager:
             "anonymization_mapping": {}, # Ajouté pour l'anonymisation
             "session_obj": Session(user_id, session_id),
             "intent_confirmation_pending": False,
-            "intent_candidate": {},
+            "intent_candidate": {"intent": None, "name": None, "full_user_input": None},
         }
 
 

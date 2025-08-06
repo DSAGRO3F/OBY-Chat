@@ -48,6 +48,7 @@ def generate_structured_medical_plan(user_input, system_prompt):
     """
 
     print("📥 Début génération du plan structuré médical...")
+    print(f'generate_structured_medical_plan.py/user_input: {user_input}')
 
 
     # ============================================

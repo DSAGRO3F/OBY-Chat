@@ -1,34 +1,20 @@
 """
 Module `chatbot_ui.py` – Interface conversationnelle de l'application OBY-IA (page `/chatbot`)
 
-Ce module Dash définit la page chatbot de OBY-IA, qui permet aux professionnels de santé
-d’interagir avec un agent intelligent pour obtenir :
+Ce module définit l'interface utilisateur du chatbot OBY-IA dans l'application Dash.
 
-1. **Analyse des constantes médicales du patient** :
-   - Extraction et affichage des constantes sous forme de graphiques et tableaux.
-   - Détection automatique des anomalies.
-   - Sérialisation et désérialisation des graphiques pour l’exportation.
+Il contient :
+- Le layout complet de la page chatbot avec champ de saisie, historique des échanges,
+  boutons d'envoi et de déconnexion, ainsi que les composants pour l'affichage des constantes.
+- Le callback principal `handle_user_input_or_logout()` qui gère les requêtes utilisateur,
+  la détection d’intention, la confirmation, l’affichage dynamique, et les réponses du LLM.
+- L’intégration avec la gestion de session utilisateur et la logique métier de génération de plans de soins,
+  d'extraction de constantes médicales ou de recommandations.
 
-2. **Interaction en langage naturel avec le LLM** :
-   - Détection de l’intention utilisateur (consultation, génération de PPA, recommandations).
-   - Extraction du nom du patient à partir de la requête.
-   - Génération de contenu médical structuré via des prompts spécialisés.
-   - Historisation des messages utilisateur/LLM et affichage dynamique.
-
-3. **Export des résultats** :
-   - Génération d’un fichier Markdown résumant la session (réponses LLM + graphiques).
-
-4. **Contrôle de disponibilité de l’index ChromaDB** :
-   - Affichage d’une bannière d’attente tant que l’index n’est pas prêt.
-   - Activation différée des composants de saisie utilisateur.
-
-Composants techniques :
-- Utilise `session_manager_instance` pour la gestion d’état (session, mapping, historique).
-- Repose sur les modules fonctionnels : `extract_user_intent`, `generate_ppa_from_poa`,
-  `generate_structured_medical_plan`, `get_patient_constants_graphs`, `export_chat_response`, etc.
-
-Cette page est au cœur de l’expérience utilisateur de OBY-IA, combinant interface conviviale
-et logique métier intelligente.
+Ce module dépend de plusieurs composants de l'application OBY-IA :
+- session_manager_instance : pour suivre l’état de la session utilisateur
+- handle_initial_request() et handle_confirmation_response() : logique de traitement conversationnel
+- get_constants(), generate_structured_medical_plan() : fonctions de génération de contenu
 """
 
 
@@ -204,7 +190,6 @@ print("🧩 ID présents dans le layout chatbot :", ids_in_chatbot_layout)
     Output("chat_history_display", "children"),
 
     Input("send_button", "n_clicks"),
-    Input("logout_button", "n_clicks"),
 
     State("user_input", "value"),
     State("chat_history", "data"),
@@ -212,47 +197,48 @@ print("🧩 ID présents dans le layout chatbot :", ids_in_chatbot_layout)
     State("current_patient", "data"),
     prevent_initial_call=True
 )
-def handle_user_input_or_logout(send_clicks, logout_clicks,user_input, chat_history, session_data, current_patient):
+def handle_user_input_or_logout(send_clicks, user_input, chat_history, session_data, current_patient):
 
     """
-    Callback principal de gestion des interactions utilisateur.
+    Gère la saisie utilisateur et les réponses du chatbot dans OBY-IA.
 
-    Cette fonction gère :
-    - la déconnexion de l’utilisateur,
-    - la détection de l’intention (consultation de constantes, génération de PPA ou plan de soins),
-    - l’appel au modèle LLM pour produire une réponse appropriée,
-    - l’affichage et la mise à jour de l’historique et des données patient.
+    Ce callback est déclenché à chaque clic sur le bouton d'envoi (`send_button`)
+    et exécute l'une des deux logiques principales :
+    - Si aucune intention n’est encore confirmée, il détecte l’intention (PPA, constantes, recommandations)
+      et affiche une demande de confirmation.
+    - Si une confirmation est attendue, il traite la réponse de l’utilisateur ("oui"/"non"),
+      déclenche le pipeline correspondant et met à jour l’historique affiché.
+
+    Le retour inclut :
+    - L’historique enrichi (chat utilisateur + bot),
+    - Les constantes affichées sous forme de graphiques ou tableau si la demande le requiert,
+    - Le patient courant,
+    - Les graphiques sérialisés (pour export),
+    - Le contenu à afficher dans le `chat_history_display`.
 
     Args:
-        send_clicks (int) : Nombre de clics sur le bouton "Envoyer".
-        user_input (str) : Message saisi par l’utilisateur.
-        logout_clicks (int) : Nombre de clics sur le bouton "Déconnexion".
-        chat_history (list) : Liste des messages actuellement affichés.
-        session_data (dict) : Données de session utilisateur (user_id, session_id).
-        current_patient (str) : Nom du patient actuellement sélectionné.
+        send_clicks (int): Nombre de clics sur le bouton d'envoi.
+        user_input (str): Requête saisie par l'utilisateur.
+        chat_history (list): Historique actuel des messages affichés dans l'interface.
+        session_data (dict): Données de la session utilisateur courante.
+        current_patient (str | None): Nom du patient actuellement sélectionné.
 
     Returns:
-        tuple : Mise à jour de :
-            - l'historique du chat,
-            - les graphiques et tableaux des constantes,
-            - le résumé des anomalies,
-            - le nom du patient actif,
-            - les figures sérialisées,
-            - l’affichage du chat.
+        tuple:
+            - chat_history (list) : Historique mis à jour (pour stockage),
+            - constants_graphs (list[Graph]) : Graphiques des constantes (si applicables),
+            - constants_table (str | html.Div) : Tableau HTML des constantes (si applicable),
+            - anomaly_graphs (str | html.Div) : Bloc des anomalies détectées (si applicable),
+            - current_patient (str | None) : Nom du patient mis à jour,
+            - serialized_figs (list | None) : Liste des figures Plotly sérialisées pour export,
+            - chat_history_display (html.Div) : Contenu HTML de l'historique à afficher à l'écran.
+
+    Raises:
+        dash.exceptions.PreventUpdate: Si aucun clic n’a été détecté ou si la session n’est pas active.
+
     """
     if send_clicks is None or send_clicks == 0:
         raise dash.exceptions.PreventUpdate
-
-    triggered = ctx.triggered_id
-    print(f"📌 Callback triggered by: {triggered}")
-    print("✅ Bouton cliqué")
-
-    # --- Gestion de la déconnexion ---
-    if triggered == "logout_button":
-        print("🔴 Déconnexion demandée")
-        if session_data:
-            session_manager_instance.end_session(session_data["user_id"], session_data["session_id"])
-        return "", "", "", "", None
 
 
     # --- Vérification session ---
@@ -260,324 +246,277 @@ def handle_user_input_or_logout(send_clicks, logout_clicks,user_input, chat_hist
         # ⚠️ Pas de session active
         return "❌ Session non authentifiée. Veuillez vous reconnecter.", "", "", "", dash.no_update
 
-    print("🚀 chatbot_ui.py chargé !")
-    print(f'requête utilisateur {user_input}')
 
     # --- Initialisation des blocs d'affichage et variables de retour ---
-    figs_list = []
-    table_html = ""
-    anomaly_block = ""
-    user_id = session_data.get("user_id")
-    session_id = session_data.get("session_id")
     serialized_figs = None  # Valeur par défaut
-    bot_response = []  # Liste pour pouvoir itérer même si vide
     bot_msg = None
+    constants_graphs = []
+    constants_table = ""
+    anomaly_graphs = ""
+    chat_history_display = dash.no_update  # ⚠️ Ne pas réafficher s’il n’y a pas de nouvelle réponse
+    full_chat_history = []
 
-
-        # --- Initialisation demande ---
-    bot_response = "🤖 Je traite votre demande..."
-
-
-    # --- Extraction de l’intention ---
-    print(f'⚠️démarrage détection intentions-chatbot-ui.py...')
-    intent_dict = detect_user_intent(user_input)
-
-    nom = extract_patient_name_llm(user_input)
-
-    intent = intent_dict.get("intent", "unknown")
-
-
-    # --- Étape confirmation de l’intention ---
+    # --- Si une session existe... ---
     session_id = session_data.get("session_id")
     session = session_manager_instance.get_session(session_id)
 
-    if session.get("intent_confirmation_pending"):
-        answer = user_input.strip().lower()
-        if answer in ["oui", "yes", "ok", "c'est bien ça"]:
-            confirmed_intent = session.get("intent_candidate", {}).get("intent")
-            nom = session.get("intent_candidate", {}).get("nom", "Nom patient inconnu")
 
-            # Nettoyage post-confirmation
-            session["intent_confirmation_pending"] = False
-            session["intent_candidate"] = {}
+    if session:
+        if user_input:
 
-            # Définition des flags
-            ppa_requested = confirmed_intent == "generate_ppa"
-            constantes_requested = confirmed_intent == "get_constants"
-            recommandations_requested = confirmed_intent == "generate_recommendations"
-            print(f"✅ Intention confirmée par l’utilisateur : {confirmed_intent}")
-        else:
-            # Refus utilisateur → proposition de reformulation
-            session["intent_confirmation_pending"] = False
-            session["intent_candidate"] = {}
-            bot_response = "Compris. Voici quelques exemples de requêtes que vous pouvez utiliser :\n" \
-                           "- *Prépare-moi le plan d’aide pour Madame Dupont*\n" \
-                           "- *Montre-moi les constantes du patient Martin sur le dernier mois*\n" \
-                           "- *Quelles sont les recommandations en cas d’AVC ?*"
-            user_msg = html.Div(f"👤 {user_input.strip()}", className="user-message")
-            chat_history.append(user_msg)
-            chat_history.append(html.Div(dcc.Markdown(bot_response), className="bot-response"))
+        # --- Si l'input correspond à la requête entrée par l'utilisateur ---
+        # --- L'utilisateur n'a pas encore entré sa requête -> session["intent_confirmation_pending"] = False
+            if not session["intent_confirmation_pending"]:
+                print("📩 Début du traitement de la requête utilisateur")
 
-    if session_data:
-        session = session_manager_instance.get(session_data["session_id"])
-        # Informer session_data de l'intention détectée
-        session["intent_confirmation_pending"] = True
-        session["intent_candidate"] = {"intent": intent, "nom": nom}
-        # Insérer l'intention détectée dans bot_response
-        if intent == "generate_ppa":
-            text = "demande de génération de PPA"
-        if intent == "get_constants":
-            text = "demande de constantes patient"
-        # if intent == "generate_recommendations":
-        else: text = "demande de recommandations patient"
-        bot_response = f"Je comprends que vous souhaitez une {text}, est ce que vous confirmez ?"
+                # ✅ Initialisations uniquement dans ce cas
+                current_patient = current_patient or None
+                chat_history = chat_history or []
 
-        user_input_str = user_input.strip().lower()
+                (
+                chat_history, figs_list, table_html, anomaly_block,
+                current_patient, serialized_figs,chat_history_display
+                ) = handle_initial_request(
+                    user_input, session, session_data, chat_history, current_patient
+                )
 
-        if user_input_str in ["oui", "ok", "yes", "c'est bien ça"]:
-            # Confirmation acceptée → on récupère l’intention et on continue
-            ppa_requested = intent == "generate_ppa"
-            constantes_requested = intent == "get_constants"
-            recommandations_requested = intent == "generate_recommendations"
+                constants_graphs = [dcc.Graph(figure=fig) for fig in figs_list]
+                constants_table = None if not table_html else html.Div(table_html)
+                anomaly_graphs = None if not anomaly_block else html.Div(anomaly_block)
 
-            print(f"🎯 Intentions détectées : "
-                  f"recommandations: {recommandations_requested},"
-                  f"constantes={constantes_requested}, "
-                  f"ppa={ppa_requested}, "
-                  f"nom patient={nom}")
-            if ppa_requested or constantes_requested or recommandations_requested:
-                print(f'✅détection intention réussie')
+                print("⏸️ Attente de confirmation utilisateur")
+                return chat_history, constants_graphs, constants_table, anomaly_graphs, current_patient, serialized_figs, chat_history_display
 
 
-            # On déclenche l'un des pipelines suivants selin l'intention détectée
-            # --- Réinitialisation si changement de patient ---
-            if nom and (ppa_requested or constantes_requested or recommandations_requested):
-                if nom and nom != current_patient:
-                    print(f"🆕 Changement de patient détecté : {current_patient} ➡️ {nom}")
-                    chat_history = []
-                    figs_list = []
-                    table_html = ""
-                    anomaly_block = ""
-                    current_patient = nom
-                    # Remet à zéro le mapping d’anonymisation
-                    session_manager_instance.reset_anonymization_mapping(user_id)
-                    session_manager_instance.set_current_patient(session_id, nom)
+        # --- Si l'input correspond à une confirmation attendue suite à une requête ---
+        # --- Récupération de la réponse de l'utilisateur + affichage ---
+            if session["intent_confirmation_pending"]:
+                print("✅ Traitement de la réponse de confirmation utilisateur")
 
-                else:
-                    print(f"✅ Patient conservé : {current_patient}")
+                (
+                new_chat_history, figs_list, table_html, anomaly_block,
+                current_patient, serialized_figs, chat_history_display
+                ) = handle_confirmation_response(
+                    user_input, session, session_data, chat_history, current_patient
+                )
 
-            # --- Traitement des constantes ---
-            if constantes_requested:
-                try:
-                    print("📊 Appel à process_patient_request_with_constants()")
-                    bot_response, figs_list, table_html, anomaly_block = process_patient_request_with_constants(nom)
-                    serialized_figs = serialize_figs(figs_list)
-                except Exception as e:
-                    print(f"❌ Erreur dans process_patient_request_with_constants : {e}")
-                    bot_response = "Une erreur est survenue pendant le traitement des constantes."
-                    figs_list, table_html, anomaly_block = [], "", ""
+                # Concaténation new mess + historique
+                full_chat_history = chat_history + new_chat_history
+                chat_history_display = html.Div(full_chat_history)
+
+                constants_graphs = [dcc.Graph(figure=fig) for fig in figs_list]
+                constants_table = None if not table_html else html.Div(table_html)
+                anomaly_graphs = None if not anomaly_block else html.Div(anomaly_block)
 
 
-            # --- Traitement demande PPA ---
-            elif ppa_requested:
-                print("📄 Appel à process_ppa_request() pour le PPA")
-                try:
-                    bot_response, dict_mapping = process_ppa_request(user_input, system_prompt)
-
-                    # Enregistrer le mapping renvoyé par la fonction dans la session
-                    # Le récupérer proprement via session_manager.get_anonymization_mapping()
-                    session_manager_instance.set_anonymization_mapping(session_id, dict_mapping)
-
-                    # Quand le LLM a donné une réponse (bot_response), ajout de la réponse dans la session
-                    session_manager_instance.append_llm_response(session_id, bot_response)
-
-                    # ✅ Ajouter l’échange complet (question + réponse)
-                    session = session_manager_instance.get_session(session_id)
-                    session_obj = session.get("session_obj")
-                    if session_obj:
-                        session_obj.add_message(user_input, bot_response)
-
-                    figs_list, table_html, anomaly_block = [], "", ""
-
-                except Exception as e:
-                    print(f"❌ Erreur dans process_ppa_request : {e}")
-                    bot_response = "Une erreur est survenue pendant la génération du PPA."
-                    figs_list, table_html, anomaly_block = "", "", ""
+    return full_chat_history, constants_graphs, constants_table, anomaly_graphs, current_patient, serialized_figs, chat_history_display
 
 
 
-            # --- Traitement demande plan de soins ---
-            elif recommandations_requested:
-                print("📄 Appel à generate_structured_medical_plan() pour plan de soins")
-                try:
-                    bot_response, dict_mapping = generate_structured_medical_plan(user_input,
-                                                                                  system_prompt_medical_plan)
-
-                    # Enregistrer le mapping renvoyé par la fonction dans la session
-                    # Le récupérer proprement via session_manager.get_anonymization_mapping()
-                    session_manager_instance.set_anonymization_mapping(session_id, dict_mapping)
-
-                    # Quand le LLM a donné une réponse (bot_response), ajout de la réponse dans la session
-                    session_manager_instance.append_llm_response(session_id, bot_response)
-
-                    # ✅ Ajouter l’échange complet (question + réponse)
-                    session = session_manager_instance.get_session(session_id)
-                    session_obj = session.get("session_obj")
-                    if session_obj:
-                        session_obj.add_message(user_input, bot_response)
-
-                    figs_list, table_html, anomaly_block = [], "", ""
-
-                except Exception as e:
-                    print(f"❌ Erreur dans generate_structured_medical_plan : {e}")
-                    bot_response = "Une erreur est survenue pendant l'extraction des recommandations de soins."
-                    figs_list, table_html, anomaly_block = [], "", ""
-
-            if not any([ppa_requested, constantes_requested, recommandations_requested]):
-                print("❗ Aucune intention détectée dans la requête utilisateur.")
+# print("✅ Callback handle_chat_request enregistré")
 
 
-        else:
-            # L’utilisateur a refusé → proposer de reformuler
+# ================================================================================================ #
+# --------------------- Fonctions appelées par handle_user_input_or_logout() --------------------- #
+# ================================================================================================ #
+# 1/.
+def handle_initial_request(user_input, session, session_data, chat_history, current_patient):
+    # --- Si une demande utlisateur existe ---
 
-            session["intent_confirmation_pending"] = False
-            session["intent_candidate"] = {}
-            bot_response = "Compris. Voici quelques exemples de requêtes que vous pouvez utiliser :\n" \
-                           "- *Prépare-moi le plan d’aide pour Madame Dupont*\n" \
-                           "- *Montre-moi les constantes du patient Martin sur le dernier mois*\n" \
-                           "- *Quelles sont les recommandations en cas d’AVC ?*"
+    bot_response = "🤖 Je traite votre demande..."
+    print("🚀 chatbot_ui.py chargé !")
+    print(f'requête utilisateur {user_input}')
 
+    # Détection intention
+    intent_dict = detect_user_intent(user_input)
+    nom = extract_patient_name_llm(user_input)
+    intent = intent_dict.get("intent", "unknown")
+    print(f'🟢Intention détectée: {intent}')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # # --- Réinitialisation si changement de patient ---
-    # if nom and (ppa_requested or constantes_requested or recommandations_requested):
-    #     if nom and nom != current_patient:
-    #         print(f"🆕 Changement de patient détecté : {current_patient} ➡️ {nom}")
-    #         chat_history = []
-    #         figs_list = []
-    #         table_html = ""
-    #         anomaly_block = ""
-    #         current_patient = nom
-    #         # Remet à zéro le mapping d’anonymisation
-    #         session_manager_instance.reset_anonymization_mapping(user_id)
-    #         session_manager_instance.set_current_patient(session_id, nom)
-    #
-    #     else:
-    #         print(f"✅ Patient conservé : {current_patient}")
-    #
-    #
-    #
-    # # --- Traitement des constantes ---
-    # if constantes_requested:
-    #     try:
-    #         print("📊 Appel à process_patient_request_with_constants()")
-    #         bot_response, figs_list, table_html, anomaly_block = process_patient_request_with_constants(nom)
-    #         serialized_figs = serialize_figs(figs_list)
-    #     except Exception as e:
-    #         print(f"❌ Erreur dans process_patient_request_with_constants : {e}")
-    #         bot_response = "Une erreur est survenue pendant le traitement des constantes."
-    #         figs_list, table_html, anomaly_block = [], "", ""
-    #
-    #
-    # # --- Traitement demande PPA ---
-    # elif ppa_requested:
-    #     print("📄 Appel à process_ppa_request() pour le PPA")
-    #     try:
-    #         bot_response, dict_mapping= process_ppa_request(user_input, system_prompt)
-    #
-    #         # Enregistrer le mapping renvoyé par la fonction dans la session
-    #         # Le récupérer proprement via session_manager.get_anonymization_mapping()
-    #         session_manager_instance.set_anonymization_mapping(session_id, dict_mapping)
-    #
-    #         # Quand le LLM a donné une réponse (bot_response), ajout de la réponse dans la session
-    #         session_manager_instance.append_llm_response(session_id, bot_response)
-    #
-    #         # ✅ Ajouter l’échange complet (question + réponse)
-    #         session = session_manager_instance.get_session(session_id)
-    #         session_obj = session.get("session_obj")
-    #         if session_obj:
-    #             session_obj.add_message(user_input, bot_response)
-    #
-    #         figs_list, table_html, anomaly_block = [], "", ""
-    #
-    #     except Exception as e:
-    #         print(f"❌ Erreur dans process_ppa_request : {e}")
-    #         bot_response = "Une erreur est survenue pendant la génération du PPA."
-    #         figs_list, table_html, anomaly_block = "", "", ""
-    #
-    #
-    #
-    # # --- Traitement demande plan de soins ---
-    # elif recommandations_requested:
-    #     print("📄 Appel à generate_structured_medical_plan() pour plan de soins")
-    #     try:
-    #         bot_response, dict_mapping= generate_structured_medical_plan(user_input, system_prompt_medical_plan)
-    #
-    #         # Enregistrer le mapping renvoyé par la fonction dans la session
-    #         # Le récupérer proprement via session_manager.get_anonymization_mapping()
-    #         session_manager_instance.set_anonymization_mapping(session_id, dict_mapping)
-    #
-    #         # Quand le LLM a donné une réponse (bot_response), ajout de la réponse dans la session
-    #         session_manager_instance.append_llm_response(session_id, bot_response)
-    #
-    #         # ✅ Ajouter l’échange complet (question + réponse)
-    #         session = session_manager_instance.get_session(session_id)
-    #         session_obj = session.get("session_obj")
-    #         if session_obj:
-    #             session_obj.add_message(user_input, bot_response)
-    #
-    #         figs_list, table_html, anomaly_block = [], "", ""
-    #
-    #     except Exception as e:
-    #         print(f"❌ Erreur dans generate_structured_medical_plan : {e}")
-    #         bot_response = "Une erreur est survenue pendant l'extraction des recommandations de soins."
-    #         figs_list, table_html, anomaly_block = [], "", ""
-
-
-    # Test
-
-
-    # --- Correspondance avec Output() du layout ---
-    constants_graphs = [dcc.Graph(figure=fig) for fig in figs_list]
-    constants_table = None if not table_html else html.Div(table_html)
-    anomaly_graphs = None if not anomaly_block else html.Div(anomaly_block)
-
-    # 💡 Ajout de la requête utilisateur
-    user_input_str = str(user_input).strip() if user_input else ""
-    print(f"user_input brut: {user_input}")
-    print(f"user_input_str après nettoyage: '{user_input_str}'")
-
-    # Si l'input est vide, on bloque l'exécution
-    if not user_input_str:
-        print("⚠️ Aucun texte saisi, arrêt du traitement.")
-        return (
-            dash.no_update, constants_graphs, constants_table, anomaly_graphs,
-            current_patient, serialized_figs
-        )
-
-    user_msg = html.Div(f"👤 {user_input_str}", className="user-message")
+    # --- Affichage requête + concaténation chat_history ---
+    user_msg = html.Div(f"👤 {user_input.strip()}", className="user-message")
     chat_history.append(user_msg)
 
-    # 💡 Cas PPA / constantes / web
+    # En attente de confirmation par l'utlisateur
+    session["intent_confirmation_pending"] = True
+    session["intent_candidate"] = {"intent": intent, "name": nom, "full_user_input": user_input}
+
+    # --- Étape affichage de l'intention ---
+    if intent == "generate_ppa":
+        text = "demande de génération de PPA"
+        bot_response = f"Je comprends que vous souhaitez une {text}, est-ce que vous confirmez oui/non ?"
+
+    elif intent == "get_constants":
+        text = "demande de constantes patient"
+        bot_response = f"Je comprends que vous souhaitez une {text}, est-ce que vous confirmez oui/non ?"
+
+    elif intent == "get_recommendations":
+        text = "demande de recommandations de soins"
+        bot_response = f"Je comprends que vous souhaitez une {text}, est-ce que vous confirmez oui/non ?"
+
+    else:
+        # Requête hors contexte gérable
+        bot_response = (
+            "❌ Cette demande ne peut pas être traitée par OBY-IA, car elle sort du cadre de l'accompagnement des personnes âgées.\n\n"
+            "Voici quelques exemples de requêtes que vous pouvez utiliser :\n"
+            "- *Prépare-moi le plan d’aide pour Madame Dupont*\n"
+            "- *Montre-moi les constantes du patient Martin sur le dernier mois*\n"
+            "- *Quelles sont les recommandations en cas d’AVC ?*"
+        )
+    chat_history.append(html.Div(dcc.Markdown(bot_response), className="bot-response"))
+
+    # Enregistrer l'échange (requête utilisateur + demande de confirmation)
+    session = session_manager_instance.get_session(session_data["session_id"])
+    session_obj = session.get("session_obj")
+    if session_obj:
+        session_obj.add_message(user_input, bot_response)
+
+
+    # chat_history_display = dash.no_update  # Ne rien afficher tout de suite
+    chat_history_display = chat_history
+
+    return chat_history, [], "", "", current_patient, [], chat_history_display
+
+
+
+# 2/.
+def handle_confirmation_response(user_input, session, session_data, chat_history, current_patient):
+    figs_list = []
+    table_html = ""
+    anomaly_block = ""
+    serialized_figs = None
+    bot_response = []
+    user_id = session_data["user_id"]
+    session_id = session_data["session_id"]
+
+
+    print('⚠️Confirmation attendue...')
+    answer = user_input.strip().lower()
+    print(f"✅Réponse de l'utilisateur suite demande confirmation: {answer}")
+    user_msg = html.Div(f"👤 {answer}", className="user-message")
+    chat_history.append(user_msg)
+
+    full_user_input = session["intent_candidate"]["full_user_input"]
+    print(f'⚠️handle_confirmation_response/full_user_input: {full_user_input}')
+
+
+
+    # Intention confirmée, -> changement état de intent_confirmation_pending
+    if answer in ["oui", "yes", "ok", "c'est bien ça"]:
+        session["intent_confirmation_pending"] = False
+        intent = session["intent_candidate"]["intent"]
+        nom = session["intent_candidate"]["name"]
+
+        # Définition des flags
+        ppa_requested = intent == "generate_ppa"
+        constantes_requested = intent == "get_constants"
+        recommandations_requested = intent == "generate_recommendations"
+        print(f"✅ Intention confirmée par l’utilisateur : {intent}")
+
+        print(f"🎯 Intentions détectées : "
+              f"recommandations: {recommandations_requested},"
+              f"constantes={constantes_requested}, "
+              f"ppa={ppa_requested}, "
+              f"nom patient={nom}")
+        print(f'✅détection intention réussie')
+
+        # On déclenche l'un des pipelines suivants selon l'intention détectée
+        # --- Réinitialisation si changement de patient ---
+        if nom and (ppa_requested or constantes_requested or recommandations_requested):
+            if nom and nom != current_patient:
+                print(f"🆕 Changement de patient détecté : {current_patient} ➡️ {nom}")
+                chat_history = []
+                figs_list = []
+                table_html = ""
+                anomaly_block = ""
+                current_patient = nom
+                # Remet à zéro le mapping d’anonymisation
+                session_manager_instance.reset_anonymization_mapping(user_id)
+                session_manager_instance.set_current_patient(session_id, nom)
+
+            else:
+                print(f"✅ Patient conservé : {current_patient}")
+
+        # --- Traitement des constantes ---
+        if constantes_requested:
+            try:
+                print("📊 Appel à process_patient_request_with_constants()")
+                bot_response, figs_list, table_html, anomaly_block = process_patient_request_with_constants(nom)
+                serialized_figs = serialize_figs(figs_list)
+            except Exception as e:
+                print(f"❌ Erreur dans process_patient_request_with_constants : {e}")
+                bot_response = "Une erreur est survenue pendant le traitement des constantes."
+                figs_list, table_html, anomaly_block = [], "", ""
+
+
+        # --- Traitement demande PPA ---
+        elif ppa_requested:
+            print("📄 Appel à process_ppa_request() pour le PPA")
+            try:
+                bot_response, dict_mapping = process_ppa_request(full_user_input, system_prompt)
+
+                # Enregistrer le mapping renvoyé par la fonction dans la session
+                # Le récupérer proprement via session_manager.get_anonymization_mapping()
+                session_manager_instance.set_anonymization_mapping(session_id, dict_mapping)
+
+                # Quand le LLM a donné une réponse (bot_response), ajout de la réponse dans la session
+                session_manager_instance.append_llm_response(session_id, bot_response)
+
+                # ✅ Ajouter l’échange complet (question + réponse)
+                session = session_manager_instance.get_session(session_id)
+                session_obj = session.get("session_obj")
+                if session_obj:
+                    session_obj.add_message(user_input, bot_response)
+
+                figs_list, table_html, anomaly_block = [], "", ""
+
+            except Exception as e:
+                print(f"❌ Erreur dans process_ppa_request : {e}")
+                bot_response = "Une erreur est survenue pendant la génération du PPA."
+                figs_list, table_html, anomaly_block = "", "", ""
+
+
+        # --- Traitement demande plan de soins ---
+        elif recommandations_requested:
+            print("📄 Appel à generate_structured_medical_plan() pour plan de soins")
+            try:
+                bot_response, dict_mapping = generate_structured_medical_plan(full_user_input,
+                                                                              system_prompt_medical_plan)
+
+                # Enregistrer le mapping renvoyé par la fonction dans la session
+                # Le récupérer proprement via session_manager.get_anonymization_mapping()
+                session_manager_instance.set_anonymization_mapping(session_id, dict_mapping)
+
+                # Quand le LLM a donné une réponse (bot_response), ajout de la réponse dans la session
+                session_manager_instance.append_llm_response(session_id, bot_response)
+
+                # ✅ Ajouter l’échange complet (question + réponse)
+                session = session_manager_instance.get_session(session_id)
+                session_obj = session.get("session_obj")
+                if session_obj:
+                    session_obj.add_message(user_input, bot_response)
+
+                figs_list, table_html, anomaly_block = [], "", ""
+
+            except Exception as e:
+                print(f"❌ Erreur dans generate_structured_medical_plan : {e}")
+                bot_response = "Une erreur est survenue pendant l'extraction des recommandations de soins."
+                figs_list, table_html, anomaly_block = [], "", ""
+
+
+
+    else:
+        # Rejet de l’intention
+        session["intent_confirmation_pending"] = False
+        session["intent_candidate"]["intent"] = {"intent": None, "name": None, "full_user_input": ""}
+
+        bot_response = (
+            "Compris. Voici quelques exemples de requêtes que vous pouvez utiliser :\n"
+            "- *Prépare-moi le plan d’aide pour Madame Dupont*\n"
+            "- *Montre-moi les constantes du patient Martin sur le dernier mois*\n"
+            "- *Quelles sont les recommandations en cas d’AVC ?*"
+        )
+
     if bot_response:
         bot_msg = html.Div(
             dcc.Markdown(str(bot_response), dangerously_allow_html=False),
@@ -585,15 +524,14 @@ def handle_user_input_or_logout(send_clicks, logout_clicks,user_input, chat_hist
         )
         chat_history.append(bot_msg)
 
-    chat_history_display = chat_history
+    chat_history_display = html.Div(chat_history)
 
-    # 💡 Retour de l'ensemble : un seul historique pour affichage + store
-    return chat_history, constants_graphs, constants_table, anomaly_graphs, current_patient, serialized_figs, chat_history_display
-
-print("✅ Callback handle_chat_request enregistré")
+    return chat_history, figs_list, table_html, anomaly_block, current_patient, serialized_figs, chat_history_display
 
 
-
+# ==============================
+# Production fichiers md
+# ==============================
 @callback(
     Output("export_feedback", "children"),
     Input("export_button", "n_clicks"),
@@ -638,6 +576,10 @@ def export_chat_response(n_clicks, session_data, current_patient, serialized_fig
         return f"❌ Erreur lors de l’export : {e}"
 
 
+
+# ==============================
+# Indexation bases chromadb
+# ==============================
 @callback(Output("index_banner_text", "children"),
     Output("index_banner_container", "style"),
     Output("user_input", "disabled"),
@@ -669,9 +611,9 @@ def check_index_status(n):
                 - user_input.disabled (bool): True si l'entrée doit être désactivée.
                 - send_button.disabled (bool): True si le bouton doit être désactivé.
         """
-    print(f"⏱️ Callback check_index_status déclenché avec n = {n}")
-    print("🔁 Vérification de l'état de l'indexation ChromaDB...")
-    print("📦 Index prêt ?", is_chroma_index_ready())
+    # print(f"⏱️ Callback check_index_status déclenché avec n = {n}")
+    # print("🔁 Vérification de l'état de l'indexation ChromaDB...")
+    # print("📦 Index prêt ?", is_chroma_index_ready())
 
     if is_chroma_index_ready(verbose=True):
         return (
@@ -688,52 +630,33 @@ def check_index_status(n):
             True
         )
 
+
+
 # ============================
-# Autre solution
+# Gestion deconnexion
 # ============================
-# BANNER_STYLE = {
-#     "position": "absolute",
-#     "top": "10px",
-#     "right": "20px",
-#     "zIndex": "1000",
-#     "padding": "6px 12px",
-#     "borderRadius": "12px",
-#     "backgroundColor": "#f8f9fa",
-#     "boxShadow": "0 1px 3px rgba(0,0,0,0.2)",
-#     "display": "block"
-# }
-#
-# @callback(
-#     Output("index_banner_text", "children"),
-#     Output("index_banner_container", "style"),
-#     Output("user_input", "disabled"),
-#     Output("send_button", "disabled"),
-#     Input("index_check_interval", "n_intervals"),
-# )
-# def check_index_status(n):
-#     print("🔁 Vérification de l'état de l'indexation ChromaDB...")
-#     print("📦 Index prêt ?", is_chroma_index_ready())
-#
-#     base_style = BANNER_STYLE.copy()
-#
-#     if is_chroma_index_ready():
-#         dot = html.Span("●", id="index_status_dot", style={"color": "green", "marginRight": "5px"})
-#         return (
-#             [dot, "Prêt"],
-#             base_style,
-#             False,
-#             False
-#         )
-#     else:
-#         dot = html.Span("●", id="index_status_dot", style={"color": "orange", "marginRight": "5px"})
-#         return (
-#             [dot, "En cours d'indexation"],
-#             base_style,
-#             True,
-#             True
-#         )
-#
-print("✅ chatbot_ui.py chargé et exécuté")
+@callback(
+    Output("session_data", "data", allow_duplicate=True),
+    Output("chat_history", "data", allow_duplicate=True),
+    Output("current_patient", "data", allow_duplicate=True),
+    Output("constants_graphs_store", "data", allow_duplicate=True),
+    Input("logout_button", "n_clicks"),
+    State("session_data", "data"),
+    prevent_initial_call=True
+)
+def logout_user(n_clicks, session_data):
+    if session_data:
+        user_id = session_data.get("user_id")
+        session_id = session_data.get("session_id")
+        session_manager_instance.end_session(user_id, session_id)
+        print(f"🔒 Session terminée pour {user_id} - ID: {session_id}")
+        return None, [], None, None
+    return None, [], None, None
+
+
+
+# Tests
+# print("✅ chatbot_ui.py chargé et exécuté")
 
 # @callback(
 #     Output("chat_history_display", "children"),
@@ -743,3 +666,4 @@ print("✅ chatbot_ui.py chargé et exécuté")
 # def test_button(n_clicks):
 #     print("✅ Callback test déclenché.")
 #     return f"Bouton cliqué {n_clicks} fois"
+
