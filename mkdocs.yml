@@ -74,6 +74,7 @@ extra_css:
 nav:
   - Accueil: index.md
   - Architecture fonctionnelle: architecture.md
+  - Documentation OBY-IA: documentation_oby_ia.md
   - Code source:
       - Outils IA & Traitement: codebase/tools.md
       - Vue d'ensemble: codebase/overview.md

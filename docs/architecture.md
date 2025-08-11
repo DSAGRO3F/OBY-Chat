@@ -108,6 +108,7 @@ src/api/models.py — schémas Pydantic des entrées/sorties.
 ### **3) Parcours types (diagrammes PlantUML)**
 Ces schémas apparaîtront si ton mkdocs.yml est configuré avec plantuml_markdown (serveur public activé). 
 #### 3.1. Générer un PPA
+```plantuml
 @startuml
 title Parcours "Générer un PPA"
 
@@ -123,10 +124,12 @@ UI -> PPA : process_ppa_request()
 PPA --> UI : PPA (texte structuré)
 UI --> Utilisateur : Affichage + Export
 @enduml
+```
 
 ---
 
 #### 3.2. Consulter les constantes d’un patient
+```plantuml
 @startuml
 title Parcours "Consulter les constantes"
 
@@ -142,10 +145,11 @@ UI -> Const : process_patient_request_with_constants(nom)
 Const --> UI : Graphiques + Tableau + Résumé anomalies
 UI --> Utilisateur : Affichage + Export
 @enduml
-
+```
 ---
 
 #### 3.3. Indexer la base documentaire
+```plantuml
 @startuml
 title Parcours "Indexer la base documentaire"
 
@@ -160,7 +164,7 @@ Pipeline -> Scrape : pages web -> JSON
 Pipeline -> Index : JSON -> ChromaDB
 Pipeline -> Pipeline : update_index_journal() + index_ready.flag
 @enduml
-
+```
 ---
 
 ### **4) Traçabilité**
