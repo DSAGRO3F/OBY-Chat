@@ -10,12 +10,11 @@ soit des pages web structurées, puis les segmente et les insère dans une colle
 from uuid import uuid4
 from datetime import datetime
 import os, json
-from chromadb import Client
-from chromadb.config import Settings
+from chromadb.api import ClientAPI
 from chromadb.utils import embedding_functions
 from src.utils.chroma_client import get_chroma_client
 
-def index_documents(source_dir: str, source_type: str, client: Client):
+def index_documents(source_dir: str, source_type: str, client: ClientAPI):
     """
     Indexe les documents JSON contenus dans un répertoire dans une collection ChromaDB.
 
@@ -40,6 +39,8 @@ def index_documents(source_dir: str, source_type: str, client: Client):
     """
 
     print("lancement fonction -> index_documents()... ")
+    if client is None:
+        client = get_chroma_client()
 
     if source_type not in ("docx", "web"):
         raise ValueError("source_type doit être 'docx' ou 'web'.")
@@ -47,9 +48,8 @@ def index_documents(source_dir: str, source_type: str, client: Client):
     collection_name = "base_docx" if source_type == "docx" else "base_web"
 
     # 🔹 Initialisation collection
-    # client = get_chroma_client()
     embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
-        model_name="all-MiniLM-L6-v2"
+        model_name="BAAI/bge-large-en-v1.5"
     )
     collection = client.get_or_create_collection(name=collection_name, embedding_function=embedding_fn)
 

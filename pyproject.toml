@@ -51,6 +51,8 @@ dependencies = [
     "mkdocstrings[python]",
     "mkdocs-glightbox",
     "plantuml-markdown",
+    "fastapi",
+    "uvicorn"
 
 
 ]

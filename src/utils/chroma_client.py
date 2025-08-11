@@ -14,26 +14,13 @@ Utilisé dans l'ensemble du projet pour interagir avec la base Chroma.
 
 
 # src/utils/chroma_client.py
-
-from chromadb import Client
-from chromadb.config import Settings
+from chromadb import PersistentClient
 from config.config import CHROMA_GLOBAL_DIR  # Unique base
-from functools import lru_cache
-
-@lru_cache
-def get_chroma_client() -> Client:
-    """
-    Initialise un client ChromaDB unique, stocké dans CHROMA_GLOBAL_DIR.
-    Utilise lru_cache pour garantir l’unicité de l’instance.
-    """
-    print(f"📦 Initialisation du client ChromaDB (répertoire : {CHROMA_GLOBAL_DIR})")
-    settings = Settings(persist_directory=CHROMA_GLOBAL_DIR,
-                        anonymized_telemetry=False,
-                        is_persistent=True)
-    return Client(settings)
 
 
-
+def get_chroma_client():
+    client = PersistentClient(path=CHROMA_GLOBAL_DIR)
+    return client
 
 
 

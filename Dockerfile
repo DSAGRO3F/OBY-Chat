@@ -35,9 +35,10 @@ RUN curl -o /usr/local/bin/plantuml.jar https://github.com/plantuml/plantuml/rel
 COPY mkdocs.yml ./mkdocs.yml
 
 
-# Étape 10: 8050 pour Dash (mose app), 8080 pour MkDocs (mode doc)
+# Étape 10: 8050 pour Dash (mose app), 8080 pour MkDocs (mode doc), 8000 mode API
 EXPOSE 8050
 EXPOSE 8080
+EXPOSE 8000
 
 # Étape 11 : Copier les données si nécessaire (optionnel, utile en prod)
 # COPY data/input/ ./data/input/

@@ -5,6 +5,194 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ---
 
 
+## 📄 Module : `api.routes.chat`
+
+> **Rôle :**
+> src/api/routes/chat.py
+> 
+> chat.py — Routes API pour la gestion des échanges entre l'utilisateur et OBY-IA.
+> 
+> 📁 Chemin : src/api/routes/chat.py
+> 
+> Ce module définit les endpoints FastAPI permettant d'interagir avec l'agent
+> conversationnel OBY-IA via API.  
+> Il gère la réception des requêtes utilisateur, la transmission au moteur
+> de traitement (`process_user_input`) et le renvoi des réponses formatées.
+> 
+> Fonctionnalités principales :
+> - Point d'entrée `/chat` (méthode POST) pour envoyer un message et recevoir une réponse.
+> - Conversion automatique de la requête JSON en modèle `ChatRequest`.
+> - Utilisation du modèle `ChatResponse` pour structurer la réponse API.
+> - Passage des données de session, historique de chat et contexte patient
+>   au moteur de traitement.
+> 
+> Imports :
+> - `APIRouter` : gestion des routes FastAPI.
+> - `ChatResponse`, `ChatRequest` : modèles Pydantic pour la validation des données.
+> - `process_user_input` : fonction cœur de traitement des requêtes.
+> 
+> Usage :
+>     POST /chat
+>     Body : ChatRequest (JSON)
+>     Retour : ChatResponse (JSON)
+
+---
+
+
+## 📄 Module : `api.routes.export`
+
+> **Rôle :**
+> src/api/routes/export.py
+> Exporte l’historique de conversation OBY-IA au format Markdown et renvoie l’URL du fichier.
+> 
+> Cette route :
+> 1) vérifie la présence d’une session valide (session_id),
+> 2) désérialise les éventuels graphiques des constantes (Plotly) fournis,
+> 3) appelle `export_llm_responses(...)` pour générer le fichier `.md` dans `outputs/...`,
+> 4) retourne une réponse JSON avec un lien web pointant vers la ressource statique
+>    (mappée par l’application vers `/static/...`).
+> 
+> Paramètres
+> ----------
+> payload : ExportRequest
+>     Corps de requête contenant :
+>     - `session_data` : dict avec au minimum `session_id`,
+>     - `current_patient` : nom du patient (utilisé pour le nommage/chemin),
+>     - `serialized_figs` : liste des figures Plotly sérialisées (peut être vide).
+> 
+> Returns
+> -------
+> dict
+>     Objet JSON avec :
+>     - `status` : "success" ou "error",
+>     - `message` : détail du résultat,
+>     - `markdown_file_url` : URL relative `/static/...` vers le fichier exporté, ou `None` en cas d’erreur.
+> 
+> Notes
+> -----
+> - Cette route suppose que l’application FastAPI a monté un répertoire statique
+>   exposant `outputs/` sous le préfixe `/static/`.
+> - Si aucun graphique n’est fourni, l’export Markdown se base uniquement sur l’historique
+>   de session (messages utilisateur / réponses OBY-IA) maintenu par `session_manager_instance`.
+
+---
+
+
+## 📄 Module : `api.routes.login`
+
+> **Rôle :**
+> src/api/routes/login.py
+> 
+> Authentifier un utilisateur et créer une nouvelle session.
+> 
+> Vérifie si les identifiants fournis correspondent à un utilisateur
+> valide dans la base locale. Si oui, génère un identifiant de session
+> unique, initialise la session dans le gestionnaire centralisé, et
+> retourne les données de session.
+> 
+> Args:
+>     request (LoginRequest): Objet contenant `user_id` et `password`.
+> 
+> Returns:
+>     LoginResponse: Message de confirmation et données de session.
+> 
+> Raises:
+>     HTTPException: Si les champs sont manquants (400) ou si les
+>     identifiants sont invalides (401).
+
+---
+
+
+## 📄 Module : `api.routes.logout`
+
+> **Rôle :**
+> src/api/routes/logout.py
+> 
+> Déconnecter un utilisateur et réinitialiser sa session.
+> 
+> Supprime la session identifiée par `user_id` et `session_id` du
+> gestionnaire centralisé. Retourne un indicateur `already_logged_out`
+> pour signaler si la session était déjà inexistante.
+> 
+> Args:
+>     request (LogoutRequest): Objet contenant `user_id` et `session_id`.
+> 
+> Returns:
+>     LogoutResponse: Message de confirmation, état des données de
+>     session, et indicateur `already_logged_out`.
+> 
+> Raises:
+>     HTTPException: Si la requête est invalide (400) ou si les champs
+>     obligatoires sont absents.
+
+---
+
+
+## 📄 Module : `api.routes.poa_patients`
+
+> **Rôle :**
+> src/api/routes/poa_patients.py
+> Module API pour la gestion des dossiers patients POA dans OBY-IA.
+> 
+> Ce module expose plusieurs endpoints sécurisés pour :
+>     - Lister les fichiers patients disponibles.
+>     - Lire un dossier patient au format JSON.
+>     - Créer un nouveau dossier patient.
+>     - Mettre à jour un dossier patient existant.
+>     - Supprimer un dossier patient.
+> 
+> Seuls les utilisateurs authentifiés disposant des droits d'édition
+> (actuellement : `admin`) peuvent effectuer ces opérations.
+> 
+> Endpoints :
+>     GET    /patients           → Liste les fichiers patients.
+>     GET    /patients/{file}    → Retourne le contenu JSON d’un patient.
+>     POST   /patients           → Crée un nouveau dossier patient.
+>     PUT    /patients/{file}    → Met à jour un dossier patient existant.
+>     DELETE /patients/{file}    → Supprime un dossier patient.
+> 
+> Sécurité :
+>     Les appels nécessitent les en-têtes HTTP :
+>         X-User-Id    : identifiant utilisateur
+>         X-Session-Id : identifiant de session obtenu via /auth/login
+
+---
+
+
+## 📄 Module : `api.routes.status`
+
+> **Rôle :**
+> src/api/routes/status.py
+> Vérifie si les index ChromaDB sont prêts à être interrogés.
+> Renvoie le statut à l’interface OBY pour activer/désactiver les champs.
+
+---
+
+
+## 📄 Module : `api.main_api`
+
+> **Rôle :**
+> src/api/main_api.py
+> 
+> point d’entrée du serveur FastAPI. main_api.py a pour rôle de :
+> Créer l’objet FastAPI()
+> Importer et inclure les routes (chat, login, logout…)
+> Définir la configuration de CORS (permet d’autoriser les appels depuis l’interface OBY)
+> Ajouter éventuellement des middlewares (authentification, logs, etc.)
+
+---
+
+
+## 📄 Module : `api.models`
+
+> **Rôle :**
+> src/api/models.py
+> 
+> Ce fichier regroupe toutes les structures de données échangées avec l’API, basées sur pydantic.
+
+---
+
+
 ## 📄 Module : `data.constant_generator`
 
 > **Rôle :**
@@ -40,6 +228,24 @@ _Cette page fournit une description concise des principaux modules Python du pro
 > 
 > L’anonymisation repose à la fois sur des règles dynamiques (ex. : prénom selon le sexe)
 > et sur des valeurs codées en dur (HARDCODED_VALUES).
+
+---
+
+
+## 📄 Module : `func.api_core`
+
+> **Rôle :**
+> Fonction centrale appelée par l'API ou l'interface pour traiter la requête utilisateur.
+> 
+>     Args:
+>         send_clicks (int): Nombre de clics sur le bouton envoyer.
+>         user_input (str): Message saisi par l'utilisateur.
+>         chat_history (list): Historique des échanges.
+>         session_data (dict): Données de session utilisateur.
+>         current_patient (Optional[str]): Nom du patient actuellement sélectionné.
+> 
+>     Returns:
+>         dict: Dictionnaire contenant les résultats du traitement.
 
 ---
 
@@ -165,6 +371,70 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ---
 
 
+## 📄 Module : `func.handle_user_requests`
+
+> **Rôle :**
+> Gestion des requêtes utilisateur pour OBY-IA (détection d’intention, confirmation et exécution).
+> 
+> Ce module centralise la logique conversationnelle « back-end » entre l’interface
+> et les pipelines métier d’OBY-IA. Il orchestre deux étapes clés :
+> 
+> 1) handle_initial_request(...) :
+>    - Analyse l’input utilisateur (détection d’intention et extraction éventuelle
+>      du nom de patient).
+>    - Met en place un état de confirmation (session["intent_confirmation_pending"] = True)
+>      et prépare un message de confirmation.
+>    - Retourne les éléments nécessaires pour l’affichage / la réponse (historique,
+>      tableaux, graphiques, etc.), généralement vides à ce stade.
+> 
+> 2) handle_confirmation_response(...) :
+>    - Interprète la confirmation (ex.: « oui / non ») lorsque l’intention est en attente.
+>    - Déclenche le pipeline adapté :
+>        • PPA (generate_ppa_from_poa.process_ppa_request),
+>        • Recommandations (generate_structured_medical_plan),
+>        • Constantes patient (process_patient_request_with_constants).
+>    - Met à jour l’état de session (réinitialisation du flag de confirmation,
+>      mémorisation du patient courant, etc.) et assemble la réponse finale.
+> 
+> Modes de sortie :
+>     Le paramètre `output_mode` permet d’adapter le format des objets retournés :
+>       - "dash" : le module peut retourner des composants Dash (html.Div, dcc.Markdown,
+>                  figures Plotly « go.Figure », etc.) pour l’UI interne.
+>       - "api"  : le module retourne des structures sérialisables (listes/dicts/strings),
+>                  adaptées à FastAPI / JSON (pas d’objets Dash).
+> 
+> Effets de bord :
+>     - Mise à jour de la session (ex. intent_confirmation_pending, intent_candidate).
+>     - Enrichissement de l’historique de conversation (chat_history / new_chat_history).
+> 
+> Dépendances principales :
+>     - src.llm_user_session.session_manager_instance
+>     - src.func.extract_user_intent, src.func.extract_patient_name
+>     - src.func.generate_ppa_from_poa, src.func.generate_structured_medical_plan
+>     - src.func.get_patient_constants_graphs
+>     - src.func.serialize_figs (sérialisation des figures)
+>     - (optionnel côté UI) dash.html / dash.dcc pour le mode "dash"
+> 
+> Convention de retour :
+>     Les fonctions retournent un 7-uplet :
+>         (chat_history_ou_new_chat_history,
+>          figures_out,
+>          table_html,
+>          anomaly_block,
+>          current_patient,
+>          serialized_figs,
+>          chat_history_display)
+> 
+>     * En mode "initial", chat_history est renvoyé (nouvel historique cumulé).
+>     * En mode "confirmation", new_chat_history est renvoyé (ajouts du tour courant).
+>     * Le « full_chat_history » est assemblé par l’appelant si nécessaire.
+> 
+> Ce module est conçu pour être appelé à la fois par l’interface Dash (UI)
+> et par la couche API (FastAPI) via une fonction « tronc commun ».
+
+---
+
+
 ## 📄 Module : `func.index_documents_chromadb`
 
 > **Rôle :**
@@ -172,6 +442,26 @@ _Cette page fournit une description concise des principaux modules Python du pro
 > 
 > Ce module prend en entrée des fichiers JSON représentant soit des documents issus de fichiers DOCX,
 > soit des pages web structurées, puis les segmente et les insère dans une collection ChromaDB.
+>     Indexe les documents JSON contenus dans un répertoire dans une collection ChromaDB.
+> 
+>     Chaque document est découpé en sections (ou chunk unique dans le cas d'un fichier DOCX complet),
+>     puis inséré dans une base vectorielle avec ses métadonnées.
+> 
+>     Args:
+>         source_dir (str): Chemin du dossier contenant les fichiers JSON à indexer.
+>         source_type (str): Type de document à indexer, soit 'docx' soit 'web'.
+>         client (Client): Instance du client ChromaDB utilisée pour la persistance des données.
+> 
+>     Entrées :
+>         - source_dir (str) : Dossier contenant les fichiers JSON.
+>         - source_type (str) : 'docx' ou 'web' (détermine la collection cible).
+> 
+>     Sorties :
+>         - Indexation des chunks dans une collection nommée selon la source.
+> 
+> 
+>     Raises:
+>         ValueError: Si le type de source est invalide (autre que 'docx' ou 'web').
 
 ---
 
@@ -231,10 +521,36 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ## 📄 Module : `func.run_full_indexing_pipeline`
 
 > **Rôle :**
-> Module principal pour exécuter le pipeline complet d’indexation documentaire.
-> Ce pipeline détecte les fichiers DOCX et les pages web modifiés, les convertit en JSON,
-> et les indexe dans ChromaDB via LangChain. Il peut être lancé automatiquement
-> (avec un scheduler) ou manuellement.
+> Module `run_full_indexing_pipeline.py` – Pipeline principal d’indexation documentaire pour OBY-IA.
+> 
+> Ce module exécute l’ensemble du processus de préparation de la base documentaire utilisée
+> par les agents RAG de OBY-IA, en assurant une indexation vectorielle actualisée dans ChromaDB.
+> 
+> Fonctionnalités couvertes :
+> 1. **Détection de modifications** :
+>    - Identification des fichiers DOCX ou pages web récemment modifiés via calcul de hashs.
+>    - Détection des changements dans la définition des sites de confiance (`trusted_sites.py`).
+> 
+> 2. **Conversion en JSON structuré** :
+>    - Transformation des fichiers DOCX en fichiers JSON exploitables.
+>    - Scraping et structuration des nouvelles pages web selon les règles définies.
+> 
+> 3. **Indexation vectorielle dans ChromaDB** :
+>    - Indexation incrémentale ou complète des données selon les changements détectés.
+>    - Séparation des sources DOCX et web (`source_type`).
+> 
+> 4. **Journalisation des indexations** :
+>    - Mise à jour du fichier de suivi (`indexed_files.json`) pour éviter les réindexations inutiles.
+> 
+> 5. **Signalement de disponibilité** :
+>    - Écriture d’un fichier `index_ready.flag` permettant aux autres modules de savoir si l’index est prêt.
+> 
+> Ce pipeline peut être lancé :
+> - automatiquement (via un scheduler ou watchdog),
+> - ou manuellement (en exécutant ce fichier en tant que script).
+> 
+> Il constitue un composant critique du système OBY-IA pour garantir la fraîcheur et la cohérence
+> des bases documentaires utilisées dans les interactions LLM + RAG.
 
 ---
 
@@ -316,7 +632,7 @@ _Cette page fournit une description concise des principaux modules Python du pro
 > **Rôle :**
 > Module d'export des réponses générées par le modèle LLM pour un patient donné.
 > 
-> Ce module permet de récupérer toutes les réponses associées à une session,
+> Ce module permet de récupérer toutes les réponses associées à une session (requête utilisateur + réponse LLM),
 > de les concaténer proprement, et de les exporter dans un fichier Markdown.
 > Il peut également intégrer des graphiques de constantes si fournis.
 > 
@@ -423,16 +739,41 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ## 📄 Module : `pages.chatbot_ui`
 
 > **Rôle :**
-> Interface utilisateur du chatbot OBY-IA (page Dash `/chatbot`).
-> Ce module définit l’interface graphique de la page chatbot de l’application OBY-IA.
-> Il gère :
-> - l’affichage des constantes médicales du patient (graphique, tableau, anomalies),
-> - la détection de l’intention utilisateur à partir d’une saisie libre,
-> - la génération automatique de contenu (PPA, plan de soins, recommandations),
-> - l’enregistrement et l’affichage de l’historique des échanges avec le LLM,
-> - l’export de la session au format Markdown,
-> - l’affichage des détails dans une fenêtre modale.
-> Ce module repose sur Dash, Dash Bootstrap Components et une logique centralisée via `session_manager_instance`.
+> Module `chatbot_ui.py` – Interface conversationnelle de l'application OBY-IA (page `/chatbot`)
+> 
+> Ce module Dash définit la page chatbot de OBY-IA, qui permet aux professionnels de santé
+> d’interagir avec un agent intelligent pour obtenir :
+> 
+> 1. **Analyse des constantes médicales du patient** :
+>    - Extraction et affichage des constantes sous forme de graphiques et tableaux.
+>    - Détection automatique des anomalies.
+>    - Sérialisation et désérialisation des graphiques pour l’exportation.
+> 
+> 2. **Interaction en langage naturel avec le LLM** :
+>    - Détection de l’intention utilisateur (consultation, génération de PPA, recommandations).
+>    - Extraction du nom du patient à partir de la requête.
+>    - Génération de contenu médical structuré via des prompts spécialisés.
+>    - Historisation des messages utilisateur/LLM et affichage dynamique.
+> 
+> 3. **Export des résultats** :
+>    - Génération d’un fichier Markdown résumant la session (réponses LLM + graphiques).
+> 
+> 4. **Contrôle de disponibilité de l’index ChromaDB** :
+>    - Affichage d’une bannière d’attente tant que l’index n’est pas prêt.
+>    - Activation différée des composants de saisie utilisateur.
+> 
+> 5. **Gestion de la deconnexion de l'utilisateur** :
+>    - Le click du bouton deconnexion dans la page de chat déclenche la supression de la session.
+>    - La suppression de la session entraîne celle de l'historique du chat de la fenêtre de chat.
+> 
+> 
+> Composants techniques :
+> - Utilise `session_manager_instance` pour la gestion d’état (session, mapping, historique).
+> - Repose sur les modules fonctionnels : `extract_user_intent`, `generate_ppa_from_poa`,
+>   `generate_structured_medical_plan`, `get_patient_constants_graphs`, `export_chat_response`, etc.
+> 
+> Cette page est au cœur de l’expérience utilisateur de OBY-IA, combinant interface conviviale
+> et logique métier intelligente.
 
 ---
 
@@ -440,15 +781,29 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ## 📄 Module : `pages.home`
 
 > **Rôle :**
-> Page d'accueil et d'authentification de l'application OBY-IA.
+> Module `home.py` – Page d'accueil, authentification et interface d'administration de OBY-IA.
 > 
-> Ce module Dash permet :
-> - l'authentification des utilisateurs via un identifiant et un mot de passe,
-> - la gestion des sessions (création, suppression),
-> - l'accès conditionnel aux fonctions d'administration (comme la réinitialisation des bases de données),
-> - l'affichage dynamique de l'interface en fonction du rôle de l'utilisateur (admin ou utilisateur classique).
+> Ce module Dash gère les fonctionnalités suivantes :
+> 1. **Authentification utilisateur** :
+>    - Vérification des identifiants via une base interne (`USER_DATABASE`).
+>    - Création et stockage de la session via `dcc.Store` et `session_manager_instance`.
+>    - Affichage conditionnel de l'interface selon le rôle (utilisateur ou admin).
 > 
-> La session est stockée via `dcc.Store`, et la sécurité repose sur `session_manager_instance`.
+> 2. **Contrôles d'administration (admin uniquement)** :
+>    - Réinitialisation des bases : ChromaDB, fichiers JSON extraits du web, index de suivi.
+>    - Interface de déclenchement réservée aux administrateurs.
+> 
+> 3. **Accès à la documentation du projet** :
+>    - Vérification en temps réel de la disponibilité du serveur MkDocs (`http://127.0.0.1:8000`).
+>    - Redirection automatique vers la documentation si disponible.
+>    - Cette documentation projet n'est pas mise à jour régulièrement. Elle sera définitivement remplacée par une documentation dynamique.
+>    - Cette documentation dynamique pourra être consultée par le paramétrage de "start.sh".
+> 
+> 4. **Visualisation des statistiques d’indexation ChromaDB** :
+>    - Affichage du nombre de fichiers indexés (DOCX, web), de chunks, et de fichiers JSON associés.
+>    - Rafraîchissement manuel ou automatique de ces statistiques à l’ouverture.
+> 
+> Ce module constitue la page d’accueil et d’entrée principale de l’application OBY-IA.
 
 ---
 
@@ -469,88 +824,3 @@ _Cette page fournit une description concise des principaux modules Python du pro
 
 ---
 
-"""
-# 🧠 Architecture fonctionnelle de OBY-IA
-
-Ce schéma présente l'organisation des modules techniques d'OBY-IA.
-```plantuml
-@startuml
-title Architecture fonctionnelle de OBY-IA
-
-skinparam componentStyle rectangle
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam package {
-  BorderColor black
-  BackgroundColor white
-}
-skinparam rectangle {
-  BackgroundColor white
-  BorderColor black
-}
-skinparam defaultTextAlignment center
-
-' Légende des couleurs
-legend left
-|= Couleur |= Bloc fonctionnel |
-| <back:FFF2CC>     | Interface utilisateur |
-| <back:D9EAD3>     | Traitement LLM / Intentions |
-| <back:CFE2F3>     | Génération de PPA |
-| <back:F4CCCC>     | Recommandations médicales |
-| <back:EAD1DC>     | Analyse des constantes |
-| <back:D9D2E9>     | Indexation documentaire |
-endlegend
-
-' === Interface utilisateur ===
-package "Interface utilisateur" #FFF2CC {
-  rectangle "home.py" as home
-  note right of home
-    authenticate_user()
-    logout_user()
-    trigger_reset()
-    display_admin_controls()
-    check_mkdocs_status()
-    open_docs_site()
-    update_chroma_stats()
-  end note
-
-  rectangle "chatbot_ui.py" as chatbot
-  note right of chatbot
-    handle_user_input_or_logout()
-    export_chat_response()
-    check_index_status()
-  end note
-}
-' === Traitement LLM / Intentions ===
-package "Traitement LLM / Intentions" #D9EAD3 {
-  rectangle "extract_user_intent.py\n––––––––––––––––\ndetect_user_intent()\nllm_intent_classification()" as intent
-}
-
-' === Génération de PPA ===
-package "Génération de PPA" #CFE2F3 {
-  rectangle "generate_ppa_from_poa.py\n––––––––––––––––\nprocess_ppa_request()" as ppa
-}
-
-' === Recommandations médicales ===
-package "Recommandations médicales" #F4CCCC {
-  rectangle "generate_structured_medical_plan.py\n––––––––––––––––\ngenerate_structured_medical_plan()" as reco
-}
-
-' === Analyse des constantes ===
-package "Analyse des constantes" #EAD1DC {
-  rectangle "get_patient_constants_graphs.py\n––––––––––––––––\nprocess_patient_request_with_constants()" as const
-}
-
-' === Indexation documentaire ===
-package "Indexation documentaire" #D9D2E9 {
-  rectangle "run_full_indexing_pipeline.py\n––––––––––––––––\nrun_full_indexing_pipeline()" as indexer
-}
-
-' === Relations principales ===
-chatbot --> ppa
-chatbot --> reco
-chatbot --> const
-chatbot --> intent
-home --> indexer
-@enduml
-```

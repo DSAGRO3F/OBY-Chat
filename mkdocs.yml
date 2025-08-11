@@ -60,7 +60,7 @@ plugins:
             docstring_style: google
             merge_init_into_class: true
   - glightbox
-  # (Optionnel - pour exporter en PDF si tu ajoutes le plugin)
+  # (Optionnel - pour exporter en PDF si ajout plugin)
   # - pdf-export:
   #     media_type: print
 
@@ -72,7 +72,6 @@ extra_css:
   - style_sheet_documentation.css
 
 nav:
-  - Test: test.md
   - Accueil: index.md
   - Architecture fonctionnelle: architecture.md
   - Code source:

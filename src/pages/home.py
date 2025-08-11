@@ -7,19 +7,17 @@ Ce module Dash gère les fonctionnalités suivantes :
    - Création et stockage de la session via `dcc.Store` et `session_manager_instance`.
    - Affichage conditionnel de l'interface selon le rôle (utilisateur ou admin).
 
-2. **Déconnexion et gestion de session** :
-   - Suppression propre de la session en cours.
-   - Réinitialisation du mappage d’anonymisation à la connexion.
-
-3. **Contrôles d'administration (admin uniquement)** :
+2. **Contrôles d'administration (admin uniquement)** :
    - Réinitialisation des bases : ChromaDB, fichiers JSON extraits du web, index de suivi.
    - Interface de déclenchement réservée aux administrateurs.
 
-4. **Accès à la documentation du projet** :
+3. **Accès à la documentation du projet** :
    - Vérification en temps réel de la disponibilité du serveur MkDocs (`http://127.0.0.1:8000`).
    - Redirection automatique vers la documentation si disponible.
+   - Cette documentation projet n'est pas mise à jour régulièrement. Elle sera définitivement remplacée par une documentation dynamique.
+   - Cette documentation dynamique pourra être consultée par le paramétrage de "start.sh".
 
-5. **Visualisation des statistiques d’indexation ChromaDB** :
+4. **Visualisation des statistiques d’indexation ChromaDB** :
    - Affichage du nombre de fichiers indexés (DOCX, web), de chunks, et de fichiers JSON associés.
    - Rafraîchissement manuel ou automatique de ces statistiques à l’ouverture.
 
@@ -136,43 +134,6 @@ def authenticate_user(n_clicks, user_id_input, password_input):
             print("❌ Identifiants invalides")
             return "❌ Identifiants invalides. Veuillez réessayer.", dash.no_update
     return "❌ Veuillez remplir tous les champs.", dash.no_update
-
-
-# # ===============================================#
-# # Callback pour la déconnexion
-# # ===============================================#
-# @dash.callback(
-#     Output("auth_feedback", "children", allow_duplicate=True),
-#     Output("session_data", "data", allow_duplicate=True),
-#     Input("logout_button", "n_clicks"),
-#     State("session_data", "data"),
-#     prevent_initial_call=True
-# )
-# def logout_user(n_clicks, session_data):
-#     """
-#     Met fin à la session utilisateur en cours.
-#
-#     Supprime la session active à partir des informations enregistrées,
-#     et réinitialise les données côté client.
-#
-#     Args:
-#         n_clicks (int) : Nombre de clics sur le bouton "Déconnexion".
-#         session_data (dict) : Données de session utilisateur en cours.
-#
-#     Returns:
-#         tuple :
-#             - Message de confirmation (str),
-#             - None pour réinitialiser `session_data`.
-#     """
-#
-#     if session_data:
-#         user_id = session_data.get("user_id")
-#         session_id = session_data.get("session_id")
-#         session_manager_instance.end_session(user_id, session_id)
-#         print(f"🔒 Session terminée pour {user_id} - ID: {session_id}")
-#         return "✅ Déconnexion réussie.", None
-#     return "❌ Aucune session active.", None
-#
 
 
 

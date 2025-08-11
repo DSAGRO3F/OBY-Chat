@@ -4,6 +4,222 @@ Ce chapitre regroupe la documentation technique des modules qui assurent le trai
 
 ---
 
+## 📁 Module : `api`
+<!---
+src/api/routes/chat.py
+
+chat.py — Routes API pour la gestion des échanges entre l'utilisateur et OBY-IA.
+
+📁 Chemin : src/api/routes/chat.py
+
+Ce module définit les endpoints FastAPI permettant d'interagir avec l'agent
+conversationnel OBY-IA via API.  
+Il gère la réception des requêtes utilisateur, la transmission au moteur
+de traitement (`process_user_input`) et le renvoi des réponses formatées.
+
+Fonctionnalités principales :
+- Point d'entrée `/chat` (méthode POST) pour envoyer un message et recevoir une réponse.
+- Conversion automatique de la requête JSON en modèle `ChatRequest`.
+- Utilisation du modèle `ChatResponse` pour structurer la réponse API.
+- Passage des données de session, historique de chat et contexte patient
+  au moteur de traitement.
+
+Imports :
+- `APIRouter` : gestion des routes FastAPI.
+- `ChatResponse`, `ChatRequest` : modèles Pydantic pour la validation des données.
+- `process_user_input` : fonction cœur de traitement des requêtes.
+
+Usage :
+    POST /chat
+    Body : ChatRequest (JSON)
+    Retour : ChatResponse (JSON)
+--->
+
+::: api.routes.chat
+    options:
+      show_source: true
+      heading_level: 2
+
+---
+
+<!---
+src/api/routes/export.py
+Exporte l’historique de conversation OBY-IA au format Markdown et renvoie l’URL du fichier.
+
+Cette route :
+1) vérifie la présence d’une session valide (session_id),
+2) désérialise les éventuels graphiques des constantes (Plotly) fournis,
+3) appelle `export_llm_responses(...)` pour générer le fichier `.md` dans `outputs/...`,
+4) retourne une réponse JSON avec un lien web pointant vers la ressource statique
+   (mappée par l’application vers `/static/...`).
+
+Paramètres
+----------
+payload : ExportRequest
+    Corps de requête contenant :
+    - `session_data` : dict avec au minimum `session_id`,
+    - `current_patient` : nom du patient (utilisé pour le nommage/chemin),
+    - `serialized_figs` : liste des figures Plotly sérialisées (peut être vide).
+
+Returns
+-------
+dict
+    Objet JSON avec :
+    - `status` : "success" ou "error",
+    - `message` : détail du résultat,
+    - `markdown_file_url` : URL relative `/static/...` vers le fichier exporté, ou `None` en cas d’erreur.
+
+Notes
+-----
+- Cette route suppose que l’application FastAPI a monté un répertoire statique
+  exposant `outputs/` sous le préfixe `/static/`.
+- Si aucun graphique n’est fourni, l’export Markdown se base uniquement sur l’historique
+  de session (messages utilisateur / réponses OBY-IA) maintenu par `session_manager_instance`.
+
+--->
+
+::: api.routes.export
+    options:
+      show_source: true
+      heading_level: 2
+
+---
+
+<!---
+src/api/routes/login.py
+
+Authentifier un utilisateur et créer une nouvelle session.
+
+Vérifie si les identifiants fournis correspondent à un utilisateur
+valide dans la base locale. Si oui, génère un identifiant de session
+unique, initialise la session dans le gestionnaire centralisé, et
+retourne les données de session.
+
+Args:
+    request (LoginRequest): Objet contenant `user_id` et `password`.
+
+Returns:
+    LoginResponse: Message de confirmation et données de session.
+
+Raises:
+    HTTPException: Si les champs sont manquants (400) ou si les
+    identifiants sont invalides (401).
+--->
+
+::: api.routes.login
+    options:
+      show_source: true
+      heading_level: 2
+
+---
+
+<!---
+src/api/routes/logout.py
+
+Déconnecter un utilisateur et réinitialiser sa session.
+
+Supprime la session identifiée par `user_id` et `session_id` du
+gestionnaire centralisé. Retourne un indicateur `already_logged_out`
+pour signaler si la session était déjà inexistante.
+
+Args:
+    request (LogoutRequest): Objet contenant `user_id` et `session_id`.
+
+Returns:
+    LogoutResponse: Message de confirmation, état des données de
+    session, et indicateur `already_logged_out`.
+
+Raises:
+    HTTPException: Si la requête est invalide (400) ou si les champs
+    obligatoires sont absents.
+
+--->
+
+::: api.routes.logout
+    options:
+      show_source: true
+      heading_level: 2
+
+---
+
+<!---
+src/api/routes/poa_patients.py
+Module API pour la gestion des dossiers patients POA dans OBY-IA.
+
+Ce module expose plusieurs endpoints sécurisés pour :
+    - Lister les fichiers patients disponibles.
+    - Lire un dossier patient au format JSON.
+    - Créer un nouveau dossier patient.
+    - Mettre à jour un dossier patient existant.
+    - Supprimer un dossier patient.
+
+Seuls les utilisateurs authentifiés disposant des droits d'édition
+(actuellement : `admin`) peuvent effectuer ces opérations.
+
+Endpoints :
+    GET    /patients           → Liste les fichiers patients.
+    GET    /patients/{file}    → Retourne le contenu JSON d’un patient.
+    POST   /patients           → Crée un nouveau dossier patient.
+    PUT    /patients/{file}    → Met à jour un dossier patient existant.
+    DELETE /patients/{file}    → Supprime un dossier patient.
+
+Sécurité :
+    Les appels nécessitent les en-têtes HTTP :
+        X-User-Id    : identifiant utilisateur
+        X-Session-Id : identifiant de session obtenu via /auth/login
+--->
+
+::: api.routes.poa_patients
+    options:
+      show_source: true
+      heading_level: 2
+
+---
+
+<!---
+src/api/routes/status.py
+Vérifie si les index ChromaDB sont prêts à être interrogés.
+Renvoie le statut à l’interface OBY pour activer/désactiver les champs.
+--->
+
+::: api.routes.status
+    options:
+      show_source: true
+      heading_level: 2
+
+---
+
+<!---
+src/api/main_api.py
+
+point d’entrée du serveur FastAPI. main_api.py a pour rôle de :
+Créer l’objet FastAPI()
+Importer et inclure les routes (chat, login, logout…)
+Définir la configuration de CORS (permet d’autoriser les appels depuis l’interface OBY)
+Ajouter éventuellement des middlewares (authentification, logs, etc.)
+--->
+
+::: api.main_api
+    options:
+      show_source: true
+      heading_level: 2
+
+---
+
+<!---
+src/api/models.py
+
+Ce fichier regroupe toutes les structures de données échangées avec l’API, basées sur pydantic.
+--->
+
+::: api.models
+    options:
+      show_source: true
+      heading_level: 2
+
+---
+
+
 ## 📁 Module : `data`
 <!---
 Module de génération de données fictives pour les constantes médicales.
@@ -49,6 +265,27 @@ et sur des valeurs codées en dur (HARDCODED_VALUES).
 --->
 
 ::: func.anonymizer
+    options:
+      show_source: true
+      heading_level: 2
+
+---
+
+<!---
+    Fonction centrale appelée par l'API ou l'interface pour traiter la requête utilisateur.
+
+    Args:
+        send_clicks (int): Nombre de clics sur le bouton envoyer.
+        user_input (str): Message saisi par l'utilisateur.
+        chat_history (list): Historique des échanges.
+        session_data (dict): Données de session utilisateur.
+        current_patient (Optional[str]): Nom du patient actuellement sélectionné.
+
+    Returns:
+        dict: Dictionnaire contenant les résultats du traitement.
+--->
+
+::: func.api_core
     options:
       show_source: true
       heading_level: 2
@@ -203,10 +440,97 @@ Utilisé notamment dans la page chatbot_ui de l’application OBY-IA.
 ---
 
 <!---
+Gestion des requêtes utilisateur pour OBY-IA (détection d’intention, confirmation et exécution).
+
+Ce module centralise la logique conversationnelle « back-end » entre l’interface
+et les pipelines métier d’OBY-IA. Il orchestre deux étapes clés :
+
+1) handle_initial_request(...) :
+   - Analyse l’input utilisateur (détection d’intention et extraction éventuelle
+     du nom de patient).
+   - Met en place un état de confirmation (session["intent_confirmation_pending"] = True)
+     et prépare un message de confirmation.
+   - Retourne les éléments nécessaires pour l’affichage / la réponse (historique,
+     tableaux, graphiques, etc.), généralement vides à ce stade.
+
+2) handle_confirmation_response(...) :
+   - Interprète la confirmation (ex.: « oui / non ») lorsque l’intention est en attente.
+   - Déclenche le pipeline adapté :
+       • PPA (generate_ppa_from_poa.process_ppa_request),
+       • Recommandations (generate_structured_medical_plan),
+       • Constantes patient (process_patient_request_with_constants).
+   - Met à jour l’état de session (réinitialisation du flag de confirmation,
+     mémorisation du patient courant, etc.) et assemble la réponse finale.
+
+Modes de sortie :
+    Le paramètre `output_mode` permet d’adapter le format des objets retournés :
+      - "dash" : le module peut retourner des composants Dash (html.Div, dcc.Markdown,
+                 figures Plotly « go.Figure », etc.) pour l’UI interne.
+      - "api"  : le module retourne des structures sérialisables (listes/dicts/strings),
+                 adaptées à FastAPI / JSON (pas d’objets Dash).
+
+Effets de bord :
+    - Mise à jour de la session (ex. intent_confirmation_pending, intent_candidate).
+    - Enrichissement de l’historique de conversation (chat_history / new_chat_history).
+
+Dépendances principales :
+    - src.llm_user_session.session_manager_instance
+    - src.func.extract_user_intent, src.func.extract_patient_name
+    - src.func.generate_ppa_from_poa, src.func.generate_structured_medical_plan
+    - src.func.get_patient_constants_graphs
+    - src.func.serialize_figs (sérialisation des figures)
+    - (optionnel côté UI) dash.html / dash.dcc pour le mode "dash"
+
+Convention de retour :
+    Les fonctions retournent un 7-uplet :
+        (chat_history_ou_new_chat_history,
+         figures_out,
+         table_html,
+         anomaly_block,
+         current_patient,
+         serialized_figs,
+         chat_history_display)
+
+    * En mode "initial", chat_history est renvoyé (nouvel historique cumulé).
+    * En mode "confirmation", new_chat_history est renvoyé (ajouts du tour courant).
+    * Le « full_chat_history » est assemblé par l’appelant si nécessaire.
+
+Ce module est conçu pour être appelé à la fois par l’interface Dash (UI)
+et par la couche API (FastAPI) via une fonction « tronc commun ».
+--->
+
+::: func.handle_user_requests
+    options:
+      show_source: true
+      heading_level: 2
+
+---
+
+<!---
 Module d'indexation des documents de santé dans une base vectorielle ChromaDB.
 
 Ce module prend en entrée des fichiers JSON représentant soit des documents issus de fichiers DOCX,
 soit des pages web structurées, puis les segmente et les insère dans une collection ChromaDB.
+    Indexe les documents JSON contenus dans un répertoire dans une collection ChromaDB.
+
+    Chaque document est découpé en sections (ou chunk unique dans le cas d'un fichier DOCX complet),
+    puis inséré dans une base vectorielle avec ses métadonnées.
+
+    Args:
+        source_dir (str): Chemin du dossier contenant les fichiers JSON à indexer.
+        source_type (str): Type de document à indexer, soit 'docx' soit 'web'.
+        client (Client): Instance du client ChromaDB utilisée pour la persistance des données.
+
+    Entrées :
+        - source_dir (str) : Dossier contenant les fichiers JSON.
+        - source_type (str) : 'docx' ou 'web' (détermine la collection cible).
+
+    Sorties :
+        - Indexation des chunks dans une collection nommée selon la source.
+
+
+    Raises:
+        ValueError: Si le type de source est invalide (autre que 'docx' ou 'web').
 --->
 
 ::: func.index_documents_chromadb
@@ -570,6 +894,11 @@ d’interagir avec un agent intelligent pour obtenir :
    - Affichage d’une bannière d’attente tant que l’index n’est pas prêt.
    - Activation différée des composants de saisie utilisateur.
 
+5. **Gestion de la deconnexion de l'utilisateur** :
+   - Le click du bouton deconnexion dans la page de chat déclenche la supression de la session.
+   - La suppression de la session entraîne celle de l'historique du chat de la fenêtre de chat.
+
+
 Composants techniques :
 - Utilise `session_manager_instance` pour la gestion d’état (session, mapping, historique).
 - Repose sur les modules fonctionnels : `extract_user_intent`, `generate_ppa_from_poa`,
@@ -595,19 +924,17 @@ Ce module Dash gère les fonctionnalités suivantes :
    - Création et stockage de la session via `dcc.Store` et `session_manager_instance`.
    - Affichage conditionnel de l'interface selon le rôle (utilisateur ou admin).
 
-2. **Déconnexion et gestion de session** :
-   - Suppression propre de la session en cours.
-   - Réinitialisation du mappage d’anonymisation à la connexion.
-
-3. **Contrôles d'administration (admin uniquement)** :
+2. **Contrôles d'administration (admin uniquement)** :
    - Réinitialisation des bases : ChromaDB, fichiers JSON extraits du web, index de suivi.
    - Interface de déclenchement réservée aux administrateurs.
 
-4. **Accès à la documentation du projet** :
+3. **Accès à la documentation du projet** :
    - Vérification en temps réel de la disponibilité du serveur MkDocs (`http://127.0.0.1:8000`).
    - Redirection automatique vers la documentation si disponible.
+   - Cette documentation projet n'est pas mise à jour régulièrement. Elle sera définitivement remplacée par une documentation dynamique.
+   - Cette documentation dynamique pourra être consultée par le paramétrage de "start.sh".
 
-5. **Visualisation des statistiques d’indexation ChromaDB** :
+4. **Visualisation des statistiques d’indexation ChromaDB** :
    - Affichage du nombre de fichiers indexés (DOCX, web), de chunks, et de fichiers JSON associés.
    - Rafraîchissement manuel ou automatique de ces statistiques à l’ouverture.
 

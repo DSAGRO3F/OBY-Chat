@@ -182,3 +182,65 @@ docker system prune -a
 
 ---
 
+ ✅Test de OBY-IA en mode API
+En plus du mode application web, OBY-IA peut être sollicité directement via une API REST.
+Ce mode permet à l’agence d’intégrer ou de tester les fonctionnalités de l’agent conversationnel depuis n’importe quel outil compatible HTTP (Swagger UI, Postman, cURL…).
+1. Lancement du mode API
+
+Le mode API est activé automatiquement lorsque la variable d’environnement APP_MODE est positionnée sur api.
+En exécution Docker, cela est géré par le script start.sh :
+elif [ "$APP_MODE" = "api" ]; then
+    echo "🌐 Lancement du service OBY-IA en mode API..."
+    uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+Le conteneur expose le port 8000, qui correspond à l’API FastAPI.
+
+2. Accès à la documentation interactive
+Une fois l’application démarrée en mode API, la documentation Swagger UI est accessible à l’adresse :
+https://<nom-domaine-ou-ip>:8000/docs
+Elle permet de :
+Visualiser les endpoints disponibles.
+Consulter le format attendu des requêtes et des réponses.
+Tester les appels directement depuis le navigateur.
+
+3. Endpoints principaux
+| Endpoint           | Méthode | Description                                             |
+| ------------------ | ------- | ------------------------------------------------------- |
+| `/auth/login`      | POST    | Authentifie un utilisateur et retourne un `session_id`. |
+| `/chat/chat`       | POST    | Envoie un message à l’agent et reçoit la réponse.       |
+| `/chat/export`     | POST    | Exporte l’historique de la session au format Markdown.  |
+| `/auth/logout`     | POST    | Ferme la session utilisateur.                           |
+| `/status/indexing` | GET     | Vérifie si l’indexation documentaire est prête.         |
+
+4. Séquence type de test
+   1. Authentification
+   - Endpoint : /auth/login
+   - Fournir user_id et password.
+   - Récupérer le session_id de la réponse.
+   2. Interaction avec l’agent
+   - Endpoint : /chat/chat
+   - Fournir un corps JSON :
+   {
+     "user_input": "Prépare le plan pour le patient Dupont",
+     "session_data": {
+       "user_id": "demo",
+       "session_id": "<valeur_retournee_par_login>"
+     }
+   }
+
+   3. Export de session (optionnel)
+      - Endpoint : /chat/export
+      - Fournir le même session_data pour obtenir le résumé de la session au format Markdown.
+   4. Déconnexion
+      - Endpoint : /auth/logout
+      - Met fin à la session côté serveur.
+
+**Remarque importante**
+- Les appels API sont stateless côté HTTP : c’est le session_id qui permet de retrouver le contexte.
+- Un utilisateur doit obligatoirement s’authentifier avant tout échange avec /chat/chat.
+
+
+
+
+
+
+
