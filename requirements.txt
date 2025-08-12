@@ -41,3 +41,7 @@ mkdocs-section-index
 mkdocstrings[python]
 mkdocs-glightbox
 plantuml-markdown
+fastapi==0.111.*
+uvicorn[standard]==0.30.*
+pydantic==2.8.*
+starlette==0.45.*
