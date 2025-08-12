@@ -182,36 +182,47 @@ docker system prune -a
 
 ---
 
- ✅Test de OBY-IA en mode API
+## ✅Test de OBY-IA en mode API
 En plus du mode application web, OBY-IA peut être sollicité directement via une API REST.
 Ce mode permet à l’agence d’intégrer ou de tester les fonctionnalités de l’agent conversationnel depuis n’importe quel outil compatible HTTP (Swagger UI, Postman, cURL…).
-1. Lancement du mode API
+### 1. Lancement du mode API
 
 Le mode API est activé automatiquement lorsque la variable d’environnement APP_MODE est positionnée sur api.
 En exécution Docker, cela est géré par le script start.sh :
+```
 elif [ "$APP_MODE" = "api" ]; then
     echo "🌐 Lancement du service OBY-IA en mode API..."
     uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+```
 Le conteneur expose le port 8000, qui correspond à l’API FastAPI.
 
-2. Accès à la documentation interactive
+### 2. Accès à la documentation interactive
 Une fois l’application démarrée en mode API, la documentation Swagger UI est accessible à l’adresse :
+```
 https://<nom-domaine-ou-ip>:8000/docs
+```
 Elle permet de :
 Visualiser les endpoints disponibles.
 Consulter le format attendu des requêtes et des réponses.
 Tester les appels directement depuis le navigateur.
 
-3. Endpoints principaux
-| Endpoint           | Méthode | Description                                             |
-| ------------------ | ------- | ------------------------------------------------------- |
-| `/auth/login`      | POST    | Authentifie un utilisateur et retourne un `session_id`. |
-| `/chat/chat`       | POST    | Envoie un message à l’agent et reçoit la réponse.       |
-| `/chat/export`     | POST    | Exporte l’historique de la session au format Markdown.  |
-| `/auth/logout`     | POST    | Ferme la session utilisateur.                           |
-| `/status/indexing` | GET     | Vérifie si l’indexation documentaire est prête.         |
+### 3. Endpoints principaux
 
-4. Séquence type de test
+| Endpoint              | Méthode | Description |
+|-----------------------|:-------:|-------------|
+| `/auth/login`         | `POST`  | Authentifie un utilisateur et retourne un `session_id`. |
+| `/auth/logout`        | `POST`  | Ferme la session utilisateur. |
+| `/chat/chat`          | `POST`  | Envoie un message à l’agent et reçoit la réponse. |
+| `/chat/export`        | `POST`  | Exporte l’historique de la session au format Markdown. |
+| `/status/indexing`    | `GET`   | Vérifie si l’indexation documentaire est prête. |
+| `/patients`           | `GET`   | Liste les fichiers patients disponibles (POA). |
+| `/patients/{file}`    | `GET`   | Retourne le contenu JSON d’un dossier patient. |
+| `/patients`           | `POST`  | Crée un nouveau dossier patient. |
+| `/patients/{file}`    | `PUT`   | Met à jour un dossier patient existant. |
+| `/patients/{file}`    | `DELETE`| Supprime un dossier patient. |
+
+
+### 4. Séquence type de test
    1. Authentification
    - Endpoint : /auth/login
    - Fournir user_id et password.
@@ -234,9 +245,10 @@ Tester les appels directement depuis le navigateur.
       - Endpoint : /auth/logout
       - Met fin à la session côté serveur.
 
-**Remarque importante**
+## **Remarque importante**
 - Les appels API sont stateless côté HTTP : c’est le session_id qui permet de retrouver le contexte.
 - Un utilisateur doit obligatoirement s’authentifier avant tout échange avec /chat/chat.
+- Le nom du patient doit être dans la requête utilisateur: Cela permet de détecter le changement de patient et d'enclencher la suppression de l'historique dans la fenêtre de chat.
 
 
 
