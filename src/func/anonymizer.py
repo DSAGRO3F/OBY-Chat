@@ -23,6 +23,8 @@ from src.func.detect_genre import HARDCODED_VALUES
 def _anonymize_dict(data: Any, mapping: Dict[str, str], path: str = "", parent_sexe: str = None) -> Any:
     """
     Fonction récursive interne pour anonymiser une structure JSON.
+    On fait une détection du sexe du patient et on attribue, en fonction du sexe, des valeurs de prénom.
+    L'objectif est de conserver un ensemble de données cohérentes pour que le LLM puisse avoir un contexte cohérent.
 
     Args:
         data (Any): Données JSON à traiter (dictionnaire, liste, ou valeur).
@@ -60,7 +62,7 @@ def _anonymize_dict(data: Any, mapping: Dict[str, str], path: str = "", parent_s
         ]
 
     elif isinstance(data, str):
-        # Exemple d'exclusion (date naissance usager) si tu veux le garder non anonymisé
+        # Exemple d'exclusion (date naissance usager) si on veut le garder non anonymisé
         normalized_path = path.lower()
         if normalized_path == "usager.informations d'état civil.personnephysique.datenaissance":
             return data
