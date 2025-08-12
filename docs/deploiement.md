@@ -14,6 +14,7 @@ Elle inclut également un site de documentation technique complet basé sur MkDo
 - Offrir deux modes de fonctionnement :
   - `APP_MODE=app` → Interface Dash (application par défaut)
   - `APP_MODE=doc` → Site de documentation MkDocs
+  - `APP_MODE=api` → Utilisation du service OBY-IA par API (bas de ce fichier).
 
 ---
 
@@ -192,7 +193,7 @@ En exécution Docker, cela est géré par le script start.sh :
 ```
 elif [ "$APP_MODE" = "api" ]; then
     echo "🌐 Lancement du service OBY-IA en mode API..."
-    uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+    uvicorn src.api.main_api:app --host 0.0.0.0 --port 8000
 ```
 Le conteneur expose le port 8000, qui correspond à l’API FastAPI.
 
