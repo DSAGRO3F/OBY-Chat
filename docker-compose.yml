@@ -1,34 +1,82 @@
-# Ce fichier décrit la base commune du service OBY-IA.
-#On va définir ici :
+# """docker-compose pour OBY-IA — Option A (pilotage par argument).
 #
-#le service principal (nommé ici obyia-app)
-#la façon de construire l'image (à partir du Dockerfile)
-#le port sur lequel ton application écoute (8050 pour Dash)
+# Résumé
+#     Définit trois services partageant la même image :
+#       - obyia-app : application Dash (PORT=8050), démarre par défaut.
+#       - obyia-api : API Uvicorn (PORT=8000), activable via profil "api".
+#       - obyia-doc : site MkDocs (PORT=8080), activable via profil "doc".
+#     Chaque service passe un argument explicite à start.sh : "app" | "api" | "doc".
+#
+# Utilisation
+#     - Lancer l’app Dash :        docker compose up -d
+#     - Lancer l’API :             docker compose --profile api up -d obyia-api
+#     - Lancer la doc :            docker compose --profile doc up -d obyia-doc
+#     - Arrêter un service :       docker compose down obyia-api
+#
+# Bonnes pratiques
+#     - Ne publier qu’un seul port par service pour éviter les conflits côté hôte.
+#     - Activer APP_DEBUG=1 uniquement pour le service "app" lors de tests locaux.
+#     - Monter les volumes nécessaires (outputs, assets) sur les services qui en ont besoin.
+#
+# Notes
+#     - Les profils évitent de démarrer tous les services à la fois.
+#     - Le mapping hôte:conteneur peut être adapté (ex. 18050:8050) si le port hôte est occupé.
+# """
 
-# ✅Explication :
-#Élément	Rôle
-#version	Version de syntaxe de Docker Compose
-#services	Définit les conteneurs à lancer
-#build.context: .	Le dossier où se trouve le Dockerfile et tout le projet
-#build.dockerfile	Nom du Dockerfile à utiliser
-#container_name	Nom visible du conteneur (facultatif mais lisible)
-#ports	Lie le port 8050 du conteneur à celui de ta machine
-#command	Commande à exécuter au lancement du conteneur
 
-
-
+version: "3.9"
 
 services:
+  # === Mode APP (Dash) — démarre par défaut avec: docker compose up -d
   obyia-app:
-    volumes:
-      - ./outputs:/app/outputs
-      - ./assets:/app/assets
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: obyia-container
+    container_name: obyia-app
+    command: ["./start.sh", "app"]   # <-- argument à start.sh
     ports:
-      - "8050:8050"
-      - "8080:8080"
+      - "8050:8050"                  # hôte:conteneur
+    volumes:
+      - ./outputs:/app/outputs
+      - ./assets:/app/assets
+    # Optionnel: activer le debug Dash en local
+    # environment:
+    #   - APP_DEBUG=1
+
+  # === Mode API (Uvicorn) — lancer avec: docker compose --profile api up -d obyia-api
+  obyia-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: obyia-api
+    command: ["./start.sh", "api"]   # <-- argument à start.sh
+    ports:
       - "8000:8000"
-    command: ./start.sh
+    profiles: ["api"]
+
+  # === Mode DOC (MkDocs) — lancer avec: docker compose --profile doc up -d obyia-doc
+  obyia-doc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: obyia-doc
+    command: ["./start.sh", "doc"]   # <-- argument à start.sh
+    ports:
+      - "8080:8080"
+    profiles: ["doc"]
+
+# Ancien code
+#services:
+#  obyia-app:
+#    volumes:
+#      - ./outputs:/app/outputs
+#      - ./assets:/app/assets
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    container_name: obyia-container
+#    ports:
+#      - "8050:8050"
+#      - "8080:8080"
+#      - "8000:8000"
+#    command: ./start.sh

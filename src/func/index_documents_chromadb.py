@@ -38,7 +38,7 @@ def index_documents(source_dir: str, source_type: str, client: ClientAPI):
         ValueError: Si le type de source est invalide (autre que 'docx' ou 'web').
     """
 
-    print("lancement fonction -> index_documents()... ")
+    print("🟡 Lancement fonction -> index_documents()... ")
     if client is None:
         client = get_chroma_client()
 
@@ -48,19 +48,20 @@ def index_documents(source_dir: str, source_type: str, client: ClientAPI):
     collection_name = "base_docx" if source_type == "docx" else "base_web"
 
     # 🔹 Initialisation collection
+    print(f'🟡Initialisation de la collection {collection_name}...')
     embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
         model_name="BAAI/bge-large-en-v1.5"
     )
     collection = client.get_or_create_collection(name=collection_name, embedding_function=embedding_fn)
 
-    print(f"🔍 Indexation des documents depuis : {source_dir} (type: {source_type})")
+    print(f"🟡Indexation des documents depuis : {source_dir} (type: {source_type})")
 
     total_files, indexed_chunks = 0, 0
 
     for file in os.listdir(source_dir):
         if not file.endswith(".json"):
             continue
-        print(f"📄 Traitement du fichier JSON : {file}")
+        print(f"🟡 Traitement du fichier JSON : {file}")
 
         file_path = os.path.join(source_dir, file)
         try:
@@ -83,7 +84,7 @@ def index_documents(source_dir: str, source_type: str, client: ClientAPI):
                 # ✅ 1 seul chunk : texte complet
                 chunk_text = fiche.get("texte_complet", "").strip()
                 if not chunk_text:
-                    print(f"⚠️ Texte vide pour le fichier {file}")
+                    print(f"⚠️ Texte vide pour le fichier {file}, source_type : {source_type}")
                     continue
 
                 chunk_id = f"{file}_{uuid4().hex[:8]}"
@@ -108,7 +109,7 @@ def index_documents(source_dir: str, source_type: str, client: ClientAPI):
             elif source_type == "web":
                 sections = fiche.get("sections", [])
                 if not sections:
-                    print(f"⚠️ Aucune section trouvée dans le fichier {file}")
+                    print(f"⚠️ Aucune section trouvée dans le fichier {file}, source_type : {source_type}")
                     continue
 
                 for i, section in enumerate(sections):

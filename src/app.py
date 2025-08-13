@@ -135,9 +135,12 @@ if __name__ == "__main__":
 
     time.sleep(1)
 
-    # Lancer le serveur Dash
-    port = int(os.environ.get("PORT", 8000))  # 8000 Lancer mode API sur Render.com
-    app.run(host="0.0.0.0", port=port, debug=True)
-    # app.run(host="127.0.0.1", debug=True)
-
-
+    port = int(os.environ.get("PORT", 8050))
+    debug_flag = os.environ.get("APP_DEBUG", "0") == "1"
+    # Si APP_DEBUG=1 => debug/reloader ON, sinon OFF
+    app.run(
+        host="0.0.0.0",
+        port=port,
+        debug=debug_flag,
+        use_reloader=debug_flag
+    )
