@@ -217,12 +217,15 @@ def handle_user_input_or_logout(send_clicks, user_input, chat_history, session_d
     # ✅ 1. Appel unique à la fonction centrale
     response: ChatResponse = process_user_input(send_clicks, user_input, chat_history, session_data, current_patient)
     print("🔍 ChatResponse:", response)
+
+
     # ⚠️ 2. Si la session est invalide ou non initialisée
     if response.status == "error":
         return response.message, "", "", "", no_update, None, no_update
 
+
     # ✅ 3. Transformation des objets pour Dash
-    figures = [dcc.Graph(figure=fig) for fig in response.figures] if response.figures else []
+    figures = [dcc.Graph(figure=fig) for fig in response.figures_out] if response.figures_out else []
     table = html.Div(response.table_html) if response.table_html else None
     anomalies = html.Div(response.anomaly_block) if response.anomaly_block else None
 

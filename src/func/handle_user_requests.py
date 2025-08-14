@@ -136,7 +136,7 @@ def handle_initial_request(user_input, session, session_data,
     - L’appelant est responsable d’afficher `chat_history` et d’attendre la
       réponse de confirmation de l’utilisateur.
     """
-
+    new_chat_items = []
     # --- Si une demande utlisateur existe ---
 
     bot_response = "🤖 Je traite votre demande..."
@@ -154,7 +154,8 @@ def handle_initial_request(user_input, session, session_data,
         user_msg = html.Div(f"👤 {user_input.strip()}", className="user-message")
     else:
         user_msg = {"role": "user", "text": user_input.strip()}
-    chat_history.append(user_msg)
+
+    new_chat_items.append(user_msg)
 
     # En attente de confirmation par l'utlisateur
     session["intent_confirmation_pending"] = True
@@ -185,10 +186,10 @@ def handle_initial_request(user_input, session, session_data,
 
     # Logique API ou Dash...
     if output_mode == "dash":
-        chat_history.append(html.Div(dcc.Markdown(bot_response), className="bot-response"))
+        new_chat_items.append(html.Div(dcc.Markdown(bot_response), className="bot-response"))
     else:
         # API-safe structure (pure JSON)
-        chat_history.append({"role": "assistant", "markdown": str(bot_response)})
+        new_chat_items.append({"role": "assistant", "markdown": str(bot_response)})
 
 
     # Enregistrer l'échange (requête utilisateur + demande de confirmation)
@@ -197,9 +198,9 @@ def handle_initial_request(user_input, session, session_data,
     if session_obj:
         session_obj.add_message(user_input, bot_response)
 
-    chat_history_display = chat_history
+    chat_history_display = None
 
-    return chat_history, [], "", "", current_patient, [], chat_history_display
+    return new_chat_items, [], "", "", current_patient, [], chat_history_display
 
 
 
@@ -279,6 +280,7 @@ def handle_confirmation_response(user_input, session, session_data,
     serialized_figs = None
     figures_out: list = []
     bot_response: str = ""
+    new_chat_items = []
     user_id = session_data["user_id"]
     session_id = session_data["session_id"]
 
@@ -290,7 +292,9 @@ def handle_confirmation_response(user_input, session, session_data,
         user_msg = html.Div(f"👤 {answer}", className="user-message")
     else:
         user_msg = {"role": "user", "text": user_input.strip()}
-    chat_history.append(user_msg)
+
+    new_chat_items.append(user_msg)
+
 
     full_user_input = session["intent_candidate"]["full_user_input"]
     print(f'⚠️handle_confirmation_response/full_user_input: {full_user_input}')
@@ -320,12 +324,15 @@ def handle_confirmation_response(user_input, session, session_data,
         # --- Réinitialisation si changement de patient ---
         if nom and (ppa_requested or constantes_requested or recommandations_requested):
             if nom and nom != current_patient:
-                print(f"🆕 Changement de patient détecté : {current_patient} ➡️ {nom}")
-                chat_history = []
+                print(f"🔴 Changement de patient détecté : {current_patient} ➡️ {nom}")
+
+                # ⚠️ Reset du delta SANS perdre le message utilisateur déjà capturé
+                new_chat_items = [user_msg]
                 figs_list = []
                 table_html = ""
                 anomaly_block = ""
                 current_patient = nom
+
                 # Remet à zéro le mapping d’anonymisation
                 session_manager_instance.reset_anonymization_mapping(user_id)
                 session_manager_instance.set_current_patient(session_id, nom)
@@ -413,7 +420,7 @@ def handle_confirmation_response(user_input, session, session_data,
     else:
         # Rejet de l’intention
         session["intent_confirmation_pending"] = False
-        session["intent_candidate"]["intent"] = {"intent": None, "name": None, "full_user_input": ""}
+        session["intent_candidate"] = {"intent": None, "name": None, "full_user_input": ""}
 
         bot_response = (
             "Compris. Voici quelques exemples de requêtes que vous pouvez utiliser :\n"
@@ -428,12 +435,13 @@ def handle_confirmation_response(user_input, session, session_data,
                 dcc.Markdown(str(bot_response), dangerously_allow_html=False),
                 className="bot-response"
             )
-            chat_history.append(bot_msg)
+            new_chat_items.append(bot_msg)
         else:
-            chat_history.append({"role": "assistant", "markdown": str(bot_response)})
+            new_chat_items.append({"role": "assistant", "markdown": str(bot_response)})
 
-    chat_history_display = html.Div(chat_history)
+    chat_history_display = None
 
-    return (chat_history, figures_out, table_html,
+
+    return (new_chat_items, figures_out, table_html,
             anomaly_block, current_patient,
-            serialized_figs, chat_history_display if output_mode == "dash" else None)
+            serialized_figs, chat_history_display)
