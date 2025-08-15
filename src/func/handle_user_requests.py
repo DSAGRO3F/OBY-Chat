@@ -79,8 +79,9 @@ from src.func.serialize_figs import serialize_figs, deserialize_figs
 # --------------------- Fonctions appelées par handle_user_input_or_logout() --------------------- #
 # ================================================================================================ #
 # 1/.
-def handle_initial_request(user_input, session, session_data,
-                           chat_history, current_patient, output_mode: Literal["dash", "api"] = "dash"):
+def handle_initial_request(user_input, session,
+                           session_data, chat_history,
+                           current_patient, output_mode: Literal["dash", "api"] = "dash"):
 
     """
     Traite la requête initiale : détection d’intention et demande de confirmation.
@@ -136,12 +137,12 @@ def handle_initial_request(user_input, session, session_data,
     - L’appelant est responsable d’afficher `chat_history` et d’attendre la
       réponse de confirmation de l’utilisateur.
     """
-    new_chat_items = []
+    chat_history = []
     # --- Si une demande utlisateur existe ---
 
     bot_response = "🤖 Je traite votre demande..."
     print("🚀 chatbot_ui.py chargé !")
-    print(f'requête utilisateur {user_input}')
+    print(f'🟡 requête utilisateur {user_input}')
 
     # Détection intention
     intent_dict = detect_user_intent(user_input)
@@ -155,7 +156,7 @@ def handle_initial_request(user_input, session, session_data,
     else:
         user_msg = {"role": "user", "text": user_input.strip()}
 
-    new_chat_items.append(user_msg)
+    chat_history.append(user_msg)
 
     # En attente de confirmation par l'utlisateur
     session["intent_confirmation_pending"] = True
@@ -186,10 +187,10 @@ def handle_initial_request(user_input, session, session_data,
 
     # Logique API ou Dash...
     if output_mode == "dash":
-        new_chat_items.append(html.Div(dcc.Markdown(bot_response), className="bot-response"))
+        chat_history.append(html.Div(dcc.Markdown(bot_response), className="bot-response"))
     else:
         # API-safe structure (pure JSON)
-        new_chat_items.append({"role": "assistant", "markdown": str(bot_response)})
+        chat_history.append({"role": "assistant", "markdown": str(bot_response)})
 
 
     # Enregistrer l'échange (requête utilisateur + demande de confirmation)
@@ -200,13 +201,14 @@ def handle_initial_request(user_input, session, session_data,
 
     chat_history_display = None
 
-    return new_chat_items, [], "", "", current_patient, [], chat_history_display
+    return chat_history, [], "", "", current_patient, [], chat_history_display
 
 
 
 # 2/.
-def handle_confirmation_response(user_input, session, session_data,
-                                 chat_history, current_patient, output_mode: Literal["dash", "api"] = "dash"):
+def handle_confirmation_response(user_input, session,
+                                 session_data, chat_history,
+                                 current_patient, output_mode: Literal["dash", "api"] = "dash"):
 
     """
     Traite la réponse de confirmation et exécute le pipeline métier approprié.
@@ -280,7 +282,7 @@ def handle_confirmation_response(user_input, session, session_data,
     serialized_figs = None
     figures_out: list = []
     bot_response: str = ""
-    new_chat_items = []
+    chat_history = []
     user_id = session_data["user_id"]
     session_id = session_data["session_id"]
 
@@ -293,7 +295,7 @@ def handle_confirmation_response(user_input, session, session_data,
     else:
         user_msg = {"role": "user", "text": user_input.strip()}
 
-    new_chat_items.append(user_msg)
+    chat_history.append(user_msg)
 
 
     full_user_input = session["intent_candidate"]["full_user_input"]
@@ -327,7 +329,7 @@ def handle_confirmation_response(user_input, session, session_data,
                 print(f"🔴 Changement de patient détecté : {current_patient} ➡️ {nom}")
 
                 # ⚠️ Reset du delta SANS perdre le message utilisateur déjà capturé
-                new_chat_items = [user_msg]
+                chat_history = [user_msg]
                 figs_list = []
                 table_html = ""
                 anomaly_block = ""
@@ -435,13 +437,13 @@ def handle_confirmation_response(user_input, session, session_data,
                 dcc.Markdown(str(bot_response), dangerously_allow_html=False),
                 className="bot-response"
             )
-            new_chat_items.append(bot_msg)
+            chat_history.append(bot_msg)
         else:
-            new_chat_items.append({"role": "assistant", "markdown": str(bot_response)})
+            chat_history.append({"role": "assistant", "markdown": str(bot_response)})
 
     chat_history_display = None
 
 
-    return (new_chat_items, figures_out, table_html,
+    return (chat_history, figures_out, table_html,
             anomaly_block, current_patient,
             serialized_figs, chat_history_display)

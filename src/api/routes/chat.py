@@ -6,13 +6,13 @@ chat.py : gérer les échanges utilisateur ⇄ OBY-IA
 """
 
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from src.api.models import ChatResponse, ChatRequest
 from src.func.api_core import process_user_input
 router = APIRouter()
 
-@router.post("/chat", response_model=ChatResponse)
-async def handle_chat_api(payload: ChatRequest):
+@router.post("", response_model=ChatResponse, response_model_exclude_none=True)
+async def handle_chat_api(payload: ChatRequest) -> ChatResponse:
     """
     chat.py — Routes API pour la gestion des échanges entre l'utilisateur et OBY-IA.
 
@@ -41,12 +41,19 @@ async def handle_chat_api(payload: ChatRequest):
         Retour : ChatResponse (JSON)
     """
 
-    result = process_user_input(
-        send_clicks=payload.send_clicks,
-        user_input=payload.user_input,
-        chat_history=payload.chat_history,
-        session_data=payload.session_data,
-        current_patient=payload.current_patient,
-        output_mode="api",
-    )
-    return result
+    try:
+        result = process_user_input(
+            send_clicks=payload.send_clicks or 1,
+            user_input=payload.user_input,
+            chat_history=payload.chat_history or [],
+            session_data=payload.session_data,
+            current_patient=payload.current_patient,
+            output_mode="api",
+        )
+
+
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+

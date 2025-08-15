@@ -214,34 +214,51 @@ def handle_user_input_or_logout(send_clicks, user_input, chat_history, session_d
         )
         """
 
+
+
     # ✅ 1. Appel unique à la fonction centrale
     response: ChatResponse = process_user_input(send_clicks, user_input, chat_history, session_data, current_patient)
     print("🔍 ChatResponse:", response)
 
 
     # ⚠️ 2. Si la session est invalide ou non initialisée
-    if response.status == "error":
-        return response.message, "", "", "", no_update, None, no_update
-
+    if response.status in ("no_click", "unauthenticated", "no_action"):
+        # ne pas écraser le Store, et afficher un message si utile
+        ui_msg = (
+            html.Div(response.message) if response.message else dash.no_update
+        )
+        return (
+            dash.no_update,  # chat_history (Store)
+            [],  # figures
+            None,  # table
+            None,  # anomalies
+            current_patient,  # pas de changement forcé
+            None,  # serialized_figs
+            ui_msg  # affichage
+        )
 
     # ✅ 3. Transformation des objets pour Dash
     figures = [dcc.Graph(figure=fig) for fig in response.figures_out] if response.figures_out else []
     table = html.Div(response.table_html) if response.table_html else None
     anomalies = html.Div(response.anomaly_block) if response.anomaly_block else None
 
-    if response.full_chat_history:
-        chat_history_display = html.Div(response.full_chat_history)
-    elif response.chat_history:
-        chat_history_display = html.Div(response.chat_history)
-    else:
-        chat_history_display = no_update
 
-    # chat_history_display = html.Div(response.full_chat_history) if response.full_chat_history else no_update
+    # chat_history= interactions passées stockées dans dcc.Store()
+    # S'assurer que delta est une liste plate de composants
+    chat_history = chat_history or []
+    delta = response.partial_chat_from_user_request or response.chat_history or []
 
+    if isinstance(delta, list) and len(delta) == 1 and isinstance(delta[0], list):
+        delta = delta[0]
+
+    full_chat_history = chat_history + delta
+    chat_history_display = html.Div(full_chat_history)
+
+    current_patient_out = response.current_patient if response.current_patient is not None else current_patient
 
     # ✅ 4. Renvoi au layout
     return (
-        response.full_chat_history or response.chat_history,
+        full_chat_history,
         figures,
         table,
         anomalies,
@@ -253,126 +270,7 @@ def handle_user_input_or_logout(send_clicks, user_input, chat_history, session_d
 
 
 
-
-
-
-    # """
-    # Gère la saisie utilisateur et les réponses du chatbot dans OBY-IA.
-    #
-    # Ce callback est déclenché à chaque clic sur le bouton d'envoi (`send_button`)
-    # et exécute l'une des deux logiques principales :
-    # - Si aucune intention n’est encore confirmée, il détecte l’intention (PPA, constantes, recommandations)
-    #   et affiche une demande de confirmation.
-    # - Si une confirmation est attendue, il traite la réponse de l’utilisateur ("oui"/"non"),
-    #   déclenche le pipeline correspondant et met à jour l’historique affiché.
-    #
-    # Le retour inclut :
-    # - L’historique enrichi (chat utilisateur + bot),
-    # - Les constantes affichées sous forme de graphiques ou tableau si la demande le requiert,
-    # - Le patient courant,
-    # - Les graphiques sérialisés (pour export),
-    # - Le contenu à afficher dans le `chat_history_display`.
-    #
-    # Args:
-    #     send_clicks (int): Nombre de clics sur le bouton d'envoi.
-    #     user_input (str): Requête saisie par l'utilisateur.
-    #     chat_history (list): Historique actuel des messages affichés dans l'interface.
-    #     session_data (dict): Données de la session utilisateur courante.
-    #     current_patient (str | None): Nom du patient actuellement sélectionné.
-    #
-    # Returns:
-    #     tuple:
-    #         - chat_history (list) : Historique mis à jour (pour stockage),
-    #         - constants_graphs (list[Graph]) : Graphiques des constantes (si applicables),
-    #         - constants_table (str | html.Div) : Tableau HTML des constantes (si applicable),
-    #         - anomaly_graphs (str | html.Div) : Bloc des anomalies détectées (si applicable),
-    #         - current_patient (str | None) : Nom du patient mis à jour,
-    #         - serialized_figs (list | None) : Liste des figures Plotly sérialisées pour export,
-    #         - chat_history_display (html.Div) : Contenu HTML de l'historique à afficher à l'écran.
-    #
-    # Raises:
-    #     dash.exceptions.PreventUpdate: Si aucun clic n’a été détecté ou si la session n’est pas active.
-    #
-    # """
-    # if send_clicks is None or send_clicks == 0:
-    #     raise dash.exceptions.PreventUpdate
-    #
-    #
-    # # --- Vérification session ---
-    # if not session_data or not isinstance(session_data, dict):
-    #     # ⚠️ Pas de session active
-    #     return "❌ Session non authentifiée. Veuillez vous reconnecter.", "", "", "", dash.no_update
-    #
-    #
-    # --- Initialisation des blocs d'affichage et variables de retour ---
-    # serialized_figs = None  # Valeur par défaut
-    # bot_msg = None
-    # constants_graphs = []
-    # constants_table = ""
-    # anomaly_graphs = ""
-    # chat_history_display = dash.no_update  # ⚠️ Ne pas réafficher s’il n’y a pas de nouvelle réponse
-    # full_chat_history = []
-    #
-    # # --- Si une session existe... ---
-    # session_id = session_data.get("session_id")
-    # session = session_manager_instance.get_session(session_id)
-    #
-    #
-    # if session:
-    #     if user_input:
-    #
-    #     # --- Si l'input correspond à la requête entrée par l'utilisateur ---
-    #     # --- L'utilisateur n'a pas encore entré sa requête -> session["intent_confirmation_pending"] = False
-    #         if not session["intent_confirmation_pending"]:
-    #             print("📩 Début du traitement de la requête utilisateur")
-    #
-    #             # ✅ Initialisations uniquement dans ce cas
-    #             current_patient = current_patient or None
-    #             chat_history = chat_history or []
-    #
-    #             (
-    #             chat_history, figs_list, table_html, anomaly_block,
-    #             current_patient, serialized_figs,chat_history_display
-    #             ) = handle_initial_request(
-    #                 user_input, session, session_data, chat_history, current_patient
-    #             )
-    #
-    #             constants_graphs = [dcc.Graph(figure=fig) for fig in figs_list]
-    #             constants_table = None if not table_html else html.Div(table_html)
-    #             anomaly_graphs = None if not anomaly_block else html.Div(anomaly_block)
-    #
-    #             print("⏸️ Attente de confirmation utilisateur")
-    #             return chat_history, constants_graphs, constants_table, anomaly_graphs, current_patient, serialized_figs, chat_history_display
-    #
-    #
-    #     # --- Si l'input correspond à une confirmation attendue suite à une requête ---
-    #     # --- Récupération de la réponse de l'utilisateur + affichage ---
-    #         if session["intent_confirmation_pending"]:
-    #             print("✅ Traitement de la réponse de confirmation utilisateur")
-    #
-    #             (
-    #             new_chat_history, figs_list, table_html, anomaly_block,
-    #             current_patient, serialized_figs, chat_history_display
-    #             ) = handle_confirmation_response(
-    #                 user_input, session, session_data, chat_history, current_patient
-    #             )
-    #
-    #           # Concaténation new mess + historique
-    #           full_chat_history = chat_history + new_chat_history
-    #           chat_history_display = html.Div(full_chat_history)
-    #
-    #             constants_graphs = [dcc.Graph(figure=fig) for fig in figs_list]
-    #             constants_table = None if not table_html else html.Div(table_html)
-    #             anomaly_graphs = None if not anomaly_block else html.Div(anomaly_block)
-    #
-    #
-    # return full_chat_history, constants_graphs, constants_table, anomaly_graphs, current_patient, serialized_figs, chat_history_display
-
-
-
 # print("✅ Callback handle_chat_request enregistré")
-
-
 
 
 # ==============================

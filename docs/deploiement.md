@@ -143,49 +143,104 @@ N’utilisez pas http://0.0.0.0:8050 dans le navigateur : 0.0.0.0 est une adress
 
 ## 🟢 Endpoints principaux
 
-| Endpoint              | Méthode | Description |
-|-----------------------|:-------:|-------------|
-| `/auth/login`         | `POST`  | Authentifie un utilisateur et retourne un `session_id`. |
-| `/auth/logout`        | `POST`  | Ferme la session utilisateur. |
-| `/chat/chat`          | `POST`  | Envoie un message à l’agent et reçoit la réponse. |
-| `/chat/export`        | `POST`  | Exporte l’historique de la session au format Markdown. |
-| `/status/indexing`    | `GET`   | Vérifie si l’indexation documentaire est prête. |
-| `/patients`           | `GET`   | Liste les fichiers patients disponibles (POA). |
-| `/patients/{file}`    | `GET`   | Retourne le contenu JSON d’un dossier patient. |
-| `/patients`           | `POST`  | Crée un nouveau dossier patient. |
-| `/patients/{file}`    | `PUT`   | Met à jour un dossier patient existant. |
-| `/patients/{file}`    | `DELETE`| Supprime un dossier patient. |
+| Endpoint                 |  Méthode | Description                                                                                                    |
+| ------------------------ | :------: | -------------------------------------------------------------------------------------------------------------- |
+| `/auth/login`            |  `POST`  | Authentifie un utilisateur et retourne un `session_id`.                                                        |
+| `/auth/logout`           |  `POST`  | Ferme la session utilisateur.                                                                                  |
+| `/chat`                  |  `POST`  | Envoie un message à l’agent et reçoit la réponse (renvoie un **delta** dans `partial_chat_from_user_request`). |
+| `/chat/export`           |  `POST`  | Exporte la session courante (ex. PDF/Markdown), selon l’implémentation.                                        |
+| `/status/indexing`       |   `GET`  | Vérifie si l’indexation documentaire est prête.                                                                |
+| `/admin/patients`        |   `GET`  | Liste les fichiers patients disponibles (POA).                                                                 |
+| `/admin/patients/{file}` |   `GET`  | Retourne le contenu JSON d’un dossier patient.                                                                 |
+| `/admin/patients`        |  `POST`  | Crée un nouveau dossier patient.                                                                               |
+| `/admin/patients/{file}` |   `PUT`  | Met à jour un dossier patient existant.                                                                        |
+| `/admin/patients/{file}` | `DELETE` | Supprime un dossier patient.                                                                                   |
 
 
 ### 🟢 Séquence type de test
-   1. Authentification
-   - Endpoint : /auth/login
+1. Authentification
+   - Endpoint : POST /auth/login
    - Fournir user_id et password.
    - Récupérer le session_id de la réponse.
-   2. Interaction avec l’agent
-   - Endpoint : /chat/chat
+   
+2. Interaction avec l’agent (Tour 1)
+   - Endpoint : POST /chat
    - Fournir un corps JSON :
-   {
-     "user_input": "Prépare le plan pour le patient Dupont",
-     "session_data": {
-       "user_id": "demo",
-       "session_id": "<valeur_retournee_par_login>"
-     }
-   }
+   
+```
+{
+  "send_clicks": 1,
+  "user_input": "Prépare le plan pour le patient Dupont",
+  "chat_history": [],
+  "session_data": {
+    "user_id": "demo",
+    "session_id": "<valeur_retournee_par_login>"
+  },
+  "current_patient": null
+}
+
+```
+
+    Réponse attendue :
+    - status: "awaiting_confirmation"
+    - partial_chat_from_user_request: tableau de 2 items (le message utilisateur + la demande de confirmation du bot).
+    - Côté client, vous devez ajouter ces 2 items à votre chat_history local.
+
+3. Confirmation (tour 2)
+    - Endpoint : POST /chat
+    - Corps JSON (avec l’historique cumulé du tour 1) :
+
+```
+{
+  "send_clicks": 1,
+  "user_input": "oui",
+  "chat_history": [
+    { "role": "user", "format": "markdown", "content": "Prépare le plan pour le patient Dupont" },
+    { "role": "assistant", "format": "markdown", "content": "Je comprends que vous souhaitez une demande de recommandations... confirmez oui/non ?" }
+  ],
+  "session_data": {
+    "user_id": "demo",
+    "session_id": "<valeur_retournee_par_login>"
+  },
+  "current_patient": "Dupont"
+}
+
+```
+
+    Réponse attendue :
+    - status: "response_processed"
+    - partial_chat_from_user_request: 2 items (la confirmation "oui" + la réponse finale).
+    - Côté client, ajoutez ces 2 nouveaux items à votre chat_history local.
+
+
+
+
 
    3. Export de session (optionnel)
-      - Endpoint : /chat/export
+      - Endpoint : POST /chat/export
       - Fournir le même session_data pour obtenir le résumé de la session au format Markdown.
+
+```
+{
+  "session_data": {
+    "user_id": "demo",
+    "session_id": "<valeur_retournee_par_login>"
+  },
+  "current_patient": "Dupont"
+}
+
+```
+    Réponse : selon implémentation (ex. file_url pour télécharger l’export, ou FileResponse directement).
+
    4. Déconnexion
-      - Endpoint : /auth/logout
+      - Endpoint : POST /auth/logout
       - Met fin à la session côté serveur.
 
 ## **Remarque importante**
-- Les appels API sont stateless côté HTTP : c’est le session_id qui permet de retrouver le contexte.
-- Un utilisateur doit obligatoirement s’authentifier avant tout échange avec /chat/chat.
-- Le nom du patient doit être dans la requête utilisateur: Cela permet de détecter le changement de patient et d'enclencher la suppression de l'historique dans la fenêtre de chat.
-
-
+- Les appels API sont stateless côté HTTP : c’est le session_id qui permet de retrouver le contexte côté serveur.
+- Un utilisateur doit obligatoirement s’authentifier avant tout échange avec /chat.
+- L’API renvoie un delta de conversation dans partial_chat_from_user_request. C’est au client d’additionner ce delta à son chat_history local et de le réenvoyer à chaque requête.
+- Le nom du patient doit idéalement apparaître dans la requête utilisateur (et/ou être fourni dans current_patient) : cela facilite la détection du patient actif et évite les incohérences d’historique.
 
 
 

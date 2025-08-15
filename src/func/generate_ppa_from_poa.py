@@ -68,7 +68,7 @@ def process_ppa_request(user_input, system_prompt):
     except FileNotFoundError:
         return f"❌ Impossible de charger le fichier du patient {patient_name}."
     print("✅ Chargement du document terminé.")
-    print("🔍 Aperçu du JSON brut :", json.dumps(raw_document, indent=2, ensure_ascii=False)[:1000])
+    # print("🔍 Aperçu du JSON brut :", json.dumps(raw_document, indent=2, ensure_ascii=False)[:1000])
 
     # 4. Nettoyer le contenu du fichier (POA)
     if not raw_document:
@@ -76,19 +76,19 @@ def process_ppa_request(user_input, system_prompt):
     cleaned_document = clean_patient_document(raw_document)
     print("✅ Document nettoyé.")
     # print("🔍 Aperçu du document nettoyé :", json.dumps(cleaned_document, indent=2, ensure_ascii=False)[:1000])
-    print("🔍 Aperçu du document nettoyé :", json.dumps(cleaned_document, indent=2, ensure_ascii=False)[:])
+    # print("🔍 Aperçu du document nettoyé :", json.dumps(cleaned_document, indent=2, ensure_ascii=False)[:])
 
     # 4. Bis Anonymisation du POA + conversion dictionnaire en texte
     anonymized_text, dict_mapping = anonymize_fields(cleaned_document)
     print("✅ Anonymisation effectuée.")
     # print("🔍 Texte anonymisé :", json.dumps(anonymized_text, indent=2, ensure_ascii=False)[:1000])
-    print("🔍 Texte anonymisé :", json.dumps(anonymized_text, indent=2, ensure_ascii=False)[:])
+    # print("🔍 Texte anonymisé :", json.dumps(anonymized_text, indent=2, ensure_ascii=False)[:])
 
     print("📌 Exemple de mapping :", list(dict_mapping.items())[:10])
 
     anonymized_text = convert_json_to_text(anonymized_text)
     print("✅ Conversion JSON → texte réussie.")
-    print("🔍 Prompt envoyé au modèle :", anonymized_text)
+    # print("🔍 Prompt envoyé au modèle :", anonymized_text)
 
     #5. encapsule le prompt de base pour ce type d'analyse médicale.
     user_prompt_template = llm_prompt_template_medical_plan()

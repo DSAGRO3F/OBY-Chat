@@ -83,7 +83,7 @@ def generate_structured_medical_plan(user_input, system_prompt):
     except FileNotFoundError:
         return f"❌ Impossible de charger le fichier du patient {patient_name}."
     print("✅ Chargement du document terminé.")
-    print("🔍 Aperçu du JSON brut :", json.dumps(raw_document, indent=2, ensure_ascii=False)[:1000])
+    # print("🔍 Aperçu du JSON brut :", json.dumps(raw_document, indent=2, ensure_ascii=False)[:1000])
 
 
 
@@ -95,7 +95,7 @@ def generate_structured_medical_plan(user_input, system_prompt):
     cleaned_document = clean_patient_document(raw_document)
     print("✅ Document nettoyé.")
     # print("🔍 Aperçu du document nettoyé :", json.dumps(cleaned_document, indent=2, ensure_ascii=False)[:1000])
-    print("🔍 Aperçu du document nettoyé :", json.dumps(cleaned_document, indent=2, ensure_ascii=False)[:])
+    # print("🔍 Aperçu du document nettoyé :", json.dumps(cleaned_document, indent=2, ensure_ascii=False)[:])
 
 
 
@@ -105,13 +105,13 @@ def generate_structured_medical_plan(user_input, system_prompt):
     anonymized_text, dict_mapping = anonymize_fields(cleaned_document)
     print("✅ Anonymisation effectuée.")
     # print("🔍 Texte anonymisé :", json.dumps(anonymized_text, indent=2, ensure_ascii=False)[:1000])
-    print("🔍 Texte anonymisé :", json.dumps(anonymized_text, indent=2, ensure_ascii=False)[:])
+    # print("🔍 Texte anonymisé :", json.dumps(anonymized_text, indent=2, ensure_ascii=False)[:])
 
     print("📌 Exemple de mapping :", list(dict_mapping.items())[:10])
 
     anonymized_text = convert_json_to_text(anonymized_text)
     print("✅ Conversion JSON → texte réussie.")
-    print("🔍 Prompt envoyé au modèle :", anonymized_text)
+    # print("🔍 Prompt envoyé au modèle :", anonymized_text)
 
 
 
@@ -139,7 +139,7 @@ def generate_structured_medical_plan(user_input, system_prompt):
         print("📄 Appel à rag_medical_response_from_llm()")
         response = rag_medical_response_from_llm(prompt_template, user_input, anonymized_text)
         print("📄 Réponse obtenue du LLM")
-        print(f"🟢 Réponse brute du modèle : {response}")
+        # print(f"🟢 Réponse brute du modèle : {response}")
     except Exception as e:
         print(f"❌ Erreur lors de l’appel à rag_medical_response_from_llm : {type(e).__name__} - {e}")
         traceback.print_exc()

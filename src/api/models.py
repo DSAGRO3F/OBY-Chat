@@ -20,8 +20,7 @@ class ChatResponse(BaseModel):
     status: str
     message: Optional[str] = None
     chat_history: Optional[List[Any]] = None
-    new_chat_history: Optional[List[Any]] = None
-    full_chat_history: Optional[List[Any]] = None
+    partial_chat_from_user_request: Optional[List[Any]] = None
     figures_out: Optional[List[Any]] = None # Mode API: list[dict] Plotly / Mode Dash: list[go.Figure]
     table_html: Optional[str] = None
     anomaly_block: Optional[str] = None
