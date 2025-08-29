@@ -24,7 +24,86 @@ Il a pour but de générer automatiquement des **Plans Personnalisés d’Accomp
 
 ---
 
-## 🧠 Schéma fonctionnel d'OBY-IA
+## ✅ Schéma fonctionnel d'ensemble OBY-IA
+
+Ce schéma présente une vue d'ensemble des blocs fonctionnels
+
+```plantuml
+@startuml
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment left
+skinparam componentStyle rectangle
+skinparam monochrome false
+
+legend left
+|= Couleur |= Signification |
+|<#E0F7FA>| Interaction / Intention |
+|<#E8F5E9>| Acquisition & Préparation (POA) |
+|<#E3F2FD>| Génération PPA |
+|<#F3E5F5>| Recommandations de soins |
+|<#FFF8E1>| RAG & Connaissances |
+|<#ECEFF1>| Export / Sorties |
+endlegend
+
+package "Interaction & Intention" #E0F7FA {
+  [chatbot_ui.py] as CHAT <<UI>>
+  [extract_user_intent.py] as INTENT <<NLU>>
+  [main_api.py] as API <<API>>
+}
+
+package "Acquisition & Préparation (POA)" #E8F5E9 {
+  [poa_patients.py] as POA_LIST <<Data>>
+  [poa_cleaning.py\n- clean_patient_document] as POA_CLEAN <<ETL>>
+  [anonymizer.py\n- anonymize_patient_document] as ANON <<Privacy>>
+  [convert_json_to_text.py\n- convert_json_to_text] as CONV <<Transform>>
+}
+
+package "Génération PPA" #E3F2FD {
+  [generate_ppa_from_poa.py\n- pipeline: generate_ppa_from_poa] as PPA <<Pipeline>>
+}
+
+package "Recommandations de soins" #F3E5F5 {
+  [generate_structured_medical_plan.py\n- pipeline: generate_structured_medical_plan] as RECO <<Pipeline>>
+  [get_patient_constants_graphs.py\n- generate_graphs\n- generate_constants_table] as CONSTANTS <<Inputs>>
+}
+
+package "RAG & Connaissances" #FFF8E1 {
+  [llm_prompts.py\n- rag_llm_prompt_template_medical_plan] as PROMPT <<Prompt>>
+  [rag_medical_response_from_llm] as RAGCALL <<LLM>>
+  [index_documents_chromadb.py] as INDEXER <<Index>>
+  database "ChromaDB\n- base_docx\n- base_web" as CHROMA
+}
+
+package "Export / Sorties" #ECEFF1 {
+  [export.py] as EXPORT <<Doc>>
+}
+
+API --> CHAT
+CHAT --> INTENT : intention utilisateur\n(generate_ppa / generate_recommendations)
+INTENT --> PPA : si intention == PPA
+INTENT --> RECO : si intention == recommandations
+
+POA_LIST --> POA_CLEAN
+POA_CLEAN --> ANON
+ANON --> CONV
+CONV --> PPA
+
+CONSTANTS --> RECO
+
+PROMPT --> RAGCALL
+CHROMA --> RAGCALL : passages pertinents
+RAGCALL --> RECO : texte structuré + bonnes pratiques
+
+PPA --> EXPORT : PPA (Markdown/PDF)
+RECO --> EXPORT : Recos (Markdown/PDF)
+
+@enduml
+```
+
+---
+
+## ✅ Schéma: exemple de génération de PPA
 
 Ce schéma présente l'exemple d'un flux de génération de PPA.
 

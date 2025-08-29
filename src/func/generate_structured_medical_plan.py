@@ -12,11 +12,12 @@ from src.func.poa_cleaning import clean_patient_document
 from src.func.detect_poa_file_path import extract_relevant_info
 from src.llm_user_session.model import llm_model
 from src.func.extract_patient_name import extract_patient_name_llm
-from src.func.anonymizer import anonymize_fields
+from src.func.anonymizer import anonymize_patient_document
 from src.func.anonymizer import deanonymize_fields
 from src.utils.convert_json_text import convert_json_to_text
 from src.func.llm_prompts import (rag_llm_prompt_template_medical_plan,
                                   rag_medical_response_from_llm)
+from src.func.free_text_name_anonymizer import anonymize_name_mentions_in_free_text
 
 
 import tiktoken
@@ -94,22 +95,22 @@ def generate_structured_medical_plan(user_input, system_prompt):
         print('No raw_document available')
     cleaned_document = clean_patient_document(raw_document)
     print("✅ Document nettoyé.")
-    # print("🔍 Aperçu du document nettoyé :", json.dumps(cleaned_document, indent=2, ensure_ascii=False)[:1000])
-    # print("🔍 Aperçu du document nettoyé :", json.dumps(cleaned_document, indent=2, ensure_ascii=False)[:])
-
+    print(f"🟡 Type de l'output - Document nettoyé:, {type(cleaned_document)}")
 
 
     # ============================================
     # 4. Bis Anonymisation du POA + conversion dictionnaire en texte
     # ============================================
-    anonymized_text, dict_mapping = anonymize_fields(cleaned_document)
-    print("✅ Anonymisation effectuée.")
-    # print("🔍 Texte anonymisé :", json.dumps(anonymized_text, indent=2, ensure_ascii=False)[:1000])
-    # print("🔍 Texte anonymisé :", json.dumps(anonymized_text, indent=2, ensure_ascii=False)[:])
+    anonymized_doc, dict_mapping = anonymize_patient_document(cleaned_document, debug=False)
+    anonymized_doc, dict_mapping = anonymize_name_mentions_in_free_text(anonymized_doc, dict_mapping, debug=False)
 
+    print("✅ Anonymisation effectuée.")
+    print("🔍 Texte anonymisé :", json.dumps(anonymized_doc, indent=2, ensure_ascii=False)[0][:300])
     print("📌 Exemple de mapping :", list(dict_mapping.items())[:10])
 
-    anonymized_text = convert_json_to_text(anonymized_text)
+    print(f"Après anonymisation -> {anonymized_doc}")
+
+    anonymized_text = convert_json_to_text(anonymized_doc)
     print("✅ Conversion JSON → texte réussie.")
     # print("🔍 Prompt envoyé au modèle :", anonymized_text)
 
@@ -150,7 +151,8 @@ def generate_structured_medical_plan(user_input, system_prompt):
     # 7. response = llm_model.invoke(final_prompt)
     # ============================================
     try:
-        deanonymized_response, reverse_mapping = deanonymize_fields(response, dict_mapping)
+        deanonymized_response, reverse_mapping = deanonymize_fields(response, dict_mapping, debug=True)
+
     except Exception as e:
         print(f"❌ Erreur lors de la désanonymisation : {type(e).__name__} - {e}")
         traceback.print_exc()

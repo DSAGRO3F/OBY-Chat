@@ -1,10 +1,10 @@
 # Ce fichier est automatiquement appliqué en complément de docker-compose.yml. Il est local à ton environnement de développement et ne sera pas utilisé par l’agence (sauf si elle le souhaite explicitement).
 #
 # ✅ Objectifs pour le développement local :
-#Monter les fichiers de ton hôte (Mac) dans le conteneur pour que :
-#tu puisses éditer le code, les scripts, les données, etc.,
-#et que le conteneur voit ces changements immédiatement.
-#Ajouter éventuellement des outils supplémentaires (ex: bash interactif, volume de logs...).
+# Monter les fichiers de l'hôte (Mac) dans le conteneur pour:
+# Editer le code, les scripts, les données, etc.,
+# Et que le conteneur voit ces changements immédiatement.
+# Ajouter éventuellement des outils supplémentaires (ex: volume de logs...).
 
 # ✅ Explication des volumes :
 #Volume	                  → But
@@ -16,24 +16,53 @@
 
 
 
+
+
+
 services:
+  # --- App (Dash) ---
   obyia-app:
     volumes:
       - ./src:/app/src
       - ./config:/app/config
       - ./scripts:/app/scripts
-      - ./docs:/app/docs
-      - ./src/data:/app/src/data
       - ./assets:/app/assets
-    ports:
-      - "8050:8050"
-      - "8080:8080"
-      - "8000:8000"
+      - ./outputs:/app/outputs
+      - ./src/data:/app/src/data
     env_file:
       - .env
     environment:
       - ENV=dev
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
-    command: ./start.sh
+    # Paramétrage des ports et command -> hérités du compose de base
+
+  # --- API (Uvicorn) ---
+  obyia-api:
+    volumes:
+      - ./src:/app/src
+      - ./config:/app/config
+      - ./scripts:/app/scripts
+      - ./src/data:/app/src/data
+      - ./outputs:/app/outputs
+      # Monte les assets si l'API en sert (sinon commente la ligne suivante)
+      - ./assets:/app/assets
+    env_file:
+      - .env
+    environment:
+      - ENV=dev
+    # Profils/ports/command restent ceux du fichier principal
+
+  # --- Doc (MkDocs) ---
+  obyia-doc:
+    volumes:
+      - ./docs:/app/docs
+      # Monte les assets si la doc les référence (images, logos…)
+      - ./assets:/app/assets
+      # Si mkdocs.yml est à la racine du repo (et non dans /docs),
+      # décommenter la ligne suivante pour le hot-reload :
+      - ./mkdocs.yml:/app/mkdocs.yml
+    env_file:
+      - .env
+    environment:
+      - ENV=dev
+    # Ports/command/profil hérités du compose de base
 

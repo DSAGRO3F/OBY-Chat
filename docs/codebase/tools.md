@@ -255,13 +255,17 @@ prêtes à être analysées ou visualisées dans l'application OBY-IA.
 
 ## 📁 Module : `func`
 <!---
-Ce module permet :
-- d'anonymiser des champs sensibles dans une structure JSON (ex. : prénoms, adresses, contacts),
-- de générer un dictionnaire de correspondance entre valeurs originales et anonymisées,
-- de désanonymiser un texte produit à partir des données en réinjectant les valeurs originales.
+Anonymisation de l'usager via persona française (session-aléatoire).
 
-L’anonymisation repose à la fois sur des règles dynamiques (ex. : prénom selon le sexe)
-et sur des valeurs codées en dur (HARDCODED_VALUES).
+Ce module fournit :
+- Des pools de valeurs françaises (prénoms, noms, voies, codes postaux/communes).
+- La création d'une persona cohérente pour l'usager (prénom selon le genre, nom, adresse, CP/commune).
+- Des utilitaires pour lire/écrire dans un dictionnaire JSON par chemins imbriqués.
+- Une anonymisation ciblée des champs usager que vous avez listés.
+- La construction d'un mapping {valeur_anonymisée: valeur_originale} pour la désanonymisation.
+
+Entrée : dict JSON (document patient).
+Sortie : Tuple[Any, Dict[str, str]] -> (document anonymisé, mapping).
 --->
 
 ::: func.anonymizer
@@ -368,6 +372,37 @@ Modifications apportées :
       heading_level: 2
 
 ---
+
+<!---
+Module free_text_name_anonymizer
+
+Ce module gère l’anonymisation et la désanonymisation des mentions libres
+du nom et prénom du patient dans un POA (Plan d’Objectifs et d’Actions).
+
+Contrairement à l’anonymisation structurée (sections « usager » et « contacts »),
+les informations saisies manuellement par les évaluateurs peuvent contenir
+le nom ou le prénom du patient dans des champs texte libres
+(ex. « Mme Anne Dupont, son épouse est présente »).
+
+Fonctionnalités principales :
+    - Normalisation des chaînes (suppression des accents, casse insensible,
+      gestion des espaces Unicode).
+    - Construction de variantes (nom, prénom, « Prénom Nom », « Nom Prénom »,
+      civilités + nom, civilités + prénom + nom).
+    - Parcours récursif des structures de type dict/list pour détecter
+      les chaînes contenant le nom/prénom du patient.
+    - Remplacement par l’alias choisi lors de l’anonymisation structurée.
+    - Mise à jour du mapping {alias -> original} pour permettre la
+      désanonymisation correcte de la réponse du LLM.
+--->
+
+::: func.free_text_name_anonymizer
+    options:
+      show_source: true
+      heading_level: 2
+
+---
+
 
 <!---
 Module de génération de PPA (Plan Personnalisé d’Accompagnement) à partir d’un document POA.
@@ -571,8 +606,19 @@ Module de génération de prompts pour produire des Plans Personnalisés d’Acc
 <!---
 Module de nettoyage des documents POA (Plan d’Objectifs et d’Actions).
 
-Ce module filtre les champs non informatifs ou vides dans les fichiers JSON représentant
-les données patients, afin de faciliter leur traitement en aval.
+Fonctions :
+- clean_patient_document(data: dict, trace: bool = False) -> dict | (dict, list[str])
+
+Comportement :
+1) supprime les champs vides / non informatifs ("", "non renseigné", "null")
+2) supprime les champs sensibles explicitement demandés (usager + contacts)
+3) émonde les conteneurs (dict/list) devenus vides
+4) (optionnel) trace chaque suppression si trace=True
+
+Entrée : dict (JSON patient)
+Sortie :
+- si trace=False : dict nettoyé
+- si trace=True  : (dict nettoyé, liste des suppressions)
 --->
 
 ::: func.poa_cleaning

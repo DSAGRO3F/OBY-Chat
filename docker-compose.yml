@@ -64,19 +64,3 @@ services:
     ports:
       - "8080:8080"
     profiles: ["doc"]
-
-# Ancien code
-#services:
-#  obyia-app:
-#    volumes:
-#      - ./outputs:/app/outputs
-#      - ./assets:/app/assets
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    container_name: obyia-container
-#    ports:
-#      - "8050:8050"
-#      - "8080:8080"
-#      - "8000:8000"
-#    command: ./start.sh

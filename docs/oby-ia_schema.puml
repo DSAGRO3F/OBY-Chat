@@ -1,80 +1,70 @@
-
 @startuml
-title Architecture fonctionnelle de OBY-IA
-
-skinparam componentStyle rectangle
-skinparam packageStyle rectangle
 skinparam shadowing false
-skinparam package {
-  BorderColor black
-  BackgroundColor white
-}
-skinparam rectangle {
-  BackgroundColor white
-  BorderColor black
-}
-skinparam defaultTextAlignment center
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment left
+skinparam componentStyle rectangle
+skinparam monochrome false
 
-' Légende des couleurs
 legend left
-|= Couleur |= Bloc fonctionnel |
-| <back:FFF2CC>     | Interface utilisateur |
-| <back:D9EAD3>     | Traitement LLM / Intentions |
-| <back:CFE2F3>     | Génération de PPA |
-| <back:F4CCCC>     | Recommandations médicales |
-| <back:EAD1DC>     | Analyse des constantes |
-| <back:D9D2E9>     | Indexation documentaire |
+|= Couleur |= Signification |
+|<#E0F7FA>| Interaction / Intention |
+|<#E8F5E9>| Acquisition & Préparation (POA) |
+|<#E3F2FD>| Génération PPA |
+|<#F3E5F5>| Recommandations de soins |
+|<#FFF8E1>| RAG & Connaissances |
+|<#ECEFF1>| Export / Sorties |
 endlegend
 
-' === Interface utilisateur ===
-package "Interface utilisateur" #FFF2CC {
-  rectangle "home.py" as home
-  note right of home
-    authenticate_user()
-    logout_user()
-    trigger_reset()
-    display_admin_controls()
-    check_mkdocs_status()
-    open_docs_site()
-    update_chroma_stats()
-  end note
-
-  rectangle "chatbot_ui.py" as chatbot
-  note right of chatbot
-    handle_user_input_or_logout()
-    export_chat_response()
-    check_index_status()
-  end note
-}
-' === Traitement LLM / Intentions ===
-package "Traitement LLM / Intentions" #D9EAD3 {
-  rectangle "extract_user_intent.py\n––––––––––––––––\ndetect_user_intent()\nllm_intent_classification()" as intent
+package "Interaction & Intention" #E0F7FA {
+  [chatbot_ui.py] as CHAT <<UI>>
+  [extract_user_intent.py] as INTENT <<NLU>>
+  [main_api.py] as API <<API>>
 }
 
-' === Génération de PPA ===
-package "Génération de PPA" #CFE2F3 {
-  rectangle "generate_ppa_from_poa.py\n––––––––––––––––\nprocess_ppa_request()" as ppa
+package "Acquisition & Préparation (POA)" #E8F5E9 {
+  [poa_patients.py] as POA_LIST <<Data>>
+  [poa_cleaning.py\n- clean_patient_document] as POA_CLEAN <<ETL>>
+  [anonymizer.py\n- anonymize_patient_document] as ANON <<Privacy>>
+  [convert_json_to_text.py\n- convert_json_to_text] as CONV <<Transform>>
 }
 
-' === Recommandations médicales ===
-package "Recommandations médicales" #F4CCCC {
-  rectangle "generate_structured_medical_plan.py\n––––––––––––––––\ngenerate_structured_medical_plan()" as reco
+package "Génération PPA" #E3F2FD {
+  [generate_ppa_from_poa.py\n- pipeline: generate_ppa_from_poa] as PPA <<Pipeline>>
 }
 
-' === Analyse des constantes ===
-package "Analyse des constantes" #EAD1DC {
-  rectangle "get_patient_constants_graphs.py\n––––––––––––––––\nprocess_patient_request_with_constants()" as const
+package "Recommandations de soins" #F3E5F5 {
+  [generate_structured_medical_plan.py\n- pipeline: generate_structured_medical_plan] as RECO <<Pipeline>>
+  [get_patient_constants_graphs.py\n- generate_graphs\n- generate_constants_table] as CONSTANTS <<Inputs>>
 }
 
-' === Indexation documentaire ===
-package "Indexation documentaire" #D9D2E9 {
-  rectangle "run_full_indexing_pipeline.py\n––––––––––––––––\nrun_full_indexing_pipeline()" as indexer
+package "RAG & Connaissances" #FFF8E1 {
+  [llm_prompts.py\n- rag_llm_prompt_template_medical_plan] as PROMPT <<Prompt>>
+  [rag_medical_response_from_llm] as RAGCALL <<LLM>>
+  [index_documents_chromadb.py] as INDEXER <<Index>>
+  database "ChromaDB\n- base_docx\n- base_web" as CHROMA
 }
 
-' === Relations principales ===
-chatbot --> ppa
-chatbot --> reco
-chatbot --> const
-chatbot --> intent
-home --> indexer
+package "Export / Sorties" #ECEFF1 {
+  [export.py] as EXPORT <<Doc>>
+}
+
+API --> CHAT
+CHAT --> INTENT : intention utilisateur\n(generate_ppa / generate_recommendations)
+INTENT --> PPA : si intention == PPA
+INTENT --> RECO : si intention == recommandations
+
+POA_LIST --> POA_CLEAN
+POA_CLEAN --> ANON
+ANON --> CONV
+CONV --> PPA
+
+CONSTANTS --> RECO
+
+PROMPT --> RAGCALL
+CHROMA --> RAGCALL : passages pertinents
+RAGCALL --> RECO : texte structuré + bonnes pratiques
+
+PPA --> EXPORT : PPA (Markdown/PDF)
+RECO --> EXPORT : Recos (Markdown/PDF)
+
 @enduml

@@ -402,13 +402,19 @@ def handle_confirmation_response(user_input, session,
                 session_manager_instance.set_anonymization_mapping(session_id, dict_mapping)
 
                 # Quand le LLM a donné une réponse (bot_response), ajout de la réponse dans la session
+                print("🔴before -> session_manager_instance.append_llm_response(session_id, bot_response")
                 session_manager_instance.append_llm_response(session_id, bot_response)
+                print("🔴after -> session_manager_instance.append_llm_response(session_id, bot_response")
 
                 # ✅ Ajouter l’échange complet (question + réponse)
+                print("🔴before -> session_manager_instance.get_session(session_id)")
                 session = session_manager_instance.get_session(session_id)
+                print("🔴after -> session_manager_instance.get_session(session_id)")
                 session_obj = session.get("session_obj")
                 if session_obj:
+                    print("🔴before -> session_obj.add_message(user_input, bot_response)")
                     session_obj.add_message(user_input, bot_response)
+                    print("🔴after -> session_obj.add_message(user_input, bot_response)")
 
                 figs_list, table_html, anomaly_block = [], "", ""
 
