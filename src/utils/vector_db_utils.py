@@ -13,7 +13,7 @@ from pathlib import Path
 from config.config import INDEX_READY_FLAG_PATH
 
 
-def is_chroma_index_ready(verbose: bool = True) -> bool:
+def is_chroma_index_ready(verbose: bool = False) -> bool:
     """
     Vérifie si le fichier 'index_ready.flag' existe dans le dossier vectoriel.
 
@@ -51,5 +51,5 @@ def clear_index_ready_flag() -> None:
 
 
 if __name__ == "__main__":
-    print("🔍 Test de is_chroma_index_ready()")
-    print("📦 Flag présent :", is_chroma_index_ready(verbose=True))
+    print("✅Test de is_chroma_index_ready()")
+    print("✅ Flag présent :", is_chroma_index_ready(verbose=True))

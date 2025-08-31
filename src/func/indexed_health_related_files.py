@@ -18,7 +18,6 @@ from typing import List, Dict
 from datetime import datetime
 
 from config.config import (INPUT_DOCX,
-    JSON_HEALTH_DOC_BASE,
     WEB_SITES_JSON_HEALTH_DOC_BASE,
     WEB_SITES_MODULE_PATH,
     INDEXED_FILES_JOURNAL_PATH)
@@ -75,7 +74,7 @@ def detect_changes_and_get_modified_files() -> Dict[str, List[Path]]:
     modified_web_files = []
     trusted_sites_changed = False
 
-    # --- Vérifie les fichiers .docx ---
+    # Vérifie les fichiers .docx
     current_docx_files = list(Path(INPUT_DOCX).glob("*.docx"))
     current_docx_hashes = {f.name: compute_file_hash(f) for f in current_docx_files}
 
@@ -83,7 +82,7 @@ def detect_changes_and_get_modified_files() -> Dict[str, List[Path]]:
         if journal.get("docx_files", {}).get(fname) != h:
             modified_docx_files.append(Path(INPUT_DOCX) / fname)
 
-    # --- Vérifie les JSON issus du scraping web ---
+    # Vérifie les JSON issus du scraping web
     current_web_files = list(Path(WEB_SITES_JSON_HEALTH_DOC_BASE).glob("*.json"))
     current_web_hashes = {f.name: compute_file_hash(f) for f in current_web_files}
 
@@ -91,7 +90,7 @@ def detect_changes_and_get_modified_files() -> Dict[str, List[Path]]:
         if journal.get("json_web_files", {}).get(fname) != h:
             modified_web_files.append(Path(WEB_SITES_JSON_HEALTH_DOC_BASE) / fname)
 
-    # --- Vérifie si le fichier .py des sites web a été modifié ---
+    # Vérifie si le fichier .py des sites web a été modifié
     current_py_hash = None
     if Path(WEB_SITES_MODULE_PATH).exists():
         current_py_hash = compute_file_hash(Path(WEB_SITES_MODULE_PATH))
@@ -119,7 +118,7 @@ def update_index_journal(new_docx_hashes: Dict, new_web_hashes: Dict, new_py_has
     """
 
     journal = {
-        "docx_files": new_docx_hashes,  # 🟢 anciennement 'json_docx_files'
+        "docx_files": new_docx_hashes,
         "json_web_files": new_web_hashes,
         "trusted_sites_py": new_py_hash,
         "last_update": datetime.now().isoformat()

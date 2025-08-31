@@ -18,11 +18,9 @@ Ce fichier doit être exécuté pour lancer le serveur Dash : `python -m src.app
 import os
 import time
 import sqlite3
-import flask
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-from flask import send_from_directory
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -99,7 +97,7 @@ app.layout = html.Div([
     dash.page_container
 ])
 
-print("📄 Pages enregistrées :", dash.page_registry.keys())
+print("✅Pages enregistrées :", dash.page_registry.keys())
 
 from dash.development.base_component import Component
 
@@ -118,9 +116,9 @@ def collect_ids(component):
                 ids.extend(collect_ids(children))
     return ids
 
-# Lister tous les IDs dans le layout global
+# Check -> Lister tous les IDs dans le layout global
 ids_in_layout = collect_ids(app.layout)
-print("📋 ID présents dans le layout global :", ids_in_layout)
+print("ID présents dans le layout global :", ids_in_layout)
 
 
 

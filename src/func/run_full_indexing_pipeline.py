@@ -64,10 +64,10 @@ def run_full_indexing_pipeline():
     clear_index_ready_flag()
     print("[DEBUG ✅] clear_index_ready_flag() appelé")
 
-    print("🚀 1.Lancement du pipeline d'indexation...")
-    print(f"📂 2. Dossier d'entrée DOCX : {INPUT_DOCX}")
+    print("🟡 Lancement du pipeline d'indexation...")
+    print(f"🟡 Dossier d'entrée DOCX : {INPUT_DOCX}")
 
-    # Étape 1 – Détection des changements
+    # Détection des changements
     changes_dict = detect_changes_and_get_modified_files()
     docx_files_to_index = changes_dict.get("docx_files_to_index", [])
     web_files_to_index = changes_dict.get("web_files_to_index", [])
@@ -76,51 +76,78 @@ def run_full_indexing_pipeline():
     current_web_hashes = changes_dict.get("current_web_hashes", {})
     current_py_hash = changes_dict.get("current_py_hash", None)
 
-    print(f"🔍 DOCX à indexer : {len(docx_files_to_index)} fichiers")
-    print(f"🔍 WEB à indexer : {len(web_files_to_index)} fichiers")
-    print(f"🔍 Files trusted_sites.py modifié ? {trusted_sites_changed}")
+    print(f"🟠 DOCX à indexer : {len(docx_files_to_index)} fichiers")
+    print(f"🟠 WEB à indexer : {len(web_files_to_index)} fichiers")
+    print(f"🟠 Files trusted_sites.py modifié ? {trusted_sites_changed}")
 
-    # DOCX : indexation initiale ou incrémentale
+
+
+    # DOCX : Détection de fichiers DOCX + conversion en JSON et sauvegarde
     if not current_docx_hashes:
-        print("🆕 Première indexation des fichiers DOCX...")
-        all_docx_files = list(Path(INPUT_DOCX).glob("*.docx"))
-
-
-        print(f"📂 Dossier d'entrée DOCX : {INPUT_DOCX}")
-        print(f"📄 Fichiers trouvés : {all_docx_files}")
-
-        for docx_file in all_docx_files:
-            convert_and_save_fiches(str(docx_file), JSON_HEALTH_DOC_BASE)
+        print("⚠️ Aucun fichier DOCX détecté (aucune conversion à faire).")
     else:
         if docx_files_to_index:
-            print("🛠️ 3. Conversion des fiches DOCX modifiées...")
+            print("✅ Conversion des fiches DOCX modifiées...")
             for docx_file in docx_files_to_index:
-                print(f'4. docx_file: {docx_file}')
+                print(f"🟡 docx_file: {docx_file}")
                 convert_and_save_fiches(str(docx_file), JSON_HEALTH_DOC_BASE)
+        else:
+            print("🟡 Aucun DOCX modifié — conversion non nécessaire.")
 
-    # WEB : indexation initiale ou conditionnelle
-    if not current_web_hashes or trusted_sites_changed:
-        print("🌐 Indexation complète des sources web...")
+
+
+    # WEB : Détection & scraping si nécessaire si pas de json ou modif. liste sites web
+    web_content_changed = False  # pour décider de (ré)indexer ou non
+    if not current_web_hashes:
+        # Aucun JSON web encore présent -> scraping initial
+        print("⚠️ Aucun fichier JSON web détecté — scraping initial des sources de confiance...")
         scrape_all_trusted_sites()
+        web_content_changed = True
+
+    elif trusted_sites_changed:
+        # La config des sites a changé -> on rescrape
+        print("🟡 La liste des sites de confiance a changé — scraping complet...")
+        scrape_all_trusted_sites()
+        web_content_changed = True
+
     elif web_files_to_index:
-        print("🌐 Indexation partielle : nouvelles pages web détectées...")
-        scrape_all_trusted_sites()
+        # Des JSON web ont été modifiés/ajoutés depuis le dernier journal
+        # (ex: scraping précédent, ajout manuel, etc.) -> pas besoin de rescraper,
+        print(f"🟡 {len(web_files_to_index)} fichier(s) JSON web modifié(s) — scraping non nécessaire.")
+        web_content_changed = True
 
-    # Étape 4 – Construction index vectoriel si nécessaire
-    if docx_files_to_index or web_files_to_index or trusted_sites_changed:
-        print("📚 Construction d'un nouvel index vectoriel...")
+    else:
+        print("✅ Aucun changement web — ni scraping ni réindexation nécessaires.")
+
+
+    # Construction index vectoriel si nécessaire
+    needs_reindex = bool(docx_files_to_index) or bool(web_content_changed)
+
+    if needs_reindex:
+        print("🟡 Construction d'un nouvel index vectoriel...")
         client = get_chroma_client()
         index_documents(JSON_HEALTH_DOC_BASE, source_type="docx", client=client)
         index_documents(WEB_SITES_JSON_HEALTH_DOC_BASE, source_type="web", client=client)
     else:
         print("✅ Aucun changement détecté, indexation non nécessaire.")
 
-    # Étape 5 – Mise à jour du journal des fichiers
+
+    # Mise à jour du journal des fichiers
+    post_changes = detect_changes_and_get_modified_files()
     update_index_journal(
-        new_docx_hashes=current_docx_hashes,
-        new_web_hashes=current_web_hashes,
-        new_py_hash=current_py_hash,
+        new_docx_hashes=post_changes.get("current_docx_hashes", {}),
+        new_web_hashes=post_changes.get("current_web_hashes", {}),
+        new_py_hash=post_changes.get("current_py_hash", None),
     )
+    print("✅ Journal d'index mis à jour.")
+
+
+
+    # update_index_journal(
+    #     new_docx_hashes=current_docx_hashes,
+    #     new_web_hashes=current_web_hashes,
+    #     new_py_hash=current_py_hash,
+    # )
     print("✅ Pipeline terminé avec succès !")
 
 
@@ -128,7 +155,10 @@ def run_full_indexing_pipeline():
     print("[DEBUG ✅] mark_index_ready_flag() appelé")
 
 
-# Exécution directe possible
+# Pour exécution directe:
 if __name__ == "__main__":
     run_full_indexing_pipeline()
     mark_index_ready_flag()
+
+
+
