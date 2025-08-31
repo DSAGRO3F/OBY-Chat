@@ -32,11 +32,11 @@ des bases documentaires utilisées dans les interactions LLM + RAG.
 """
 
 
-
+from pathlib import Path
+import os, sys
 
 from src.utils.convert_fiches_docx_to_json import convert_and_save_fiches
 from config.config import INPUT_DOCX, JSON_HEALTH_DOC_BASE, WEB_SITES_JSON_HEALTH_DOC_BASE
-from pathlib import Path
 from src.func.indexed_health_related_files import (
     detect_changes_and_get_modified_files,
     update_index_journal,
@@ -45,6 +45,7 @@ from src.func.scrape_trusted_sites import scrape_all_trusted_sites
 from src.func.index_documents_chromadb import index_documents
 from src.utils.chroma_client import get_chroma_client
 from src.utils.vector_db_utils import mark_index_ready_flag, clear_index_ready_flag
+from src.func.index_documents_chromadb import _collection_name_for, rebuild_collection_from_disk
 
 
 def run_full_indexing_pipeline():
@@ -75,10 +76,27 @@ def run_full_indexing_pipeline():
     current_docx_hashes = changes_dict.get("current_docx_hashes", {})
     current_web_hashes = changes_dict.get("current_web_hashes", {})
     current_py_hash = changes_dict.get("current_py_hash", None)
+    docx_deleted_files = changes_dict.get("docx_deleted_files", [])
+    web_deleted_files = changes_dict.get("web_deleted_files", [])
+
 
     print(f"🟠 DOCX à indexer : {len(docx_files_to_index)} fichiers")
     print(f"🟠 WEB à indexer : {len(web_files_to_index)} fichiers")
     print(f"🟠 Files trusted_sites.py modifié ? {trusted_sites_changed}")
+
+    # Si un fichier docx est supprimé, suppression de son équivalent dans json
+    docx_json_deleted = False
+    for docx_path in docx_deleted_files:
+        json_candidate = Path(JSON_HEALTH_DOC_BASE) / (Path(docx_path).stem + ".json")
+        try:
+            os.remove(json_candidate)
+            print(f"✅ JSON dérivé supprimé (DOCX supprimé) : {json_candidate}")
+            docx_json_deleted = True
+        except FileNotFoundError:
+            # Si rien fichier déjà absent, on poursuit
+            pass
+        except Exception as e:
+            print(f"❌ Impossible de supprimer {json_candidate} : {e}", file=sys.stderr)
 
 
 
@@ -120,14 +138,34 @@ def run_full_indexing_pipeline():
         print("✅ Aucun changement web — ni scraping ni réindexation nécessaires.")
 
 
+
     # Construction index vectoriel si nécessaire
-    needs_reindex = bool(docx_files_to_index) or bool(web_content_changed)
+    needs_reindex = (
+            bool(docx_files_to_index) or
+            bool(web_content_changed) or
+            bool(docx_deleted_files) or
+            bool(web_deleted_files)
+    )
 
     if needs_reindex:
         print("🟡 Construction d'un nouvel index vectoriel...")
         client = get_chroma_client()
-        index_documents(JSON_HEALTH_DOC_BASE, source_type="docx", client=client)
-        index_documents(WEB_SITES_JSON_HEALTH_DOC_BASE, source_type="web", client=client)
+
+        # DOCX
+        rebuild_collection_from_disk(
+            client=client,
+            source_type="docx",
+            source_dir=JSON_HEALTH_DOC_BASE,
+            drop_collection=False,  # passe à True si tu veux un drop complet
+        )
+
+        # WEB
+        rebuild_collection_from_disk(
+            client=client,
+            source_type="web",
+            source_dir=WEB_SITES_JSON_HEALTH_DOC_BASE,
+            drop_collection=False,  # idem
+        )
     else:
         print("✅ Aucun changement détecté, indexation non nécessaire.")
 
@@ -140,14 +178,6 @@ def run_full_indexing_pipeline():
         new_py_hash=post_changes.get("current_py_hash", None),
     )
     print("✅ Journal d'index mis à jour.")
-
-
-
-    # update_index_journal(
-    #     new_docx_hashes=current_docx_hashes,
-    #     new_web_hashes=current_web_hashes,
-    #     new_py_hash=current_py_hash,
-    # )
     print("✅ Pipeline terminé avec succès !")
 
 

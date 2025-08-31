@@ -14,6 +14,84 @@ from chromadb.api import ClientAPI
 from chromadb.utils import embedding_functions
 from src.utils.chroma_client import get_chroma_client
 
+
+def _collection_name_for(source_type: str) -> str:
+    if source_type not in {"docx", "web"}:
+        raise ValueError(f"source_type invalide: {source_type!r} (attendus: 'docx' ou 'web')")
+    return "base_docx" if source_type == "docx" else "base_web"
+
+def rebuild_collection_from_disk(
+    client: ClientAPI,
+    source_type: str,
+    source_dir: str,
+    drop_collection: bool = False,
+) -> None:
+    """
+    Reconstruit la collection ChromaDB associée à `source_type` à partir des fichiers
+    présents dans `source_dir`.
+    On veut reconstruire une base propre sans fichiers qui auraient dûs être supprimés du fait
+    de leur suppression sur disque dans des séquences précédentes.
+
+    Deux stratégies :
+      - drop_collection=True  : supprime ENTIEREMENT la collection, puis la recrée via index_documents(...)
+      - drop_collection=False : nettoie uniquement les documents de ce `source_type` (delete where),
+                                puis réindexe depuis disque via index_documents(...)
+
+    Cette fonction suppose que `index_documents(source_dir, source_type, client)` :
+      - (re)crée la collection si nécessaire,
+      - upsert les documents avec un metadatas["source_type"] = source_type.
+    """
+
+    collection_name = _collection_name_for(source_type)
+
+    if drop_collection:
+        try:
+            client.delete_collection(name=collection_name)
+            print(f"🧨 Collection supprimée : {collection_name}")
+        except Exception as e:
+            print(f"ℹ️ Suppression ignorée (collection absente ?) : {e}")
+        # Réindexation complète depuis le répertoire
+        index_documents(source_dir=source_dir, source_type=source_type, client=client)
+        print(f"✅ Collection reconstruite : {collection_name}")
+        return
+
+    # Variante « soft » : on garde la collection mais on supprime tous les documents du type concerné
+    try:
+        embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
+            model_name="BAAI/bge-large-en-v1.5"
+        )
+        collection = client.get_or_create_collection(
+            name=collection_name, embedding_function=embedding_fn
+        )
+        try:
+            before = collection.count()
+        except Exception:
+            before = None
+
+        # On supprime tous les documents de ce source_type (même si une seule collection est partagée)
+        collection.delete(where={"source_type": source_type})
+        try:
+            after = collection.count()
+            print(f"✳️ Nettoyage {collection_name} (source_type={source_type}) : {before} → {after}")
+        except Exception:
+            print(f"✳️ Nettoyage {collection_name} (source_type={source_type}) effectué.")
+
+    except Exception as e:
+        # Si le nettoyage ciblé échoue (collection corrompue, schéma changé, etc.), on supprime la collection.
+        print(f"⚠️ Échec du nettoyage ciblé ({collection_name}). Fallback drop. Détail: {e}")
+        try:
+            client.delete_collection(name=collection_name)
+            print(f"❎ Collection supprimée : {collection_name}")
+        except Exception as e2:
+            print(f"❌ Impossible de supprimer {collection_name} : {e2}")
+
+    finally:
+        # Dans tous les cas, on (re)indexe depuis les fichiers présents
+        index_documents(source_dir=source_dir, source_type=source_type, client=client)
+        print(f"✅ Collection réindexée depuis le disque : {collection_name}")
+
+
+
 def index_documents(source_dir: str, source_type: str, client: ClientAPI):
     """
     Indexe les documents JSON contenus dans un répertoire dans une collection ChromaDB.
