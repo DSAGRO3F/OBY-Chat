@@ -28,21 +28,21 @@ print(f"Clé API chargée ? {'✅' if mistral_api_key else '❌'}")
 
 
 
-# Pb: POA + réponse LLM > 53K tokens -> triop pour mistral ==> migre vers chatgpt 4.o
 # Instance unique du modèle mistral
-# llm_model = ChatMistralAI(
-#     model='mistral-large-latest',
-#     api_key=os.environ.get('MISTRAL_API_KEY'),
-#     temperature=0
-# )
+llm_model = ChatMistralAI(
+    model='mistral-large-2407',
+    api_key=os.environ.get('MISTRAL_API_KEY'),
+    temperature=0,
+    max_tokens=10000,
+)
 
 
 
 
 # Instance unique du modèle chatgpt
-llm_model = ChatOpenAI(
-    model="gpt-4.1-2025-04-14",
-    temperature=0.0,
-    max_tokens=16000,
-    api_key=open_ai_api_key,
-)
+# llm_model = ChatOpenAI(
+#     model="gpt-4.1-2025-04-14",
+#     temperature=0.0,
+#     max_tokens=16000,
+#     api_key=open_ai_api_key,
+# )

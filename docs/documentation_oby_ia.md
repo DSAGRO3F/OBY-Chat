@@ -1,5 +1,35 @@
 # Liste des blocs fonctionnels OBY-IA.
 
+## Nom: app.py
+### Rôle: initialise l'application Dash
+### Docstring:
+  - Ce module initialise l'application Dash, configure la navigation entre les pages, et vérifie la disponibilité de la base de données des constantes médicales.
+
+  - Fonctionnalités principales :
+    - Chargement des variables d'environnement depuis un fichier `.env` à la racine. 
+    - Vérification et génération automatique de la base SQLite (`constantes_sante.db`). 
+    - Initialisation de l'application Dash avec gestion des pages (`use_pages=True`). 
+    - Mise en place d'une barre de navigation et d'un conteneur de pages dynamiques. 
+    - Démarrage d'un planificateur de tâches (scheduler) dans un thread dédié au lancement. 
+    - Ce fichier doit être exécuté pour lancer le serveur Dash : `python -m src.app`
+### Module appelé par le module app.py:
+  - scheduler.py
+	- Surveillance des répertoires et (ré)indexation ChromaDB. 
+    - Au démarrage :
+      - Si CHROMA_GLOBAL_DIR est absent ou vide → pipeline d'indexation initiale. 
+      - Sinon, si le flag 'index_ready' est absent :
+        - Vérifie la présence des collections 'base_docx' et 'base_web'. 
+        - Si elles manquent → relance le pipeline. 
+        - Sinon → marque le flag 'ready'. 
+      - Si le flag est présent → simple surveillance. 
+    - En fonctionnement :
+      - Watchdog surveille INPUT_DOCX et WEB_SITES_HEALTH_DOC_BASE. 
+      - Au moindre changement fichier, déclenche une indexation en empêchant les exécutions simultanées.
+    - Fonction appelée par scheduler.py:
+      - run_full_indexing_pipeline()
+        - Pipeline principal d’indexation documentaire pour OBY-IA.
+
+
 ## Nom: home.py
 ### Rôle: authentification utilisateur et cloisonnement des interactions OBY-IA et utilisateur
 ### Docstring:
@@ -1390,36 +1420,55 @@
 ### Rôle: Exécuter le pipeline complet d’indexation documentaire utilisant une base chromadb et approche « RAG ».
 ### Docstring:
   - Module `run_full_indexing_pipeline.py` – Pipeline principal d’indexation documentaire pour OBY-IA.
-  - Ce module exécute l’ensemble du processus de préparation de la base documentaire utilisée par les agents RAG de OBY-IA, en assurant une indexation vectorielle actualisée dans ChromaDB.
-  - Fonctionnalités couvertes :
-	  - **Détection de modifications** :
-        - Identification des fichiers DOCX ou pages web récemment modifiés via calcul de hashs.
-        - Détection des changements dans la définition des sites de confiance (`trusted_sites.py`).
-      - **Conversion en JSON structuré** :
-        - Transformation des fichiers DOCX en fichiers JSON exploitables.
-        - Scraping et structuration des nouvelles pages web selon les règles définies.
-        - **Indexation vectorielle dans ChromaDB** :
-          - Indexation incrémentale ou complète des données selon les changements détectés.
-          - Séparation des sources DOCX et web (`source_type`).
-        - **Journalisation des indexations** :
-          - Mise à jour du fichier de suivi (`indexed_files.json`) pour éviter les réindexations inutiles.
-        - **Signalement de disponibilité** :
-          - Écriture d’un fichier `index_ready.flag` permettant aux autres modules de savoir si l’index est prêt.
-    - Ce pipeline peut être lancé :
-      - automatiquement (via un scheduler ou watchdog) ou manuellement (en exécutant ce fichier en tant que script).
-      - Il constitue un composant critique du système OBY-IA pour garantir la fraîcheur et la cohérence des bases documentaires utilisées dans les interactions LLM + RAG.
+  - Ce module orchestre la maintenance de l’index vectoriel à partir de deux sources :
+    - des fiches au format DOCX (converties en JSON),
+    - des pages web de confiance (scrapées en JSON). 
+    - Il a pour objectif d'être appelé au démarrage et à chaque événement Watchdog. 
+    - Fonctionnement, synthèse :
+      - Détection des changements via `detect_changes_and_get_modified_files()` :
+        ajouts, modifications, suppressions de fichiers DOCX/WEB, changement de `trusted_web_sites_list.py`.
+      - Nettoyage :
+        - suppression des JSON dérivés de DOCX supprimés,
+        - purge défensive des JSON web si la configuration des sites change.
+      - Production des données :
+        - conversion DOCX → JSON si des DOCX ont changé,
+        - scraping complet/partiel des sites web si nécessaire.
+      - Reconstruction des index ChromaDB :
+        - réindexation des collections à partir des dossiers JSON présents sur disque.
+      - Mise à jour du journal et pose d’un « ready flag ». 
+      - Dépendances (importées ailleurs dans le projet) :
+        - `detect_changes_and_get_modified_files`, `update_index_journal`
+        - `convert_and_save_fiches`
+        - `scrape_all_trusted_sites`
+        - `get_chroma_client`, `index_documents` (ou `rebuild_collection_from_disk`)
+        - constantes de chemins : `INPUT_DOCX`, `JSON_HEALTH_DOC_BASE`,
+          `WEB_SITES_JSON_HEALTH_DOC_BASE`, `WEB_SITES_MODULE_PATH`, `BASE_DIR`
+      - Notes :
+        - Les purges de répertoires sont précédées de vérifications de chemin (résolution absolue, inclusion sous `BASE_DIR`).
+        - Les erreurs critiques d’E/S sont loguées sur STDERR.
   - Fonctions:
     - Fonction principale:
       - run_full_indexing_pipeline
-      - Exécute le pipeline complet d’indexation des documents médicaux.
-      - Ce pipeline effectue les étapes suivantes :
-        - Détection des fichiers modifiés (DOCX, JSON web, fichier des sites de confiance).
-        - Conversion des fichiers DOCX en JSON.
-        - Scraping et structuration des pages web si nécessaire.
-        - Indexation vectorielle des fichiers convertis (DOCX et web) dans ChromaDB.
-        - Mise à jour du journal des fichiers indexés.
-        - Ce processus permet d'assurer que la base documentaire est à jour pour les requêtes RAG.
-	- Fonctions appelées:
+        - Exécute le pipeline complet de supervision et (ré)indexation.
+        - Objectifs :
+          - Détecte l’état courant et les diffs (ajouts/modifs/suppressions).
+          - Supprime les JSON orphelins issus de DOCX supprimés.
+          - Si la configuration des sites change, purge les JSON web puis lance un scraping complet ; sinon, scraping conditionnel si nécessaire.
+          - Reconstruit l’index ChromaDB à partir des JSON présents sur disque (DOCX et WEB), si des changements ont été détectés.
+          - Recalcule les hachages et met à jour le journal d’indexation.
+          - Pose le « ready flag » marquant la fin réussie du processus.
+      - Notes :
+        - Écrit/écrase des fichiers JSON (conversion DOCX, scraping web). 
+        - Purge de dossiers JSON (web) en cas de changement de configuration.
+        - (Ré)initialise des collections ChromaDB. 
+        - Met à jour le journal d’indexation et le drapeau « ready ». 
+      - Raises:
+        - RuntimeError: si une incohérence de chemin est détectée lors d’une purge.
+        - OSError: en cas d’erreurs E/S non gérées par les « ignore_errors ».
+        - Exception: toutes exceptions non interceptées par les appels sous-jacents.
+      - Returns:
+        - None 
+    - Fonctions appelées:
       - detect_changes_and_get_modified_files 
         - Détecte les fichiers de santé modifiés depuis la dernière indexation.
         - Vérifie les fichiers :
@@ -1434,6 +1483,24 @@
           - `current_docx_hashes`: nouveaux hash DOCX
           - `current_web_hashes`: nouveaux hash JSON
           - `current_py_hash`: nouveau hash du fichier `.py`
+          - `docx_deleted_files`: liste des DOCX supprimés depuis le dernier journal
+          - `web_deleted_files`: liste des JSON web supprimés depuis le dernier journal
+
+      - rebuild_collection_from_disk
+        - Reconstruit entièrement la collection ChromaDB d’un type donné.
+        - Objectif: 
+          - garantir la cohérence parfaite entre l’état disque (répertoire JSON) et l’index ChromaDB (par ex. après suppressions de fichiers, changements de configuration des sites, migration d’embedding, etc.). 
+          - supprime la collection ciblée (si elle existe),
+          - (re)crée et réindexe la collection en appelant `index_documents` à partir des JSON présents dans `source_dir`.
+        - Args:
+          - client: instance ChromaDB (ClientAPI) déjà initialisée.
+          - source_type: 'docx' ou 'web' (détermine la collection à reconstruire).
+          - source_dir: chemin du répertoire contenant les JSON à indexer.
+        - Raises:
+          - ValueError: si `source_type` n’est pas 'docx' ni 'web'.
+          - Exception: si la suppression ou la réindexation échoue (erreurs du client ChromaDB ou d’E/S remontées telles quelles).
+        - Returns:
+          - None
 
       - convert_fiches_docx_to_json
         - Convertit toutes les fiches DOCX d’un répertoire en dictionnaires JSON.
@@ -1480,13 +1547,13 @@
           - source_dir (str): Chemin du dossier contenant les fichiers JSON à indexer.
           - source_type (str): Type de document à indexer, soit 'docx' soit 'web'.
           - client (Client): Instance du client ChromaDB utilisée pour la persistance des données.
-          - Entrées :
-            - source_dir (str) : Dossier contenant les fichiers JSON.
-            - source_type (str) : 'docx' ou 'web' (détermine la collection cible).
+        - Entrées :
+          - source_dir (str) : Dossier contenant les fichiers JSON.
+          - source_type (str) : 'docx' ou 'web' (détermine la collection cible).
           - Sorties :
             - Indexation des chunks dans une collection nommée selon la source.
-          - Raises:
-            - ValueError: Si le type de source est invalide (autre que 'docx' ou 'web').
+        - Raises:
+          - ValueError: Si le type de source est invalide (autre que 'docx' ou 'web').
 
       - is_chroma_index_ready
         - Vérifie si le fichier 'index_ready.flag' existe dans le dossier vectoriel.

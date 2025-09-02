@@ -4,6 +4,14 @@ Ce module interroge une collection vectorielle Chroma (via LangChain)
 et retourne les passages les plus similaires à une requête, pour enrichir un prompt.
 """
 
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import HuggingFaceEmbeddings
+
+from langchain.schema import Document
+from src.func.index_documents_chromadb import get_chroma_client
+from config.config import CHROMA_GLOBAL_DIR, EMBEDDING_MODEL_NAME, NORMALIZE_EMBEDDINGS
+from src.utils.vector_db_utils import is_chroma_index_ready
+
 def retrieve_relevant_chunks(
     query: str,
     top_k_docx: int = 5,
@@ -31,17 +39,17 @@ def retrieve_relevant_chunks(
         chacun précédé de son titre et de sa source.
     """
 
-    from langchain_community.vectorstores import Chroma
-    from langchain_community.embeddings import HuggingFaceEmbeddings
+    if not is_chroma_index_ready():
+        raise RuntimeError("Index ChromaDB indisponible : (ré)indexation en cours.")
 
-    from langchain.schema import Document
-    from src.func.index_documents_chromadb import get_chroma_client
-    from config.config import CHROMA_GLOBAL_DIR
-
-    embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     client = get_chroma_client()
+    embedding_model = HuggingFaceEmbeddings(
+        model_name=EMBEDDING_MODEL_NAME,
+        encode_kwargs={"normalize_embeddings": NORMALIZE_EMBEDDINGS},
+    )
 
     def search_collection(collection_name: str, top_k: int) -> list[Document]:
+
         try:
             collection = client.get_collection(collection_name)
             print(f"✅ Collection trouvée : {collection_name}")

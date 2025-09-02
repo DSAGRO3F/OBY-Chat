@@ -644,7 +644,7 @@ def rag_medical_response_from_llm(prompt_template, user_input, poa_content):
         print("❌ Erreur dans format_messages :", e)
         raise
 
-    print("📤 Envoi au modèle")
+    print("📤 Étape 3: Envoi au modèle")
 
     try:
         print("\n====== MESSAGE FINAL ENVOYÉ AU LLM ======\n")

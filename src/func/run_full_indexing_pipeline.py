@@ -1,65 +1,85 @@
 """
-Module `run_full_indexing_pipeline.py` – Pipeline principal d’indexation documentaire pour OBY-IA.
+    Module `run_full_indexing_pipeline.py` – Pipeline principal d’indexation documentaire pour OBY-IA.
 
-Ce module exécute l’ensemble du processus de préparation de la base documentaire utilisée
-par les agents RAG de OBY-IA, en assurant une indexation vectorielle actualisée dans ChromaDB.
+    Pipeline d'indexation ChromaDB pour OBY-IA.
 
-Fonctionnalités couvertes :
-1. **Détection de modifications** :
-   - Identification des fichiers DOCX ou pages web récemment modifiés via calcul de hashs.
-   - Détection des changements dans la définition des sites de confiance (`trusted_sites.py`).
+    Ce module orchestre la maintenance de l’index vectoriel à partir de deux sources :
+    1) des fiches au format DOCX (converties en JSON),
+    2) des pages web de confiance (scrapées en JSON).
 
-2. **Conversion en JSON structuré** :
-   - Transformation des fichiers DOCX en fichiers JSON exploitables.
-   - Scraping et structuration des nouvelles pages web selon les règles définies.
+    Il a pour objectif d'être appelé au démarrage et à chaque événement Watchdog.
 
-3. **Indexation vectorielle dans ChromaDB** :
-   - Indexation incrémentale ou complète des données selon les changements détectés.
-   - Séparation des sources DOCX et web (`source_type`).
+    Fonctionnement, synthèse :
+    - Détection des changements via `detect_changes_and_get_modified_files()` :
+      ajouts, modifications, suppressions de fichiers DOCX/WEB, changement de
+      `trusted_web_sites_list.py`.
+    - Nettoyage :
+      - suppression des JSON dérivés de DOCX supprimés,
+      - purge défensive des JSON web si la configuration des sites change.
+    - Production des données :
+      - conversion DOCX → JSON si des DOCX ont changé,
+      - scraping complet/partiel des sites web si nécessaire.
+    - Reconstruction des index ChromaDB :
+      - réindexation des collections à partir des dossiers JSON présents sur disque.
+    - Mise à jour du journal et pose d’un « ready flag ».
 
-4. **Journalisation des indexations** :
-   - Mise à jour du fichier de suivi (`indexed_files.json`) pour éviter les réindexations inutiles.
+    Dépendances (importées ailleurs dans le projet) :
+    - `detect_changes_and_get_modified_files`, `update_index_journal`
+    - `convert_and_save_fiches`
+    - `scrape_all_trusted_sites`
+    - `get_chroma_client`, `index_documents` (ou `rebuild_collection_from_disk`)
+    - constantes de chemins : `INPUT_DOCX`, `JSON_HEALTH_DOC_BASE`,
+      `WEB_SITES_JSON_HEALTH_DOC_BASE`, `WEB_SITES_MODULE_PATH`, `BASE_DIR`
 
-5. **Signalement de disponibilité** :
-   - Écriture d’un fichier `index_ready.flag` permettant aux autres modules de savoir si l’index est prêt.
+    Notes :
+    - Les purges de répertoires sont précédées de vérifications de chemin
+      (résolution absolue, inclusion sous `BASE_DIR`).
+    - Les erreurs critiques d’E/S sont loguées sur STDERR.
 
-Ce pipeline peut être lancé :
-- automatiquement (via un scheduler ou watchdog),
-- ou manuellement (en exécutant ce fichier en tant que script).
-
-Il constitue un composant critique du système OBY-IA pour garantir la fraîcheur et la cohérence
-des bases documentaires utilisées dans les interactions LLM + RAG.
 """
 
-
 from pathlib import Path
-import os, sys
+import os, sys, shutil
 
 from src.utils.convert_fiches_docx_to_json import convert_and_save_fiches
-from config.config import INPUT_DOCX, JSON_HEALTH_DOC_BASE, WEB_SITES_JSON_HEALTH_DOC_BASE
+from config.config import INPUT_DOCX, JSON_HEALTH_DOC_BASE, WEB_SITES_JSON_HEALTH_DOC_BASE, BASE_DIR
 from src.func.indexed_health_related_files import (
     detect_changes_and_get_modified_files,
     update_index_journal,
 )
 from src.func.scrape_trusted_sites import scrape_all_trusted_sites
-from src.func.index_documents_chromadb import index_documents
 from src.utils.chroma_client import get_chroma_client
 from src.utils.vector_db_utils import mark_index_ready_flag, clear_index_ready_flag
-from src.func.index_documents_chromadb import _collection_name_for, rebuild_collection_from_disk
+from src.func.index_documents_chromadb import rebuild_collection_from_disk
 
 
 def run_full_indexing_pipeline():
     """
-    Exécute le pipeline complet d’indexation des documents médicaux.
+    Exécute le pipeline complet de supervision et (ré)indexation.
 
-    Ce pipeline effectue les étapes suivantes :
-    1. Détection des fichiers modifiés (DOCX, JSON web, fichier des sites de confiance).
-    2. Conversion des fichiers DOCX en JSON.
-    3. Scraping et structuration des pages web si nécessaire.
-    4. Indexation vectorielle des fichiers convertis (DOCX et web) dans ChromaDB.
-    5. Mise à jour du journal des fichiers indexés.
+    Objectifs :
+        1. Détecte l’état courant et les diffs (ajouts/modifs/suppressions).
+        2. Supprime les JSON orphelins issus de DOCX supprimés.
+        3. Si la configuration des sites change, purge les JSON web puis lance
+           un scraping complet ; sinon, scraping conditionnel si nécessaire.
+        4. Reconstruit l’index ChromaDB à partir des JSON présents sur disque
+           (DOCX et WEB), si des changements ont été détectés.
+        5. Recalcule les hachages et met à jour le journal d’indexation.
+        6. Pose le « ready flag » marquant la fin réussie du processus.
 
-    Ce processus permet d'assurer que la base documentaire est à jour pour les requêtes RAG.
+    Notes :
+        - Écrit/écrase des fichiers JSON (conversion DOCX, scraping web).
+        - Purge de dossiers JSON (web) en cas de changement de configuration.
+        - (Ré)initialise des collections ChromaDB.
+        - Met à jour le journal d’indexation et le drapeau « ready ».
+
+    Raises:
+        RuntimeError: si une incohérence de chemin est détectée lors d’une purge.
+        OSError: en cas d’erreurs E/S non gérées par les « ignore_errors ».
+        Exception: toutes exceptions non interceptées par les appels sous-jacents.
+
+    Returns:
+        None
     """
 
     clear_index_ready_flag()
@@ -99,6 +119,17 @@ def run_full_indexing_pipeline():
             print(f"❌ Impossible de supprimer {json_candidate} : {e}", file=sys.stderr)
 
 
+    # Si un fichier web est supprimé, suppression de son équivalent dans json
+    web_json_deleted = False
+    for web_json_path in web_deleted_files:  # éléments de type Path pointant vers WEB_SITES_JSON_HEALTH_DOC_BASE/xxx.json
+        try:
+            if web_json_path.exists():
+                os.remove(web_json_path)
+                print(f"✅ JSON web supprimé (journal signale une suppression) : {web_json_path}")
+                web_json_deleted = True
+        except Exception as e:
+            print(f"❌ Impossible de nettoyer {web_json_path} : {e}", file=sys.stderr)
+
 
     # DOCX : Détection de fichiers DOCX + conversion en JSON et sauvegarde
     if not current_docx_hashes:
@@ -114,7 +145,7 @@ def run_full_indexing_pipeline():
 
 
 
-    # WEB : Détection & scraping si nécessaire si pas de json ou modif. liste sites web
+    # WEB : Détection & scraping si nécessaire si pas de json ou modif. de la liste sites web
     web_content_changed = False  # pour décider de (ré)indexer ou non
     if not current_web_hashes:
         # Aucun JSON web encore présent -> scraping initial
@@ -123,14 +154,32 @@ def run_full_indexing_pipeline():
         web_content_changed = True
 
     elif trusted_sites_changed:
-        # La config des sites a changé -> on rescrape
+        # La config des sites a changé implique nouveau scrape
         print("🟡 La liste des sites de confiance a changé — scraping complet...")
+
+        # on vérifie que path (chemin à purger) commence par le chemin absolu de BASE_DIR.
+        # => On ne purge que si la cible est bien dans le répertoire racine attendu.
+        # Si pas le cas → “Chemin inattendu, purge annulée”.
+
+
+
+        base = Path(BASE_DIR).resolve()
+        path = WEB_SITES_JSON_HEALTH_DOC_BASE  # str ou Path vers le dossier à purger
+        target = Path(path).resolve()
+
+        # Vérifie que target == base ou est un sous-dossier de base
+        if not (target == base or base in target.parents):
+            raise RuntimeError(f"Chemin inattendu (hors {base}) : purge annulée → {target}")
+
+
+        shutil.rmtree(WEB_SITES_JSON_HEALTH_DOC_BASE, ignore_errors=True)
+        os.makedirs(WEB_SITES_JSON_HEALTH_DOC_BASE, exist_ok=True)
         scrape_all_trusted_sites()
         web_content_changed = True
 
     elif web_files_to_index:
         # Des JSON web ont été modifiés/ajoutés depuis le dernier journal
-        # (ex: scraping précédent, ajout manuel, etc.) -> pas besoin de rescraper,
+        # (ex: scraping précédent, ajout manuel, etc.) -> pas besoin nouveau scrape
         print(f"🟡 {len(web_files_to_index)} fichier(s) JSON web modifié(s) — scraping non nécessaire.")
         web_content_changed = True
 
@@ -138,34 +187,23 @@ def run_full_indexing_pipeline():
         print("✅ Aucun changement web — ni scraping ni réindexation nécessaires.")
 
 
-
     # Construction index vectoriel si nécessaire
+
     needs_reindex = (
-            bool(docx_files_to_index) or
-            bool(web_content_changed) or
-            bool(docx_deleted_files) or
-            bool(web_deleted_files)
+            bool(docx_files_to_index)
+            or bool(web_content_changed)
+            or bool(docx_deleted_files)
+            or bool(web_deleted_files)
+            or bool(docx_json_deleted)
+            or bool(web_json_deleted)
     )
 
+
     if needs_reindex:
-        print("🟡 Construction d'un nouvel index vectoriel...")
+        print("🟡 Reconstruction de l'index vectoriel...")
         client = get_chroma_client()
-
-        # DOCX
-        rebuild_collection_from_disk(
-            client=client,
-            source_type="docx",
-            source_dir=JSON_HEALTH_DOC_BASE,
-            drop_collection=False,  # passe à True si tu veux un drop complet
-        )
-
-        # WEB
-        rebuild_collection_from_disk(
-            client=client,
-            source_type="web",
-            source_dir=WEB_SITES_JSON_HEALTH_DOC_BASE,
-            drop_collection=False,  # idem
-        )
+        rebuild_collection_from_disk(client, "docx", JSON_HEALTH_DOC_BASE)
+        rebuild_collection_from_disk(client, "web", WEB_SITES_JSON_HEALTH_DOC_BASE)
     else:
         print("✅ Aucun changement détecté, indexation non nécessaire.")
 

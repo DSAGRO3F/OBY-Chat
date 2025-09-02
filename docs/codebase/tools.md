@@ -542,30 +542,25 @@ et par la couche API (FastAPI) via une fonction « tronc commun ».
 ---
 
 <!---
-Module d'indexation des documents de santé dans une base vectorielle ChromaDB.
+    Outils d’indexation ChromaDB pour OBY-IA.
 
-Ce module prend en entrée des fichiers JSON représentant soit des documents issus de fichiers DOCX,
-soit des pages web structurées, puis les segmente et les insère dans une collection ChromaDB.
-    Indexe les documents JSON contenus dans un répertoire dans une collection ChromaDB.
+    Ce module expose des utilitaires pour (ré)indexer des collections ChromaDB
+    à partir de répertoires de JSON structurés :
+    - `base_docx` : documents dérivés de fiches DOCX,
+    - `base_web`  : documents dérivés du scraping de sites de confiance.
 
-    Chaque document est découpé en sections (ou chunk unique dans le cas d'un fichier DOCX complet),
-    puis inséré dans une base vectorielle avec ses métadonnées.
+    Fournit notamment une fonction de reconstruction qui
+    supprime la collection ciblée puis la reconstruit à partir des fichiers
+    présents sur disque, garantissant l’absence de documents « fantômes »
+    lorsqu’il y a des suppressions ou des changements de configuration.
 
-    Args:
-        source_dir (str): Chemin du dossier contenant les fichiers JSON à indexer.
-        source_type (str): Type de document à indexer, soit 'docx' soit 'web'.
-        client (Client): Instance du client ChromaDB utilisée pour la persistance des données.
-
-    Entrées :
-        - source_dir (str) : Dossier contenant les fichiers JSON.
-        - source_type (str) : 'docx' ou 'web' (détermine la collection cible).
-
-    Sorties :
-        - Indexation des chunks dans une collection nommée selon la source.
-
-
-    Raises:
-        ValueError: Si le type de source est invalide (autre que 'docx' ou 'web').
+    Fonctions attendues dans ce module (ou importées) :
+    - `index_documents(source_dir, source_type, client)`: effectue l’indexation
+      à partir d’un répertoire JSON (crée la collection si nécessaire).
+    - `collection_name_for(source_type)`: mappe 'docx'/'web' vers le nom
+      de collection ChromaDB (p. ex. 'base_docx' / 'base_web').
+    - `rebuild_collection_from_disk(client, source_type, source_dir)`: supprime
+      la collection puis réindexe depuis le disque (cf. docstring ci-dessous).
 --->
 
 ::: func.index_documents_chromadb
@@ -656,34 +651,42 @@ et retourne les passages les plus similaires à une requête, pour enrichir un p
 <!---
 Module `run_full_indexing_pipeline.py` – Pipeline principal d’indexation documentaire pour OBY-IA.
 
-Ce module exécute l’ensemble du processus de préparation de la base documentaire utilisée
-par les agents RAG de OBY-IA, en assurant une indexation vectorielle actualisée dans ChromaDB.
+Pipeline d'indexation ChromaDB pour OBY-IA.
 
-Fonctionnalités couvertes :
-1. **Détection de modifications** :
-   - Identification des fichiers DOCX ou pages web récemment modifiés via calcul de hashs.
-   - Détection des changements dans la définition des sites de confiance (`trusted_sites.py`).
+Ce module orchestre la maintenance de l’index vectoriel à partir de deux sources :
+1) des fiches au format DOCX (converties en JSON),
+2) des pages web de confiance (scrapées en JSON).
 
-2. **Conversion en JSON structuré** :
-   - Transformation des fichiers DOCX en fichiers JSON exploitables.
-   - Scraping et structuration des nouvelles pages web selon les règles définies.
+Il a pour objectif d'être appelé au démarrage et à chaque événement Watchdog.
 
-3. **Indexation vectorielle dans ChromaDB** :
-   - Indexation incrémentale ou complète des données selon les changements détectés.
-   - Séparation des sources DOCX et web (`source_type`).
+Fonctionnement, synthèse :
+- Détection des changements via `detect_changes_and_get_modified_files()` :
+  ajouts, modifications, suppressions de fichiers DOCX/WEB, changement de
+  `trusted_web_sites_list.py`.
+- Nettoyage :
+  - suppression des JSON dérivés de DOCX supprimés,
+  - purge défensive des JSON web si la configuration des sites change.
+- Production des données :
+  - conversion DOCX → JSON si des DOCX ont changé,
+  - scraping complet/partiel des sites web si nécessaire.
+- Reconstruction des index ChromaDB :
+  - réindexation des collections à partir des dossiers JSON présents sur disque.
+- Mise à jour du journal et pose d’un « ready flag ».
 
-4. **Journalisation des indexations** :
-   - Mise à jour du fichier de suivi (`indexed_files.json`) pour éviter les réindexations inutiles.
+Dépendances (importées ailleurs dans le projet) :
+- `detect_changes_and_get_modified_files`, `update_index_journal`
+- `convert_and_save_fiches`
+- `scrape_all_trusted_sites`
+- `get_chroma_client`, `index_documents` (ou `rebuild_collection_from_disk`)
+- constantes de chemins : `INPUT_DOCX`, `JSON_HEALTH_DOC_BASE`,
+  `WEB_SITES_JSON_HEALTH_DOC_BASE`, `WEB_SITES_MODULE_PATH`, `BASE_DIR`
 
-5. **Signalement de disponibilité** :
-   - Écriture d’un fichier `index_ready.flag` permettant aux autres modules de savoir si l’index est prêt.
-
-Ce pipeline peut être lancé :
-- automatiquement (via un scheduler ou watchdog),
-- ou manuellement (en exécutant ce fichier en tant que script).
-
-Il constitue un composant critique du système OBY-IA pour garantir la fraîcheur et la cohérence
-des bases documentaires utilisées dans les interactions LLM + RAG.
+Notes :
+- Les purges de répertoires sont précédées de vérifications de chemin
+  (résolution absolue, inclusion sous `BASE_DIR`).
+- Les erreurs critiques d’E/S sont loguées sur STDERR.
+- Pour éviter des relances concurrentes, préférer un déclencheur
+  « debounced + lock » côté Watchdog.
 --->
 
 ::: func.run_full_indexing_pipeline
@@ -818,17 +821,19 @@ Utile pour remettre à zéro l’état de l’index avant un nouveau traitement 
 ---
 
 <!---
-Module de surveillance des fichiers pour l'indexation automatique.
+Surveillance des répertoires et (ré)indexation ChromaDB.
 
-Ce module utilise Watchdog pour observer les répertoires contenant des documents à indexer
-(docx, données web, versions de plans). Lorsqu’un changement est détecté, le pipeline
-d’indexation complet est automatiquement relancé pour mettre à jour les bases vectorielles.
+- Au démarrage :
+  * Si CHROMA_GLOBAL_DIR est absent ou vide → pipeline d'indexation initiale.
+  * Sinon, si le flag 'index_ready' est absent :
+      - Vérifie la présence des collections 'base_docx' et 'base_web'.
+      - Si elles manquent → relance le pipeline.
+      - Sinon → marque le flag 'ready'.
+  * Si le flag est présent → simple surveillance.
 
-Fonctions :
-- start_scheduler : Démarre la surveillance continue via Watchdog.
-
-Classes :
-- IndexingEventHandler : Handler personnalisé déclenchant l’indexation à chaque événement.
+- En fonctionnement :
+  - Watchdog surveille INPUT_DOCX et WEB_SITES_HEALTH_DOC_BASE.
+  - Au moindre changement fichier, déclenche une indexation en empêchant les exécutions simultanées.
 --->
 
 ::: utils.scheduler

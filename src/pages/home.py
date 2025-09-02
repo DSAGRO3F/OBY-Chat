@@ -73,9 +73,6 @@ layout = dbc.Container([
         dbc.Col([
             html.H2("Bienvenue sur OBY-IA", className="text-center mb-4"),
             dbc.Row([
-                dbc.Button("📘 Accéder à la documentation", id="open-docs-btn", color="info", className="me-2"),
-                html.Span(id="doc-access-message", style={"marginLeft": "10px"}),
-
                 html.Hr(),
 
                 html.Div(id="chroma-stats-box", className="mb-3"),
@@ -199,6 +196,7 @@ def display_admin_controls(session_data):
     if session_data and session_data.get("user_id") == "admin":
         return [
             html.Hr(),
+
             html.Button(
                 "Réinitialiser les bases",
                 id="reset-button",
@@ -210,48 +208,6 @@ def display_admin_controls(session_data):
     return []
 
 
-# ===============================================#
-# Gestion de l'accès à la documentation du projet.
-# 1. Callback pour vérifier si "mkdocs serve" est actif
-# ===============================================#
-import requests
-from dash import ctx, no_update
-
-@callback(
-    Output("doc-access-message", "children"),
-    Input("check-doc-status", "n_intervals"),
-)
-def check_mkdocs_status(_):
-    """
-    Vérifie si le site de documentation MkDocs est disponible localement.
-    Affiche un message en vert (accessible) ou rouge (inaccessible).
-    """
-    try:
-        response = requests.get("http://127.0.0.1:8000", timeout=0.5)
-        if response.status_code == 200:
-            return html.Span("✅ Documentation disponible", style={"color": "green"})
-    except requests.RequestException:
-        pass
-    return html.Span("❌ Documentation indisponible – lancez `mkdocs serve`", style={"color": "red"})
-
-
-# 2. Callback pour déclencher l’ouverture dans un nouvel onglet
-@callback(
-    Output("redirect-docs", "href"),
-    Input("open-docs-btn", "n_clicks"),
-    prevent_initial_call=True
-)
-def open_docs_site(n_clicks):
-    """
-    Redirige vers le site local de documentation s'il est accessible.
-    """
-    try:
-        response = requests.get("http://127.0.0.1:8000", timeout=0.5)
-        if response.status_code == 200:
-            return "http://127.0.0.1:8000"
-    except requests.RequestException:
-        pass
-    return no_update
 
 
 # ===============================================#

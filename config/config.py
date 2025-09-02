@@ -54,6 +54,9 @@ WEB_SITES_JSON_HEALTH_DOC_BASE = os.path.join(BASE_DIR, generated_json_from_html
 # Utiliser une base ChromaDB unique.
 CHROMA_GLOBAL_DIR = os.path.join(BASE_DIR, "src","vector_db", "chromadb")
 
+# Embedding model
+EMBEDDING_MODEL_NAME = "BAAI/bge-large-en-v1.5"
+NORMALIZE_EMBEDDINGS = True
 
 # Fichier journal d’indexation
 INDEXED_FILES_JOURNAL_PATH = BASE_DIR/ "src" / "data" / "output" / "indexation" / "indexed_files.json"
