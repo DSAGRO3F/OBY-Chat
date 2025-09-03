@@ -515,7 +515,7 @@ def save_page_as_json(base_url: str, page_url: str, title: str, sections: list, 
     """Sauvegarde la page en JSON (métadonnées + liens par section).
 
     - Format de `sections` conservé ; on ajoute la clé `links` lors de l'écriture JSON uniquement.
-    - `output_dir` est optionnel pour faciliter l'intégration sans casser l'existant.
+    - `output_dir` est optionnel.
     """
     try:
         parsed = urlparse(page_url)
@@ -592,12 +592,12 @@ def scrape_all_trusted_sites(
         for start_page in start_pages:
             print(f"  > Page de départ : {start_page}")
 
-            # 🔽 1. Toujours extraire le contenu de la page de départ elle-même
+            # 🔽 1. Extraire le contenu de la page de départ elle-même
             try:
                 title, sections = extract_structured_content(start_page)
                 if sections:
-                    # ⚠️ Si ta fonction accepte output_dir, passe-le ; sinon, enlève l’argument.
-                    save_page_as_json(base_url, start_page, title, sections, output_dir=outdir)
+                    outlinks = extract_useful_links(start_page, base_url) or []
+                    save_page_as_json(base_url, start_page, title, sections, outlinks, str(outdir))
                     # save_page_as_json(base_url, start_page, title, sections)  # <- si ta signature ne prend pas output_dir
                     written.append(Path(outdir) / "???")  # (facultatif : si save_page_as_json renvoie un chemin, utilise-le)
                 else:
@@ -607,21 +607,24 @@ def scrape_all_trusted_sites(
 
             # 🔽 2. Ensuite, explorer les liens internes filtrés
             try:
-                links = extract_useful_links(start_page, base_url)
-                print(f"    - {len(links)} liens retenus (filtrés)")
-                for page_url in links:
+                level1_links = extract_useful_links(start_page, base_url)
+                print(f"    - {len(level1_links)} liens retenus (filtrés)")
+                for page_url in level1_links:
                     try:
                         title, sections = extract_structured_content(page_url)
                         if sections:
-                            save_page_as_json(base_url, page_url, title, sections, output_dir=outdir)
-                            # save_page_as_json(base_url, page_url, title, sections)  # si signature sans output_dir
-                            # written.append(Path(outdir) / "???")
+                            # 🔹 OUTLINKS de la page courante (obligatoire pour save_page_as_json)
+                            page_outlinks = extract_useful_links(page_url, base_url) or []
+                            save_page_as_json(
+                                base_url, page_url, title, sections, page_outlinks,
+                                output_dir=str(outdir)  # <-- keyword pour éviter l'ambiguïté
+                            )
                         else:
                             print(f"[WARN] Aucun contenu utile trouvé pour {page_url}")
                     except Exception as e:
                         print(f"[ERREUR] Extraction échouée pour {page_url} : {e}", file=sys.stderr)
             except Exception as e:
-                print(f"[ERREUR] Récupération des liens échouée pour {start_page} : {e}", file=sys.stderr)
+                print(f"[ERREUR] Exploration liens depuis {start_page} : {e}", file=sys.stderr)
 
     return written
 

@@ -45,3 +45,6 @@ fastapi==0.111.*
 uvicorn[standard]==0.30.*
 pydantic==2.8.*
 starlette==0.37.*
+pytest>=8.3,<9
+pytest-cov>=5,<6
+
