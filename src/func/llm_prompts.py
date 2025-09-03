@@ -608,7 +608,7 @@ def rag_llm_prompt_template_medical_plan():
 """
 -------------------------------
 """
-
+from config.config import int_1, int_2
 
 def rag_medical_response_from_llm(prompt_template, user_input, poa_content):
     """
@@ -628,11 +628,11 @@ def rag_medical_response_from_llm(prompt_template, user_input, poa_content):
         str: Réponse du modèle LLM enrichie par les documents référencés.
     """
 
-    print("📥 Étape 1 : récupération des chunks")
-    retrieved_chunks = retrieve_relevant_chunks(query=poa_content, top_k_docx=5, top_k_web=3, separator="\n\n")
-    print("🔍 retrieved_chunks OK")
+    print("✅ 1. récupération des chunks")
+    retrieved_chunks = retrieve_relevant_chunks(query=poa_content, top_k_docx=int_1, top_k_web=int_2, separator="\n\n")
+    print("✅ retrieved_chunks OK")
 
-    print("📥 Étape 2 : création des messages")
+    print("✅ 2. création des messages")
     try:
         messages = prompt_template.format_messages(
             user_input=user_input,
@@ -644,7 +644,7 @@ def rag_medical_response_from_llm(prompt_template, user_input, poa_content):
         print("❌ Erreur dans format_messages :", e)
         raise
 
-    print("📤 Étape 3: Envoi au modèle")
+    print("✅ 3. Envoi au modèle")
 
     try:
         print("\n====== MESSAGE FINAL ENVOYÉ AU LLM ======\n")
@@ -652,7 +652,7 @@ def rag_medical_response_from_llm(prompt_template, user_input, poa_content):
         print("=========================================\n")
 
         response = llm_model.invoke(messages).content
-        print("✅ Réponse modèle OK")
+        print("✅ 4. Réponse modèle OK")
         return response
 
     except Exception as e:
@@ -668,25 +668,3 @@ def rag_medical_response_from_llm(prompt_template, user_input, poa_content):
 
 
 
-"génère le contenu initial de index.md, architecture.md et les fichiers agent.md, tools.md en fonction de mon projet"
-"Prépare un docstring de module conforme à la norme PEP 257, en français, pour le fichier"
-
-"Prépare un Plan Personnalisé d'Accompagnement du patient Deloin"
-"Monsieur Deloin vient de faire une chute, donne moi la conduite à tenir"
-"Fais une recherche sur le web concernant les points de vigilance à observer suite à un AVC"
-"Prépare la section 1 du Plan Personnalisé d'Accompagnement du patient Deloin"
-"Prépare la section 3 du Plan Personnalisé d'Accompagnement du patient Deloin"
-"Affiche les constantes du patient Deloin"
-"Prépare une synthèse du plan personnalisé d'accompagnement pour le patient Deloin"
-"Fais une recherche sur les aides financières pour les patients GIR 4"
-
-# Lanement Docker: reconstruction image + construction container
-# 1. docker compose down
-# 2. docker compose up --build ou docker compose build --no-cache
-# 3. docker compose up
-
-# Lancement site doc
-# mkdocs serve
-
-# Lancement construction site statique doc projet
-# mkdocs build

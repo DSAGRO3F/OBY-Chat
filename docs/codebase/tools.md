@@ -697,14 +697,13 @@ Notes :
 ---
 
 <!---
-Module de scraping des sites web de confiance en santé.
+Version améliorée de `scrape_trusted_sites.py` (drop-in) — **docstrings en français**
 
-Ce module permet :
-- de charger dynamiquement la liste des sites référencés,
-- d’extraire les liens utiles à partir de pages de départ,
-- de structurer le contenu HTML pertinent (titres, paragraphes, listes),
-- et de sauvegarder les pages web sous forme de fichiers JSON pour indexation.
-Utilisé pour alimenter une base documentaire de recommandations en santé.
+Objectifs (tout en conservant l'API publique existante) :
+    - Gérer `h1/h4/ol/table/blockquote` dans l'extraction structurée **sans modifier le format de retour**.
+    - Enregistrer les **hyperliens par section** (persistés dans le JSON via `save_page_as_json`.
+    - Effectuer un **crawl BFS** jusqu'à **profondeur = 2** sur le **même domaine**, avec **limite de pages par site**.
+    - Extraire des **métadonnées** (date/auteur/canonique + **source originelle**), persistées avec la page JSON.
 --->
 
 ::: func.scrape_trusted_sites
@@ -861,15 +860,21 @@ vectorielles sont prêtes à être interrogées par les utilisateurs.
 ## 📁 Module : `llm_user_session`
 
 <!---
-Initialisation des modèles de langage utilisés dans l'application OBY-IA.
-Ce module charge les clés API depuis le fichier `.env` et instancie un modèle
-de langage compatible avec LangChain, en fonction de la configuration disponible.
-Actuellement :
-- Le modèle `ChatOpenAI` (GPT-4.1) est utilisé par défaut, en raison de la limitation
-  de tokens rencontrée avec Mistral lors du traitement de documents volumineux.
-- Le modèle `ChatMistralAI` reste présent en commentaire à des fins de test ou migration future.
-Variables :
-    llm_model : Instance unique du modèle LLM utilisé pour répondre aux requêtes utilisateur.
+Module de configuration du modèle LLM pour l'application OBY-IA.
+
+Ce module initialise un modèle de langage basé sur les clés API disponibles dans
+les variables d'environnement. L'ordre de priorité est le suivant :
+    1. Mistral (ChatMistralAI)
+    2. OpenAI (ChatOpenAI) en fallback si Mistral n'est pas disponible
+
+Il gère la sécurisation via des blocs try/except afin d'éviter un plantage en cas
+d'erreur d'initialisation (clé manquante, modèle indisponible, etc.). Tous les
+événements importants sont journalisés via le module standard `logging`.
+
+Attributs:
+    llm_model (ChatMistralAI | ChatOpenAI | None): 
+        Instance unique du modèle de langage, ou None si aucune initialisation
+        n'a pu être réalisée.
 --->
 
 ::: llm_user_session.model

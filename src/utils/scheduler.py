@@ -24,7 +24,6 @@ import sys
 import time
 import threading
 from datetime import datetime
-from pathlib import Path
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler

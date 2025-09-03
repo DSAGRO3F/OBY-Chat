@@ -2,7 +2,7 @@
 
 """
 chat.py : gérer les échanges utilisateur ⇄ OBY-IA
-📁 Chemin : src/api/routes/chat.py
+Chemin : src/api/routes/chat.py
 """
 
 
@@ -16,7 +16,7 @@ async def handle_chat_api(payload: ChatRequest) -> ChatResponse:
     """
     chat.py — Routes API pour la gestion des échanges entre l'utilisateur et OBY-IA.
 
-    📁 Chemin : src/api/routes/chat.py
+    Chemin : src/api/routes/chat.py
 
     Ce module définit les endpoints FastAPI permettant d'interagir avec l'agent
     conversationnel OBY-IA via API.

@@ -8,14 +8,17 @@ from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
 
 from langchain.schema import Document
+
+
 from src.func.index_documents_chromadb import get_chroma_client
 from config.config import CHROMA_GLOBAL_DIR, EMBEDDING_MODEL_NAME, NORMALIZE_EMBEDDINGS
 from src.utils.vector_db_utils import is_chroma_index_ready
+from config.config import int_1, int_2
 
 def retrieve_relevant_chunks(
     query: str,
-    top_k_docx: int = 5,
-    top_k_web: int = 3,
+    top_k_docx: int = int_1,
+    top_k_web: int = int_2,
     separator: str = "\n\n"
 ) -> str:
     """

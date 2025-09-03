@@ -102,3 +102,7 @@ USER_DATABASE = {
     "bob": "passbob"
 }
 
+# Valeurs nb chunks
+int_1 = 3
+int_2 = 2
+

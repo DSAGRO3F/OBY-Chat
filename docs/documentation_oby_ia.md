@@ -1527,13 +1527,12 @@
           - JSON_HEALTH_DOC_BASE (str) : Répertoire de destination des fichiers JSON générés.
 
       - scrape_all_trusted_sites
-        - Module de scraping des sites web de confiance en santé.
-        - Ce module permet :
-          - de charger dynamiquement la liste des sites référencés,
-          - d’extraire les liens utiles à partir de pages de départ,
-          - de structurer le contenu HTML pertinent (titres, paragraphes, listes),
-          - et de sauvegarder les pages web sous forme de fichiers JSON pour indexation.
-          - Utilisé pour alimenter une base documentaire de recommandations en santé.
+        - Version améliorée de `scrape_trusted_sites.py`
+        - Objectifs :
+          - Gérer `h1/h4/ol/table/blockquote` dans l'extraction structurée. 
+          - Enregistrer les **hyperliens par section** (persistés dans le JSON via `save_page_as_json`. 
+          - Effectuer un **crawl BFS** jusqu'à **profondeur = 2** sur le **même domaine**, avec **limite de pages par site**. 
+          - Extraire des **métadonnées** (date/auteur/canonique + **source originelle**), persistées avec la page JSON.
 
       - get_chroma_client
         - Module d’accès centralisé au client ChromaDB pour l'application OBY-IA.
