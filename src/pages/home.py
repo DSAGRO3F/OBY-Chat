@@ -228,7 +228,7 @@ def update_chroma_stats(_):
     return html.Div([
         html.Div([
             html.Img(src="/assets/icons/statistics.png?v=1", className="icon-inline"),
-            html.H4("Statistiques de l'indexation ChromaDB", className="d-inline-block ms-2")
+            html.H4("Statistiques indexation ChromaDB", className="d-inline-block ms-2")
         ], className="d-flex align-items-center mb-3"),
 
         html.Ul([
