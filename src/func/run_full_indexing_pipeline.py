@@ -86,7 +86,7 @@ def run_full_indexing_pipeline():
     print("[DEBUG ✅] clear_index_ready_flag() appelé")
 
     print("🟡 Lancement du pipeline d'indexation...")
-    print(f"🟡 Dossier d'entrée DOCX : {INPUT_DOCX}")
+    print(f"🟡 Dossier d'entrée DOCX + nb files: {INPUT_DOCX}, {len(INPUT_DOCX)}")
 
     # Détection des changements
     changes_dict = detect_changes_and_get_modified_files()
