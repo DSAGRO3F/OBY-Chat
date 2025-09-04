@@ -1,0 +1,1461 @@
+{
+    "usager": {
+        "Informations d'état civil": {
+            "clientId": 2930,
+            "personnePhysique": {
+                "civilite": "MME",
+                "nomFamille": "REALY",
+                "prenomsActeNaissance": "ISABELLE",
+                "premierPrenomActeNaissance": "ISABELLE",
+                "nomUtilise": "REALY",
+                "prenomUtilise": "ISABELLE",
+                "sexe": "F",
+                "dateNaissance": "1934-03-10 00:00:00",
+                "communeNaissance": {
+                    "codePostal": "94120",
+                    "libelleCommune": "94120 FONTENAY-SOUS-BOIS (JUSQU'AU 1968-01-01)",
+                    "inseeCommune": "75033"
+                },
+                "paysNaissance": {
+                    "libellePays": "France",
+                    "inseePays": null
+                },
+                "situationFamiliale": null
+            }
+        },
+        "adresse": {
+            "ligne": "rue isabelle",
+            "commentaire": "Accès : , digicode :  - Maison Code portail : 1234A La porte s'ouvre seule (ne pas la pousser). Elle se referme seule 30 secondes après ouverture.",
+            "codePostal": "94120",
+            "libelleCommune": "SAINT MAUR"
+        },
+        "contactInfosPersonnels": {
+            "domicile": null,
+            "mobile": "",
+            "mail": "isa@test.fr"
+        }
+    },
+    "contacts": [],
+    "aggir": {
+        "GIR": 6,
+        "dateModification": "13/08/2025",
+        "TempsAide24H": "0h16min",
+        "AggirVariable": [
+            {
+                "Nom": "Transferts",
+                "Resultat": "A",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "non"
+                    }
+                ]
+            },
+            {
+                "Nom": "Déplacements intérieurs",
+                "Resultat": "A",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "non"
+                    }
+                ]
+            },
+            {
+                "Nom": "Toilette",
+                "Resultat": "A",
+                "AggirSousVariable": [
+                    {
+                        "Nom": "Haut",
+                        "Resultat": "A",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    },
+                    {
+                        "Nom": "Bas",
+                        "Resultat": "A",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Nom": "Elimination",
+                "Resultat": "A",
+                "AggirSousVariable": [
+                    {
+                        "Nom": "Urinaire",
+                        "Resultat": "A",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    },
+                    {
+                        "Nom": "Fécale",
+                        "Resultat": "A",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Nom": "Habillage",
+                "Resultat": "A",
+                "AggirSousVariable": [
+                    {
+                        "Nom": "Haut",
+                        "Resultat": "A",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    },
+                    {
+                        "Nom": "Moyen",
+                        "Resultat": "A",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    },
+                    {
+                        "Nom": "Bas",
+                        "Resultat": "A",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Nom": "Cuisine",
+                "Resultat": "A",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "non"
+                    }
+                ]
+            },
+            {
+                "Nom": "Alimentation",
+                "Resultat": "A",
+                "AggirSousVariable": [
+                    {
+                        "Nom": "Se servir",
+                        "Resultat": "A",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    },
+                    {
+                        "Nom": "Manger",
+                        "Resultat": "A",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Nom": "Suivi du traitement",
+                "Resultat": "A",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "non"
+                    }
+                ]
+            },
+            {
+                "Nom": "Ménage",
+                "Resultat": "C",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "oui"
+                    }
+                ]
+            },
+            {
+                "Nom": "Alerter",
+                "Resultat": "A",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "non"
+                    }
+                ]
+            },
+            {
+                "Nom": "Déplacements extérieurs",
+                "Resultat": "A",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "non"
+                    }
+                ]
+            },
+            {
+                "Nom": "Transports",
+                "Resultat": "A",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "non"
+                    }
+                ]
+            },
+            {
+                "Nom": "Activités de temps libre",
+                "Resultat": "A",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "non"
+                    }
+                ]
+            },
+            {
+                "Nom": "Achats",
+                "Resultat": "C",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "oui"
+                    }
+                ]
+            },
+            {
+                "Nom": "Gestion",
+                "Resultat": "C",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "oui"
+                    }
+                ]
+            },
+            {
+                "Nom": "Orientation",
+                "Resultat": "A",
+                "AggirSousVariable": [
+                    {
+                        "Nom": "Temps",
+                        "Resultat": "A",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    },
+                    {
+                        "Nom": "Espace",
+                        "Resultat": "A",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Nom": "Cohérence",
+                "Resultat": "A",
+                "AggirSousVariable": [
+                    {
+                        "Nom": "Communication",
+                        "Resultat": "A",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    },
+                    {
+                        "Nom": "Comportement",
+                        "Resultat": "A",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "social": {
+        "blocs": [
+            {
+                "nom": "Contexte",
+                "questionReponse": [
+                    {
+                        "question": "NATURE DE LA DEMANDE",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "ORIGINE DE LA DEMANDE",
+                        "reponse": "Prof. santé"
+                    },
+                    {
+                        "question": "TIERS PRÉSENT OU CONTACT POUR CETTE ÉVALUATION",
+                        "reponse": "Non"
+                    },
+                    {
+                        "question": "Commentaires du tiers présent ou du contact principal",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "CAPACITÉ D'EXPRESSION DE LA PERSONNE",
+                        "reponse": "Oui"
+                    },
+                    {
+                        "question": "Expression de la personne (souhaits, projets, attentes,…)",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "Précisions sur l'origine de l'orientation vers nos services",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "Date de la demande",
+                        "reponse": "2025-08-04"
+                    },
+                    {
+                        "question": "Date du rendez-vous",
+                        "reponse": "2025-08-05"
+                    },
+                    {
+                        "question": "Heure du rendez-vous",
+                        "reponse": "15:45"
+                    },
+                    {
+                        "question": "Commentaires de l'évaluateur sur le contexte de la demande",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "ÉVÈNEMENTS ET SITUATION DE RUPTURE",
+                        "reponse": "Hospitalisation récente"
+                    }
+                ]
+            },
+            {
+                "nom": "Habitat",
+                "questionReponse": [
+                    {
+                        "question": "LOCALISATION",
+                        "reponse": "Urbain"
+                    },
+                    {
+                        "question": "TYPE DE LOGEMENT",
+                        "reponse": "Maison"
+                    },
+                    {
+                        "question": "STATUT",
+                        "reponse": "Propriétaire"
+                    },
+                    {
+                        "question": "ÉLÉMENTS D'ACCESSIBILITÉ AU LOGEMENT",
+                        "reponse": "Marches"
+                    },
+                    {
+                        "question": "SURFACE APPROXIMATIVE DU LOGEMENT",
+                        "reponse": "de 81 à 100 M2"
+                    },
+                    {
+                        "question": "COMMERCES ET SERVICES DE PROXIMITÉ ( À MOINS DE 10 MN DE MARCHE)",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "MOYENS DE TRANSPORT À PROXIMITÉ (A MOINS DE 10 MN À PIED - INDIQUEZ SI POSSIBLE LES LIGNES ET ARRÊTS)",
+                        "reponse": "."
+                    },
+                    {
+                        "question": "Commentaires de l'évaluateur sur l'habitat et l'environnement de proximité",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "Composition du logement",
+                        "reponse": "Séjour=;&; Chambre=;&; SDB=;&; WC=;&; Couloirs="
+                    }
+                ]
+            },
+            {
+                "nom": "Vie Sociale",
+                "questionReponse": [
+                    {
+                        "question": "SITUATION FAMILIALE",
+                        "reponse": "Marié(e)"
+                    },
+                    {
+                        "question": "MODE DE VIE",
+                        "reponse": "Vit avec personne autonome"
+                    },
+                    {
+                        "question": "MESURE DE PROTECTION",
+                        "reponse": "Aucune mesure"
+                    },
+                    {
+                        "question": "PRÉSENCE D'UN ANIMAL DE COMPAGNIE",
+                        "reponse": "Non"
+                    },
+                    {
+                        "question": "PRÉCAUTIONS A PRENDRE VIS-À-VIS DE L'ANIMAL DE COMPAGNIE",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "LA PERSONNE REÇOIT-ELLE DES VISITES DE PROCHES ?",
+                        "reponse": "Plusieurs fois par semaine"
+                    },
+                    {
+                        "question": "Activités au domicile",
+                        "reponse": "Non"
+                    },
+                    {
+                        "question": "Participation à des activités à l’extérieur",
+                        "reponse": "Non"
+                    },
+                    {
+                        "question": "SOUHAIT D'AUTRES ACTIVITÉS",
+                        "reponse": "Non"
+                    },
+                    {
+                        "question": "Si oui lesquelles?",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "LA PERSONNE ÉPROUVE-T-ELLE UN SENTIMENT D'ISOLEMENT OU DE SOLITUDE ?",
+                        "reponse": "Non"
+                    },
+                    {
+                        "question": "DESCRIPTION DES ACTIVITES AU DOMICILE",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "DESCRIPTION DES ACTIVITES A L'EXTÉRIEUR",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "Commentaire de l'évaluateur sur la participation social",
+                        "reponse": "Non renseigné"
+                    }
+                ]
+            },
+            {
+                "nom": "PEC",
+                "questionReponse": [
+                    {
+                        "question": "PLAN D'AIDE EN COURS",
+                        "reponse": "APA"
+                    },
+                    {
+                        "question": "AIDE EXTRA LÉGALE EN COURS",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "COORDONNÉES DE L'ORGANISME INTERVENANT DANS LE FINANCEMENT",
+                        "reponse": "Apa94"
+                    },
+                    {
+                        "question": "NUMÉRO DE DOSSIER",
+                        "reponse": "4534534534"
+                    },
+                    {
+                        "question": "DROITS OUVERTS DU",
+                        "reponse": "2021-08-31"
+                    },
+                    {
+                        "question": "AU",
+                        "reponse": "2031-02-28"
+                    },
+                    {
+                        "question": "CLASSEMENT GIR RETENU",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "TAUX DE PARTICIP. USAGER",
+                        "reponse": "15,44"
+                    },
+                    {
+                        "question": "MODE D'INTERVENTION DE L'AIDE HUMAINE",
+                        "reponse": "Prestataire"
+                    },
+                    {
+                        "question": "Nombre mensuel d'heures semaine au plan d'aide - Prestataire",
+                        "reponse": "52"
+                    },
+                    {
+                        "question": "Taux horaire heure semaine - Prestataire",
+                        "reponse": "23.5"
+                    },
+                    {
+                        "question": "Taux de participation usager - Prestataire",
+                        "reponse": "1196"
+                    },
+                    {
+                        "question": "Autres éléments inscrits au plan d'aide",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "INFORMATIONS SUPPLEMENTAIRES SUR LES AIDES EXTRA LEGALES",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "Commentaires de l'évaluateur sur la prise en charge (préciser si le médecin traitant est informé de la démarche)",
+                        "reponse": "Non renseigné"
+                    }
+                ]
+            }
+        ]
+    },
+    "materiels": [],
+    "sante": {
+        "blocs": [
+            {
+                "nom": "Cardio-Respiratoire",
+                "questionReponse": [
+                    {
+                        "question": "Le patient a-t-il des difficultés pour respirer ?",
+                        "reponse": "Jamais"
+                    },
+                    {
+                        "question": "Le patient reçoit-il de l'oxygène sur prescription médicale ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Le patient dort-il en position demi assise ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Le patient est-il porteur(se) d'un Pace maker ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Le patient a-t-il les jambes qui gonflent ?",
+                        "reponse": "Non"
+                    },
+                    {
+                        "question": "Le patient dort-il avec les jambes surélevées et/ou porte-t-il des bas de contention ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Ajouter un commentaire :",
+                        "reponse": "Patient présente une FA avec pacemaker et HTA"
+                    }
+                ]
+            },
+            {
+                "nom": "Elimination",
+                "questionReponse": [
+                    {
+                        "question": "Le patient est-il stomisé ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Si oui, de quel(s) type(s) de stomie(s) s'agit-il ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Qui gère les changements de poche ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Qui gère les changements de support de la stomie ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Le patient ressent-il des troubles du transit intestinal ?",
+                        "reponse": "Constipation"
+                    },
+                    {
+                        "question": "Le patient est-il porteur d'une sonde vésicale à demeure ou d'un étui pénien ?",
+                        "reponse": "Non"
+                    },
+                    {
+                        "question": "Qui gère les changements du collecteur d'urine ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Le patient éprouve-t-il habituellement des difficultés pour uriner ?",
+                        "reponse": "Difficulté à se retenir"
+                    },
+                    {
+                        "question": "Port de protection :",
+                        "reponse": "Change complet"
+                    },
+                    {
+                        "question": "Ajouter un commentaire :",
+                        "reponse": "Surveillance du transit a été instauré au domicile"
+                    }
+                ]
+            },
+            {
+                "nom": "Général et ressenti",
+                "questionReponse": [
+                    {
+                        "question": "Recueil de la personne sur son état de santé, ses maladies ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Par rapport aux personnes du même âge, comment le patient, juge-t-il son état de santé ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Ajouter un commentaire :",
+                        "reponse": ""
+                    }
+                ]
+            },
+            {
+                "nom": "Mobilité",
+                "questionReponse": [
+                    {
+                        "question": "Présence d'un déficit moteur ?",
+                        "reponse": "Origine neurologique"
+                    },
+                    {
+                        "question": "Difficulté à certains efforts ou ports de charges de la vie quotidienne ?",
+                        "reponse": "Beaucoup"
+                    },
+                    {
+                        "question": "Porte des chaussures orthopédiques ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Porte des prothèses ou orthèses ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Description de la prothèse ou de l'orthèse :",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Ajouter des commentaires :",
+                        "reponse": "Ne se lève qu'en fauteuil"
+                    },
+                    {
+                        "question": "Ajouter des commentaires :",
+                        "reponse": " ne tient pas debout"
+                    },
+                    {
+                        "question": "Ajouter des commentaires :",
+                        "reponse": " et chute régulièrement"
+                    }
+                ],
+                "test": [
+                    {
+                        "nom": "Test du lever de chaise",
+                        "resultat": "13/08/2025"
+                    },
+                    {
+                        "nom": "Test d'équilibre",
+                        "resultat": "13/08/2025"
+                    },
+                    {
+                        "nom": "Test de la vitesse de marche sur 4 mètres",
+                        "resultat": "13/08/2025"
+                    },
+                    {
+                        "nom": "Test du lever de chaise",
+                        "resultat": "Non réalisable"
+                    },
+                    {
+                        "nom": "Test d'équilibre",
+                        "resultat": "Non réalisable"
+                    },
+                    {
+                        "nom": "Test de la vitesse de marche sur 4 mètres",
+                        "resultat": "Non réalisable"
+                    }
+                ]
+            },
+            {
+                "nom": "Nutrition",
+                "questionReponse": [
+                    {
+                        "question": "Le patient s'alimente-t-il via une sonde ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Quel type de sonde est utilisée pour sa nutrition ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Le patient a-t-il présenté une baisse des prises alimentaires ces 3 derniers mois ?",
+                        "reponse": "Baisse sévère des prises alimentaires"
+                    },
+                    {
+                        "question": "Le patient a-t-il eu une perte récente de poids au cours des 3 derniers mois ?",
+                        "reponse": "Ne sait pas"
+                    },
+                    {
+                        "question": "Le patient a-t-il eu une maladie aigüe ou un stress psychologique au cours des 3 derniers mois :",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Un régime est-il médicalement prescrit et suivi par le patient ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Si oui quel type de régime (plusieurs choix possibles) :",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Le patient est-il allergique à certains aliments ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Quels aliments ?",
+                        "reponse": "Allergique au lactose (diarrhée +++)"
+                    },
+                    {
+                        "question": "Le patient éprouve-t-il des difficultés pour mâcher ou avaler les aliments ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Quelles difficultés pour mâcher ou avaler les aliments ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Sous quelle forme de texture les aliments vous sont-ils présentés ?",
+                        "reponse": "Mixée"
+                    },
+                    {
+                        "question": "Le patient porte-t-il un appareil dentaire ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Continue-t-il à s'hydrater par la bouche ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Qui s'occupe de sa nutrition entérale ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Taille (en cm) :",
+                        "reponse": "150"
+                    },
+                    {
+                        "question": "Poids (en kg) :",
+                        "reponse": "40"
+                    },
+                    {
+                        "question": "Ajouter un commentaire :",
+                        "reponse": "Pour le poids la patiente n'a pas mangé pendant son hospitalisation et n'a pas été pesé. Elle remange depuis son retour de l'hôpital 06/08/2025."
+                    }
+                ],
+                "test": [
+                    {
+                        "nom": "IMC",
+                        "resultat": "17.8"
+                    },
+                    {
+                        "nom": "Interprétation IMC",
+                        "resultat": "Madame REALY  est en Insuffisance pondérale légère"
+                    },
+                    {
+                        "nom": "Interprétation IMC",
+                        "resultat": "13/08/2025"
+                    },
+                    {
+                        "nom": "ICOPE NUTRITION",
+                        "resultat": "Baisse sévère des prises alimentaires - Ne sait pas | ICOPE NUTRITION perturbé"
+                    },
+                    {
+                        "nom": "ICOPE NUTRITION",
+                        "resultat": " évaluation médicale ou diététique recommandée"
+                    },
+                    {
+                        "nom": "ICOPE NUTRITION",
+                        "resultat": "13/08/2025"
+                    },
+                    {
+                        "nom": "Test de dépistage du MNA",
+                        "resultat": "Veuillez remplir le bloc nutrition"
+                    },
+                    {
+                        "nom": "Test de dépistage du MNA",
+                        "resultat": "13/08/2025"
+                    }
+                ]
+            },
+            {
+                "nom": "Douleur",
+                "questionReponse": [
+                    {
+                        "question": "Le patient est-il en mesure de communiquer sur ses douleurs ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Le patient signale-t-il des douleurs ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Sur une échelle de 0 (pas de douleurs) à 10 (douleur insupportable), où le patient situe-t-il l'intensité de ses douleurs ?",
+                        "reponse": "7"
+                    },
+                    {
+                        "question": "Nature des douleurs :",
+                        "reponse": "Au repos"
+                    },
+                    {
+                        "question": "Nature des douleurs :",
+                        "reponse": "Lors de la mobilisation"
+                    },
+                    {
+                        "question": "Manifestations somatiques de la douleur :",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Description  des manifestations somatiques de la douleur :",
+                        "reponse": "Brulure et pique"
+                    },
+                    {
+                        "question": "Description  des manifestations somatiques de la douleur :",
+                        "reponse": " chauffe"
+                    },
+                    {
+                        "question": "Ajouter un commentaire (localisation, description, mode d'apparition, etc..) :",
+                        "reponse": "Par contre elle a mal seulement à la mobilisation ou quand on touche et là on est 6 voire 7/10"
+                    }
+                ]
+            },
+            {
+                "nom": "Sensoriel",
+                "questionReponse": [
+                    {
+                        "question": "Le patient porte-t-il des lunettes ou des lentilles de contact ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Le patient a-t-il des problèmes oculaires et non oculaires, des difficultés pour voir de loin ou pour lire ? Des maladies oculaires ? Du diabète ? De l'HTA ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Le patient a-t-il des troubles de la sensibilité ?",
+                        "reponse": "Sensation douloureuse"
+                    },
+                    {
+                        "question": "Précisez la localisation :",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Le patient a-t-il l'impression que son audition a baissé au cours des 4 derniers mois ou depuis votre dernière évaluation ?",
+                        "reponse": "NE SAIT PAS"
+                    },
+                    {
+                        "question": "Le patient a-t-il un appareil auditif ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Résultat du test Oreille Droite :",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Résultat du test Oreille Gauche :",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Ajouter un commentaire :",
+                        "reponse": "la patiente entend bien"
+                    }
+                ],
+                "test": [
+                    {
+                        "nom": "Icope déficience visuelle",
+                        "resultat": "13/08/2025"
+                    },
+                    {
+                        "nom": "Icope audition",
+                        "resultat": "13/08/2025"
+                    }
+                ]
+            },
+            {
+                "nom": "Peau",
+                "questionReponse": [
+                    {
+                        "question": "Le patient a-t-il des antécédents d'escarres ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Présence actuelle d'escarres :",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Localisation actuelle des escarres :",
+                        "reponse": "sacrum : protocole (urgotull = interface + hydrocellulaire = mepilex)"
+                    },
+                    {
+                        "question": "Le patient possède-t-il d’autres problèmes de peau et téguments ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Description des autres problèmes de peau et téguments :",
+                        "reponse": "Irritation voir érythème fessier et vulvaire liée au diarrhée après la lever de son occlusion"
+                    },
+                    {
+                        "question": "Ajouter un commentaire :",
+                        "reponse": "Escarre : Plaie non inflammatoire stade 2"
+                    }
+                ],
+                "test": [
+                    {
+                        "nom": "Evaluation du risque d'escarre selon l'échelle de Norton (Basé sur l'évaluation AGGIR)",
+                        "resultat": "Mme REALY  est sans risque d'escarre"
+                    },
+                    {
+                        "nom": "Evaluation du risque d'escarre selon l'échelle de Norton (Basé sur l'évaluation AGGIR)",
+                        "resultat": "13/08/2025"
+                    }
+                ]
+            },
+            {
+                "nom": "Seuils",
+                "seuil": []
+            },
+            {
+                "nom": "Saisir les mesures des constantes",
+                "mesureConstante": []
+            }
+        ]
+    },
+    "dispositifs": [],
+    "poaSocial": {
+        "problemes": [
+            {
+                "nomBloc": "Contexte",
+                "statut": "Actif",
+                "problemePose": "Événements et situation de rupture : Hospitalisation récente",
+                "objectifs": "Prévenir une nouvelle hospitalisation.",
+                "preoccupationPatient": "Faible",
+                "preoccupationProfessionel": "Faible",
+                "planActions": [],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Habitat",
+                "statut": "Actif",
+                "problemePose": "ACCES LOGEMENT: Marches",
+                "objectifs": "Permettre une circulation et une déambulation aisée et sans risques",
+                "preoccupationPatient": "Faible",
+                "preoccupationProfessionel": "Faible",
+                "planActions": [],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Vie Sociale",
+                "statut": "Inactif",
+                "problemePose": ".",
+                "objectifs": ".",
+                "preoccupationPatient": "Faible",
+                "preoccupationProfessionel": "Faible",
+                "planActions": [],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Prise En Charge",
+                "statut": "Actif",
+                "problemePose": "Prise en charge actuelle APA et GIR APA",
+                "objectifs": "Adapter le plan d'aide actuel aux besoins de la personne.",
+                "preoccupationPatient": "Faible",
+                "preoccupationProfessionel": "Faible",
+                "planActions": [],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Matériel et Autonomie",
+                "statut": "Inactif",
+                "problemePose": "",
+                "objectifs": "",
+                "preoccupationPatient": "",
+                "preoccupationProfessionel": "",
+                "planActions": [],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            }
+        ]
+    },
+    "poaSante": {
+        "problemes": [
+            {
+                "nomBloc": "Cardio-Respiratoire",
+                "statut": "Inactif",
+                "problemePose": "",
+                "objectifs": "",
+                "preoccupationPatient": "",
+                "preoccupationProfessionel": "",
+                "planActions": [],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Nutrition",
+                "statut": "Actif",
+                "problemePose": "IMC : 17.8 Madame REALY  est en Insuffisance pondérale légère\nMNA de dépistage : 7 / 14 : NON,Baisse sévère des prises alimentaires,Ne sait pas,NON,17.8,Veuillez remplir le bloc nutrition\nICOPE NUTRITION : - Perte d'appétit récente : Baisse sévère des prises alimentaires - Perte de poids récente : Ne sait pas\nAllergies : Allergique au lactose (diarrhée +++)\nDifficultés de mastication ou déglutition avec l'alimentation de type Non renseignée : Mixée",
+                "objectifs": "IMC compris entre 18,5 et 25.\nAider à la prise en charge des problèmes nutritionnels.\nVeiller a l'éviction des aliments contenant des ingrédients auxquels la personne est allergique.\nEviter les fausses routes et favoriser une bonne digestion des aliments.",
+                "preoccupationPatient": "Assez faible",
+                "preoccupationProfessionel": "Assez élevée",
+                "planActions": [],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Elimination",
+                "statut": "Actif",
+                "problemePose": "Troubles pour uriner : Difficulté à se retenir - Port de protection : Change complet\nTroubles digestifs : Constipation\nProtections hygiéniques : Change complet",
+                "objectifs": "Aider à la prise en charge des problèmes urinaires.\nAider la personne à la prise en charge des problèmes digestifs.\nMaintenir l'hygiène intime de la personne.",
+                "preoccupationPatient": "Assez élevée",
+                "preoccupationProfessionel": "Assez élevée",
+                "planActions": [],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Mobilité",
+                "statut": "Actif",
+                "problemePose": "Déficit moteur : Origine neurologique\nICOPE MOBILITE : Troubles de l'équilibre: Test d'équilibre Non réalisable",
+                "objectifs": "Permettre à la personne de maintenir son autonomie en sécurité.",
+                "preoccupationPatient": "Assez faible",
+                "preoccupationProfessionel": "Assez élevée",
+                "planActions": [],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Peau",
+                "statut": "Actif",
+                "problemePose": "Autres problèmes cutanés : Irritation voir érythème fessier et vulvaire liée au diarrhée après la lever de son occlusion",
+                "objectifs": "Maintenir lune peau saine.",
+                "preoccupationPatient": "Assez faible",
+                "preoccupationProfessionel": "Assez faible",
+                "planActions": [],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Sensoriel",
+                "statut": "Actif",
+                "problemePose": "ICOPE DEFICIENCE VISUELLE : OUI : \nTroubles de la sensibilité : Sensation douloureuse",
+                "objectifs": "Prendre en charge la déficience visuelle et ses conséquences.\nEviter les douleurs et les conséquences des troubles de la sensibilité.",
+                "preoccupationPatient": "Faible",
+                "preoccupationProfessionel": "Faible",
+                "planActions": [],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Douleur",
+                "statut": "Actif",
+                "problemePose": "Douleur : Au repos,Lors de la mobilisation - Echelle EVA de la douleur : 7 / 10\nManifestations somatiques : OUI (Brulure et pique,chauffe)",
+                "objectifs": "Prendre en charge les douleurs signalées par le patient.\nSurveiller et prendre en charge les manifestations somatiques de la douleur.",
+                "preoccupationPatient": "Assez élevée",
+                "preoccupationProfessionel": "Assez élevée",
+                "planActions": [],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Cognition",
+                "statut": "Inactif",
+                "problemePose": "",
+                "objectifs": "",
+                "preoccupationPatient": "",
+                "preoccupationProfessionel": "",
+                "planActions": [],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Polymédications",
+                "statut": "Inactif",
+                "problemePose": "",
+                "objectifs": "",
+                "preoccupationPatient": "",
+                "preoccupationProfessionel": "",
+                "planActions": [],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Autres",
+                "statut": "Inactif",
+                "problemePose": "",
+                "objectifs": "",
+                "preoccupationPatient": "",
+                "preoccupationProfessionel": "",
+                "planActions": [],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            }
+        ]
+    },
+    "poaAutonomie": ""
+}

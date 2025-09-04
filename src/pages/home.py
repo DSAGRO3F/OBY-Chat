@@ -234,11 +234,11 @@ def update_chroma_stats(_):
         html.Ul([
             html.Li([
                 html.Img(src="/assets/icons/message.png?v=1", className="icon-inline me-2"),
-                f"Fichiers DOCX indexés : {stats['docx_files']} fichiers – {stats['docx_chunks']} sections"
+                f"Fichiers DOCX indexés : {stats['docx_files']} fichiers – {stats['docx_chunks']} chunks"
             ]),
             html.Li([
                 html.Img(src="/assets/icons/robot.png?v=1", className="icon-inline me-2"),
-                f"Pages web indexées : {stats['web_files']} URLs – {stats['web_chunks']} sections"
+                f"Pages web indexées : {stats['web_files']} URLs – {stats['web_chunks']} chunks"
             ]),
             html.Li([
                 html.Img(src="/assets/icons/table.png?v=1", className="icon-inline me-2"),

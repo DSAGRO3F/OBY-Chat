@@ -569,11 +569,10 @@ def save_page_as_json(base_url: str, page_url: str, title: str, sections: list, 
 def scrape_all_trusted_sites(
     trusted_sites: Optional[List[Dict[str, Any]]] = None,
     output_dir: Optional[str | Path] = None,
-) -> List[Path]:
+):
     """
     Scrape les sites de confiance et sauvegarde les JSON.
-    - Paramètres optionnels : si absents, on charge depuis la config (rétro-compat).
-    - Retourne la liste des fichiers JSON écrits (pratique pour les tests).
+    - Paramètres optionnels : si absents, on charge depuis la config.
     """
     # Valeurs par défaut si non fournies (→ compat avec tes anciens appels sans arguments)
     if trusted_sites is None:
@@ -582,30 +581,30 @@ def scrape_all_trusted_sites(
         output_dir = WEB_SITES_JSON_HEALTH_DOC_BASE
 
     outdir = _ensure_output_dir(output_dir)
-    written: List[Path] = []
+    # written: List[Path] = []
 
     for site in trusted_sites:
         name = site.get("name")
         base_url = site.get("base_url")
-        start_pages = site.get("start_pages", [])
+        start_pages = site.get("start_pages") or site.get("start_urls") or []
         print(f"\n[INFO] Traitement du site : {name} ({base_url})")
         for start_page in start_pages:
             print(f"  > Page de départ : {start_page}")
 
-            # 🔽 1. Extraire le contenu de la page de départ elle-même
+            # ✅ Extraire le contenu de la page de départ elle-même
             try:
                 title, sections = extract_structured_content(start_page)
                 if sections:
                     outlinks = extract_useful_links(start_page, base_url) or []
                     save_page_as_json(base_url, start_page, title, sections, outlinks, str(outdir))
-                    # save_page_as_json(base_url, start_page, title, sections)  # <- si ta signature ne prend pas output_dir
-                    written.append(Path(outdir) / "???")  # (facultatif : si save_page_as_json renvoie un chemin, utilise-le)
+
+                    # written.append(Path(outdir))
                 else:
                     print(f"[WARN] Aucun contenu utile trouvé pour page de départ : {start_page}")
             except Exception as e:
                 print(f"[ERREUR] Extraction échouée pour {start_page} : {e}", file=sys.stderr)
 
-            # 🔽 2. Ensuite, explorer les liens internes filtrés
+            # ✅ Ensuite, explorer les liens internes filtrés
             try:
                 level1_links = extract_useful_links(start_page, base_url)
                 print(f"    - {len(level1_links)} liens retenus (filtrés)")
@@ -615,10 +614,7 @@ def scrape_all_trusted_sites(
                         if sections:
                             # 🔹 OUTLINKS de la page courante (obligatoire pour save_page_as_json)
                             page_outlinks = extract_useful_links(page_url, base_url) or []
-                            save_page_as_json(
-                                base_url, page_url, title, sections, page_outlinks,
-                                output_dir=str(outdir)  # <-- keyword pour éviter l'ambiguïté
-                            )
+                            save_page_as_json(base_url, page_url, title, sections, page_outlinks,str(outdir))
                         else:
                             print(f"[WARN] Aucun contenu utile trouvé pour {page_url}")
                     except Exception as e:
@@ -626,7 +622,7 @@ def scrape_all_trusted_sites(
             except Exception as e:
                 print(f"[ERREUR] Exploration liens depuis {start_page} : {e}", file=sys.stderr)
 
-    return written
+    # return written
 
 
 # -----------------------------------------------------------------------------
@@ -641,7 +637,7 @@ if __name__ == "__main__":
             ],
         }
     ]
-    out = scrape_all_trusted_sites(SITES, output_dir=os.path.join("outputs", "web_pages_json"))
+    out = scrape_all_trusted_sites(SITES, output_dir=WEB_SITES_JSON_HEALTH_DOC_BASE)
     print(json.dumps(out, indent=2, ensure_ascii=False))
 
 

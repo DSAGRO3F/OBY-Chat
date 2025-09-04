@@ -13,8 +13,16 @@ Chaque site est représenté par :
 Cette liste est utilisée par les modules de scraping et d’indexation.
 """
 
-
-
+# trusted_sites = [
+#     {
+#         "name": "INCa",
+#         "base_url": "https://e-cancer.fr",
+#         "start_pages": [
+#             "https://e-cancer.fr/toute-l-information-sur-les-cancers/prevenir-les-risques-de-cancers/comment-prevenir-au-mieux-les-risques-de-cancers"
+#         ]
+#     },
+#
+# ]
 trusted_sites = [
     {
         "name": "HAS",
@@ -110,13 +118,7 @@ trusted_sites = [
             "https://eurofins-biomnis.com/specialites/"
         ]
     },
-    {
-        "name": "Lab Tests Online",
-        "base_url": "https://hopital.fr",
-        "start_pages": [
-            "https://hopital.fr/Actualites/Lancement-de-la-version-francaise-de-Lab-Tests-on-line"
-        ]
-    },
+
     {
     "name": "MedG",
     "base_url": "https://medg.fr",
@@ -149,144 +151,3 @@ trusted_sites = [
 }
 ]
 
-
-
-
-
-
-
-
-
-
-# trusted_sites = [
-#     {
-#         "name": "HAS",
-#         "base_url": "https://www.has-sante.fr",
-#         "start_pages": [
-#             "https://www.has-sante.fr/jcms/c_2028194/fr/prendre-en-charge-une-personne-agee-polypathologique-en-soins-primaires"
-#         ]
-#     },
-#     {
-#         "name": "Personnes âgées",
-#         "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
-#         "start_pages": [
-#             "https://www.pour-les-personnes-agees.gouv.fr",
-#             "https://www.pour-les-personnes-agees.gouv.fr/acces-annuaires",
-#             "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/perte-d-autonomie-evaluation-et-droits/comment-fonctionne-la-grille-aggir"
-#         ]
-#     },
-#     {
-#         "name": "Ministère Santé",
-#         "base_url": "https://www.sante.gouv.fr",
-#         "start_pages": [
-#             "https://www.sante.gouv.fr/soins-et-maladies/prises-en-charge-specialisees/article/personnes-agees-mobiliser-l-ensemble-des-ressources-pour-renforcer-leur-acces",
-#             "https://www.sante.gouv.fr/fichiers/bo/2014/14-01/ste_20140001_0000_0074.pdf"
-#         ]
-#     },
-#     {
-#         "name": "Solidarités",
-#         "base_url": "https://www.solidarites.gouv.fr",
-#         "start_pages": [
-#             "https://www.solidarites.gouv.fr/centre-de-ressources-territorial"
-#         ]
-#     },
-#     {
-#         "name": "MSD Manuals",
-#         "base_url": "https://www.msdmanuals.com",
-#         "start_pages": [
-#             "https://www.msdmanuals.com/fr/accueil/la-santé-des-personnes-âgées/dispenser-des-soins-aux-adultes-âgés/continuité-des-soins-pour-les-adultes-âgés"
-#         ]
-#     },
-#     {
-#         "name": "SFGG",
-#         "base_url": "https://sfgg.org",
-#         "start_pages": [
-#             "https://sfgg.org",
-#             "https://sfgg.org/?s=Démarche+clinique+du+sujet+âgé&scope=contents"
-#         ]
-#     },
-#     {
-#         "name": "SPLF",
-#         "base_url": "https://splf.fr",
-#         "start_pages": [
-#             "https://splf.fr/les-groupes-de-travail-de-la-splf/"
-#         ]
-#     },
-#     {
-#         "name": "SFNDT",
-#         "base_url": "https://sfndt.org",
-#         "start_pages": [
-#             "https://sfndt.org/professionnels/recommandations-pour-la-pratique-clinique"
-#         ]
-#     },
-#     {
-#         "name": "SFMG",
-#         "base_url": "https://sfmg.fr",
-#         "start_pages": [
-#             "https://sfmg.fr"
-#         ]
-#     },
-#     {
-#         "name": "INCa",
-#         "base_url": "https://e-cancer.fr",
-#         "start_pages": [
-#             "https://e-cancer.fr/toute-l-information-sur-les-cancers/prevenir-les-risques-de-cancers/comment-prevenir-au-mieux-les-risques-de-cancers"
-#         ]
-#     },
-#     {
-#         "name": "SPILF",
-#         "base_url": "https://infectiologie.com",
-#         "start_pages": [
-#             "https://infectiologie.com/fr/recommandations.html"
-#         ]
-#     },
-#     {
-#         "name": "Unilabs",
-#         "base_url": "https://www.unilabs.fr",
-#         "start_pages": [
-#             "https://www.unilabs.fr/professionnels"
-#         ]
-#     },
-#     {
-#         "name": "Cerba",
-#         "base_url": "https://lab-cerba.com",
-#         "start_pages": [
-#             "https://lab-cerba.com/fr/nos-expertises"
-#         ]
-#     },
-#     {
-#         "name": "Biomnis",
-#         "base_url": "https://eurofins-biomnis.com",
-#         "start_pages": [
-#             "https://eurofins-biomnis.com/specialites/"
-#         ]
-#     },
-#     {
-#         "name": "Vidal",
-#         "base_url": "https://vidalfrance.com",
-#         "start_pages": [
-#             "https://vidalfrance.com/ressources/guides"
-#         ]
-#     },
-#     {
-#         "name": "Thériaque",
-#         "base_url": "https://theriaque.org",
-#         "start_pages": [
-#             "https://theriaque.org/apps/contenu/accueil.php"
-#         ]
-#     },
-#     {
-#         "name": "Lab Tests Online",
-#         "base_url": "https://hopital.fr",
-#         "start_pages": [
-#             "https://hopital.fr/Actualites/Lancement-de-la-version-francaise-de-Lab-Tests-on-line"
-#         ]
-#     },
-#     {
-#         "name": "MedG",
-#         "base_url": "https://medg.fr",
-#         "start_pages": [
-#             "https://medg.fr/matiere/geriatrie/"
-#         ]
-#     }
-# ]
