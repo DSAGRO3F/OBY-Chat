@@ -259,7 +259,6 @@ def handle_user_input_or_logout(send_clicks, user_input, chat_history, session_d
         chat_display = html.Div(full_chat_history)
 
 
-
     # ✅ 4. Renvoi au layout
     return (
         full_chat_history,

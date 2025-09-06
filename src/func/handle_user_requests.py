@@ -734,7 +734,6 @@ def handle_confirmation_response(user_input, session,
                 figs_list, table_html, anomaly_block = [], "", ""
 
 
-
     else:
         # Rejet de l’intention
         session["intent_confirmation_pending"] = False

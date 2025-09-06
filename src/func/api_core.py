@@ -116,7 +116,6 @@ def process_user_input(
             chat_history, current_patient, output_mode=output_mode
         )
 
-
         partial_chat_from_user_request = chat_from_confirmation_request
 
         return ChatResponse(

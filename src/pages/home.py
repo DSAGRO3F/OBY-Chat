@@ -85,7 +85,6 @@ layout = dbc.Container([
     dcc.Store(id="session_data", storage_type="session")
 ], fluid=True)
 
-
 # ===============================================#
 # Callback de gestion de l’authentification
 # ===============================================#

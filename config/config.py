@@ -15,7 +15,6 @@ Toutes les variables sont conçues pour être importées et utilisées par les d
 du projet.
 """
 
-
 import os
 from pathlib import Path
 

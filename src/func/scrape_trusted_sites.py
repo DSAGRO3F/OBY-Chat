@@ -515,7 +515,6 @@ def scrape_all_trusted_sites(trusted_sites: Optional[List[Dict]] = None,
     _log_print("info", "[done] %d fichiers JSON écrits", len(written))
     return
 
-
 # ===================== #
 # Exécution directe     #
 # ===================== #
