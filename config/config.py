@@ -30,7 +30,7 @@ BASE_DIR = SRC_DIR
 PAGES_DIR = SRC_DIR / "pages"
 
 # --- Assets (si tu les gardes sous src/assets) ---
-ASSETS_PATH = SRC_DIR / "assets"
+ASSETS_PATH = PROJECT_ROOT / "assets"
 FONTS_DIR = ASSETS_PATH / 'fonts' / 'dejavu-fonts-ttf-2.37' / 'ttf'
 
 # --- Données DOCX / JSON ---

@@ -1,6 +1,13 @@
 import os
+from pathlib import Path
 from config.config import JSON_HEALTH_DOC_BASE, WEB_SITES_JSON_HEALTH_DOC_BASE
 from src.func.index_documents_chromadb import get_chroma_client
+
+from config.config import INPUT_DOCX
+p = Path(INPUT_DOCX)
+print("[CFG] INPUT_DOCX =", p, "exists?", p.exists())
+if p.exists():
+    print("[CFG] DOCX list:", [x.name for x in p.glob("*.docx")])
 
 
 def _count_json_recursive(base_dir: str) -> int:
@@ -29,9 +36,15 @@ def get_chroma_index_stats() -> dict:
         "web_files": 0,  "web_chunks": 0,  "web_json_files": 0,
     }
 
+    # --- JSON sur disque (Path) ---
+    docx_dir = Path(JSON_HEALTH_DOC_BASE)
+    web_dir = Path(WEB_SITES_JSON_HEALTH_DOC_BASE)
+
     # ---- Comptage des JSON sur disque ----
-    stats["docx_json_files"] = _count_json_recursive(JSON_HEALTH_DOC_BASE)
-    stats["web_json_files"]  = _count_json_recursive(WEB_SITES_JSON_HEALTH_DOC_BASE)
+    if docx_dir.exists():
+        stats["docx_json_files"] = _count_json_recursive(JSON_HEALTH_DOC_BASE)
+    if web_dir.exists():
+        stats["web_json_files"]  = _count_json_recursive(WEB_SITES_JSON_HEALTH_DOC_BASE)
 
     # ---- Comptage Chroma ----
     try:
@@ -40,27 +53,52 @@ def get_chroma_index_stats() -> dict:
             ("docx", ["base_docx", "docx"]),  # fallback si le nom diffère entre local/prod
             ("web",  ["base_web",  "web"]),
         ]:
-            try:
-                col = _get_first_existing_collection(client, candidates)
-                # nombre de chunks
-                count = col.count() or 0
-                stats[f"{source_type}_chunks"] = count
+            col = None
+            for name in candidates:
+                try:
+                    col = client.get_collection(name)
+                    break
+                except Exception:
+                    continue
+            if not col:
+                continue
 
-                # nombre de fichiers uniques (si métadonnées disponibles)
-                metas = col.get(include=["metadatas"]).get("metadatas", []) or []
-                unique_sources = {
-                    (m.get("source") or m.get("source_url") or m.get("file_path"))
-                    for m in metas if m
-                }
-                stats[f"{source_type}_files"] = len([s for s in unique_sources if s])
-            except Exception:
-                # collection absente : laissons 0 par défaut
-                pass
-    except Exception:
-        # client indisponible : laissons 0 par défaut
-        pass
+            count = col.count() or 0
+            stats[f"{source_type}_chunks"] = count
+
+            metas = col.get(include=["metadatas"]).get("metadatas", []) or []
+            sources = {
+                (m.get("source") or m.get("source_url") or m.get("file_path"))
+                for m in metas if m
+            }
+            stats[f"{source_type}_files"] = len([s for s in sources if s])
+
+    except Exception as e:
+        print(f"⚠️ Stats Chroma indisponibles : {e}")
 
     return stats
+
+    #         try:
+    #             col = _get_first_existing_collection(client, candidates)
+    #             # nombre de chunks
+    #             count = col.count() or 0
+    #             stats[f"{source_type}_chunks"] = count
+    #
+    #             # nombre de fichiers uniques (si métadonnées disponibles)
+    #             metas = col.get(include=["metadatas"]).get("metadatas", []) or []
+    #             unique_sources = {
+    #                 (m.get("source") or m.get("source_url") or m.get("file_path"))
+    #                 for m in metas if m
+    #             }
+    #             stats[f"{source_type}_files"] = len([s for s in unique_sources if s])
+    #         except Exception:
+    #             # collection absente : laissons 0 par défaut
+    #             pass
+    # except Exception:
+    #     # client indisponible : laissons 0 par défaut
+    #     pass
+    #
+    # return stats
 
 
 

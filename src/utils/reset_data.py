@@ -15,7 +15,7 @@ from chromadb import PersistentClient
 from config.config import CHROMA_GLOBAL_DIR, JSON_HEALTH_DOC_BASE, WEB_SITES_JSON_HEALTH_DOC_BASE, INDEXED_FILES_JOURNAL_PATH
 from src.func.run_full_indexing_pipeline import run_full_indexing_pipeline
 from src.utils.vector_db_utils import mark_index_ready_flag, clear_index_ready_flag
-
+from pathlib import Path
 
 def reset_all_data():
     """
@@ -39,9 +39,10 @@ def reset_all_data():
 
     # ChromaDB : logique + fichiers
     try:
-        client = PersistentClient(path=CHROMA_GLOBAL_DIR)
+        client = PersistentClient(path=str(CHROMA_GLOBAL_DIR))
         for collection_name in ["base_docx", "base_web"]:
             try:
+                Path(CHROMA_GLOBAL_DIR).mkdir(parents=True, exist_ok=True)
                 client.delete_collection(collection_name)
                 print(f"✅ Collection supprimée : {collection_name}")
             except Exception as e:
