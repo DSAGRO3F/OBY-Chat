@@ -9,7 +9,6 @@ Ce mécanisme permet à l'application (ex. interface Dash) de savoir si les base
 vectorielles sont prêtes à être interrogées par les utilisateurs.
 """
 
-from pathlib import Path
 from config.config import INDEX_READY_FLAG_PATH
 
 

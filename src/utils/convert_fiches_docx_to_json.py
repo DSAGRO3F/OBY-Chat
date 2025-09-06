@@ -15,8 +15,6 @@ Fonctionnalités :
 
 import os
 import json
-import re
-from docx import Document
 from datetime import datetime
 from pathlib import Path
 # INPUT_DOCX directory des fichiers docx à traiter, JSON_HEALTH_DOC_BASE directory de sortie des fichiers après traitement.

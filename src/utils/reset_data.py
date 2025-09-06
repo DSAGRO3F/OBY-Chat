@@ -10,7 +10,6 @@ de travail en supprimant :
 Utile pour remettre à zéro l’état de l’index avant un nouveau traitement complet.
 """
 
-
 import os, shutil, json, threading, sys
 from chromadb import PersistentClient
 from config.config import CHROMA_GLOBAL_DIR, JSON_HEALTH_DOC_BASE, WEB_SITES_JSON_HEALTH_DOC_BASE, INDEXED_FILES_JOURNAL_PATH

@@ -15,8 +15,6 @@ Surveillance des répertoires et (ré)indexation ChromaDB.
   - Au moindre changement fichier, déclenche une indexation en empêchant les exécutions simultanées.
 """
 
-
-
 from __future__ import annotations
 
 import os
