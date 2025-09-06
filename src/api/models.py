@@ -27,8 +27,8 @@ class ChatResponse(BaseModel):
     current_patient: Optional[str] = None
     serialized_figs: Optional[Any] = None
 
-    # Ce champ est utile uniquement dans Dash → on l’exclut de l'API
-    chat_history_display: Optional[Any] = Field(default=None, exclude=True)
+    # utilisée pour remplacer l'historique en cas de switch patient
+    chat_history_display: Optional[List[Any]] = None
 
 # 🟡 Login utilisateur
 class LoginRequest(BaseModel):

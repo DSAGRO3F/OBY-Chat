@@ -246,15 +246,19 @@ def handle_user_input_or_logout(send_clicks, user_input, chat_history, session_d
     # chat_history= interactions passées stockées dans dcc.Store()
     # S'assurer que delta est une liste plate de composants
     chat_history = chat_history or []
-    delta = response.partial_chat_from_user_request or response.chat_history or []
+    # If backend gives a fully prepared display (on patient switch), use it to REPLACE the store + view.
+    if getattr(response, "chat_history_display", None) is not None:
+        full_chat_history = response.chat_history_display  # <- replace, do NOT append
+        chat_display = html.Div(full_chat_history)
+    else:
+        # Normal flow: just append the delta
+        delta = response.partial_chat_from_user_request or response.chat_history or []
+        if isinstance(delta, list) and len(delta) == 1 and isinstance(delta[0], list):
+            delta = delta[0]
+        full_chat_history = chat_history + delta
+        chat_display = html.Div(full_chat_history)
 
-    if isinstance(delta, list) and len(delta) == 1 and isinstance(delta[0], list):
-        delta = delta[0]
 
-    full_chat_history = chat_history + delta
-    chat_history_display = html.Div(full_chat_history)
-
-    current_patient_out = response.current_patient if response.current_patient is not None else current_patient
 
     # ✅ 4. Renvoi au layout
     return (
@@ -262,11 +266,10 @@ def handle_user_input_or_logout(send_clicks, user_input, chat_history, session_d
         figures,
         table,
         anomalies,
-        response.current_patient,
+        response.current_patient if response.current_patient is not None else current_patient,
         response.serialized_figs,
-        chat_history_display
+        chat_display
     )
-
 
 
 

@@ -24,7 +24,7 @@ from config.config import INPUT_DOCX, JSON_HEALTH_DOC_BASE
 
 
 
-def convert_fiches_docx_to_json(INPUT_DOCX):
+def convert_fiches_docx_to_json(INPUT_DOCX: str) -> list[dict]:
     """
     Convertit toutes les fiches DOCX d’un répertoire en dictionnaires JSON.
 
@@ -39,13 +39,22 @@ def convert_fiches_docx_to_json(INPUT_DOCX):
         List[Dict[str, str]] : Liste de dictionnaires contenant les textes extraits
         de chaque fiche, prêts à être sauvegardés ou indexés.
     """
-    print(f"📥 Étape 2 - Lecture du fichier : {INPUT_DOCX}")
+    INPUT_DOCX = str(INPUT_DOCX)
+    docx_path = Path(INPUT_DOCX)
+
+    print(f"✅ Lecture du fichier : {docx_path}")
+    if not docx_path.exists():
+        print(f"❌ Fichier introuvable : {docx_path}")
+        return []
 
     try:
+        from docx import Document
+        import re
         doc = Document(INPUT_DOCX)
     except Exception as e:
-        print(f"❌ Erreur d'ouverture du fichier {INPUT_DOCX} : {type(e).__name__} - {e}")
+        print(f"❌ Erreur d'ouverture du fichier {docx_path} : {type(e).__name__} - {e}")
         return []
+
 
     full_text = "\n".join([para.text.strip() for para in doc.paragraphs if para.text.strip()])
 
@@ -80,7 +89,7 @@ def convert_fiches_docx_to_json(INPUT_DOCX):
 
 
 
-def save_fiches_to_json(fiches, JSON_HEALTH_DOC_BASE):
+def save_fiches_to_json(fiches: list[dict], output_dir: str) -> None:
     """
     Sauvegarde une liste de fiches au format JSON dans un répertoire donné.
 
@@ -91,17 +100,34 @@ def save_fiches_to_json(fiches, JSON_HEALTH_DOC_BASE):
         fiches (List[Dict[str, str]]) : Liste de dictionnaires représentant les fiches.
         JSON_HEALTH_DOC_BASE (str) : Répertoire où sauvegarder les fichiers JSON.
     """
-    print('appel fonction save_fiches_to_json (step 3)...')
+    print('appel fonction save_fiches_to_json...')
 
+
+    output_dir = Path(JSON_HEALTH_DOC_BASE)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_dir = str(output_dir)
+
+    written: list[str] = []
     for fiche in fiches:
-        filename = f"fiche_{fiche['fiche_id']}.json"
-        filepath = os.path.join(JSON_HEALTH_DOC_BASE, filename)
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(fiche, f, ensure_ascii=False, indent=2)
+        # fiche_id sûr et zéro-paddé
+        fid = str(fiche.get("fiche_id", "000")).zfill(3)
+        output_path = output_dir / f"fiche_{fid}.json"
+
+        # On écrit dans un .tmp puis on remplace
+        tmp_path = output_path.with_suffix(".json.tmp")
+        with open(tmp_path, "w", encoding="utf-8") as f:
+            json.dump(fiche, f, indent=2, ensure_ascii=False)
+        os.replace(tmp_path, output_path)
+
+        written.append(str(output_path))
+
+    print(f"💾 {len(written)} fiches sauvegardées dans {output_dir}")
+    return
 
 
 
-def convert_and_save_fiches(INPUT_DOCX, JSON_HEALTH_DOC_BASE):
+
+def convert_and_save_fiches(INPUT_DOCX: str, output_dir: str) -> None:
     """
     Convertit toutes les fiches DOCX d’un répertoire et les enregistre au format JSON.
 
@@ -113,21 +139,18 @@ def convert_and_save_fiches(INPUT_DOCX, JSON_HEALTH_DOC_BASE):
         INPUT_DOCX (str) : Répertoire contenant les fichiers DOCX source.
         JSON_HEALTH_DOC_BASE (str) : Répertoire de destination des fichiers JSON générés.
     """
-    print("📌 Étape 1 - Appel convert_and_save_fiches")
+
+    output_dir = Path(JSON_HEALTH_DOC_BASE)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_dir = str(output_dir)
+
     fiches = convert_fiches_docx_to_json(INPUT_DOCX)
-
     if not fiches:
-        print(f"⚠️ Aucune fiche extraite depuis {INPUT_DOCX}")
-        return
+        print("ℹ️ Aucune fiche extraite (conversion vide ou erreur).")
 
-    for fiche in fiches:
-        fiche_id = fiche["fiche_id"]
-        output_path = Path(JSON_HEALTH_DOC_BASE) / f"fiche_{fiche_id}.json"
-        with open(output_path, "w", encoding="utf-8") as f:
-            import json
-            json.dump(fiche, f, indent=2, ensure_ascii=False)
+    save_fiches_to_json(fiches, output_dir)
 
-    print(f"💾 {len(fiches)} fiches sauvegardées dans {JSON_HEALTH_DOC_BASE}")
+
 
 
 if __name__ == "__main__":

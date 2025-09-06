@@ -93,6 +93,7 @@ def process_user_input(
             anomaly_block=anomaly_block or "",
             current_patient=updated_patient,
             serialized_figs=None,  # pas utile en mode API
+            chat_history_display=chat_history_display,
         )
 
 
@@ -127,6 +128,7 @@ def process_user_input(
             anomaly_block=anomaly_block or "",
             current_patient=updated_patient,
             serialized_figs=serialized_figs if output_mode == "dash" else None,
+            chat_history_display=chat_history_display,
         )
 
-    return ChatResponse(status="no_action", message="Aucune action déterminée.")
+    return ChatResponse(status="no_action", message="Aucune action déterminée.", chat_history_display=None)
