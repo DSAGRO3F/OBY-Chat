@@ -15,77 +15,65 @@ Toutes les variables sont conçues pour être importées et utilisées par les d
 du projet.
 """
 
-import os
 from pathlib import Path
+import os
 
-# === Directories ===
-# Base directory for the project (src/)
-BASE_DIR = Path(__file__).resolve().parent.parent
+# Emplacement de ce fichier: .../<repo>/config/config.py
+CONFIG_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = CONFIG_DIR.parent            # .../<repo>
+SRC_DIR = PROJECT_ROOT / "src"              # .../<repo>/src
 
-# Assets and Fonts directory
-ASSETS_DIR = BASE_DIR / 'assets'
-FONTS_DIR = ASSETS_DIR / 'fonts' / 'dejavu-fonts-ttf-2.37' / 'ttf'
-# Convert to string only when necessary
-FONT_FILES_DIR = str(FONTS_DIR)
+# Base logique de l'app = dossier 'src'
+BASE_DIR = SRC_DIR
 
-# Pages directory
-PAGES_DIR = BASE_DIR/'src'/'pages'
+# --- Pages (choisit le bon dossier existant) ---
+PAGES_DIR = SRC_DIR / "pages"
 
-# Documentary base (ensemble de fiches ou documents de référence transmis par BVIDF,
-# format .docx)
-docx_files_path = 'src/data/input/fiches_documentaires_docx/'
-INPUT_DOCX = os.path.join(BASE_DIR, docx_files_path)
+# --- Assets (si tu les gardes sous src/assets) ---
+ASSETS_PATH = SRC_DIR / "assets"
+FONTS_DIR = ASSETS_PATH / 'fonts' / 'dejavu-fonts-ttf-2.37' / 'ttf'
 
-# Post traitement Documentary base (conversion docx en json)
-generated_json_files_path = 'src/data/output/to_json_fiches_documentaires/'
-JSON_HEALTH_DOC_BASE = os.path.join(BASE_DIR, generated_json_files_path)
+# --- Données DOCX / JSON ---
+INPUT_DOCX = SRC_DIR / "data" / "input" / "fiches_documentaires_docx"
+JSON_HEALTH_DOC_BASE = SRC_DIR / "data" / "output" / "to_json_fiches_documentaires"
 
-# Autres documents issus du web
-web_sites_path = 'src/data/input/trusted_web_sites/'
-WEB_SITES_HEALTH_DOC_BASE = os.path.join(BASE_DIR, web_sites_path)
-web_sites_module_name = 'trusted_web_sites_list.py'
-WEB_SITES_MODULE_PATH = os.path.join(WEB_SITES_HEALTH_DOC_BASE, web_sites_module_name)
+# --- Web (liste & JSON) ---
+WEB_SITES_HEALTH_DOC_BASE = SRC_DIR / "data" / "input" / "trusted_web_sites"
+WEB_SITES_MODULE_PATH = WEB_SITES_HEALTH_DOC_BASE / "trusted_web_sites_list.py"
+WEB_SITES_JSON_HEALTH_DOC_BASE = SRC_DIR / "data" / "output" / "to_json_web_sites"
 
-# Post traitement sites web (conversion pages html en json)
-generated_json_from_html_files_path = 'src/data/output/to_json_web_sites/'
-WEB_SITES_JSON_HEALTH_DOC_BASE = os.path.join(BASE_DIR, generated_json_from_html_files_path)
+# --- Journal d’index ---
+INDEXED_FILES_JOURNAL_PATH = SRC_DIR / "data" / "output" / "indexation" / "indexed_files.json"
 
-# Utiliser une base ChromaDB unique.
-CHROMA_GLOBAL_DIR = os.path.join(BASE_DIR, "src","vector_db", "chromadb")
+# --- Dossiers patients ---
+PATIENT_FILES_DIR = SRC_DIR / "data" / "input" / "poa_patients"
+
+# Base chromadb
+CHROMA_GLOBAL_DIR = BASE_DIR / "vector_db" / "chromadb"
 
 # Embedding model
 EMBEDDING_MODEL_NAME = "BAAI/bge-large-en-v1.5"
 NORMALIZE_EMBEDDINGS = True
 
-# Fichier journal d’indexation
-INDEXED_FILES_JOURNAL_PATH = BASE_DIR/ "src" / "data" / "output" / "indexation" / "indexed_files.json"
+# --- Flag 'index ready' (fallback possible via env en prod) ---
+INDEX_READY_FLAG_PATH = Path(os.environ.get(
+    "OBY_FLAG_PATH",
+    str(SRC_DIR / "vector_db" / "index_ready.flag")
+))
 
-# Patient files directory (src/data/poa_patients)
-PATIENT_FILES_DIR = BASE_DIR / "src"/"data" / "input"/"poa_patients"
+# --- Exports & docs ---
+MARKDOWN_CHAT_EXPORTS = SRC_DIR / "outputs" / "chat_exports"
+TOOLS_MD_PATH = PROJECT_ROOT / "docs" / "codebase" / "tools.md"
+OVERVIEW_MD_PATH = PROJECT_ROOT / "docs" / "codebase" / "overview.md"
 
-# Path to the ChromaDB "index ready" flag
-INDEX_READY_FLAG_PATH = BASE_DIR / "src" / "vector_db" / "index_ready.flag" #-> fonctionne pas sur Render
-# INDEX_READY_FLAG_PATH = Path("/tmp/oby-chat/index_ready.flag")
-
-# Path to assets directory
-ASSETS_PATH = Path(__file__).parent.parent / "assets"
-
-# Exports des fichiers markdown
-MARKDOWN_CHAT_EXPORTS = BASE_DIR / "outputs"/"chat_exports"
-
-# Documentation projet:
-# TOOLS_MD_PATH: fichier input; OVERVIEW_MD_PATH: fichier output
-TOOLS_MD_PATH = BASE_DIR/"docs"/"codebase"/"tools.md"
-OVERVIEW_MD_PATH = BASE_DIR/"docs"/"codebase"/"overview.md"
+# --- Persistance ChromaDB (éviter os.getcwd()) ---
+PERSIST_DIRECTORY = SRC_DIR / "generated" / "chroma_db"
 
 # DB_CONSTANTES_SANTE
 DB_CONSTANTES_SANTE = 'constantes_sante.db'
 
-# Chemin racine où stocker les données ChromaDB
-PERSIST_DIRECTORY = os.path.join(os.getcwd(), "src","generated", "chroma_db")
-
-# === Versioning Settings ===
-VERSIONING_DIR = os.path.join(BASE_DIR, "src","data", "output", "ppa_versions")
+# --- Versioning ---
+VERSIONING_DIR = SRC_DIR / "data" / "output" / "ppa_versions"
 
 # === Logging and Debug ===
 LOGGING_ENABLED = True

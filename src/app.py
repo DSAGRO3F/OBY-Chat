@@ -66,8 +66,7 @@ def check_and_generate_database():
 check_and_generate_database()
 
 # Dash App
-from config.config import ASSETS_PATH, PAGES_DIR
-
+from config.config import SRC_DIR, ASSETS_PATH, PAGES_DIR
 
 app = dash.Dash(
     __name__,
