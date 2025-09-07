@@ -41,6 +41,9 @@ def convert_fiches_docx_to_json(input_dir: str) -> list[dict]:
     """
 
     docx_path = Path(input_dir)
+    if docx_path.is_dir():  # garde-fou
+        print("❌ Dossier reçu, fichier .docx attendu:", docx_path)
+        return []
 
     print(f"✅ Lecture du fichier : {docx_path}")
     if not docx_path.exists():
@@ -144,11 +147,11 @@ def convert_and_save_fiches(input_dir: PathLike, output_dir: PathLike) -> None:
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    fiches = convert_fiches_docx_to_json(str(INPUT_DOCX))
+    fiches = convert_fiches_docx_to_json(str(input_dir))
     if not fiches:
         print("🔴 Aucune fiche extraite (conversion vide ou erreur).")
 
-    save_fiches_to_json(fiches, str(JSON_HEALTH_DOC_BASE))
+    save_fiches_to_json(fiches, str(output_dir))
 
 
 
