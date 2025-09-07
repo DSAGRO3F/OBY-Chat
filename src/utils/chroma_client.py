@@ -19,7 +19,7 @@ from config.config import CHROMA_GLOBAL_DIR  # Unique base
 
 
 def get_chroma_client():
-    client = PersistentClient(path=CHROMA_GLOBAL_DIR)
+    client = PersistentClient(path=str(CHROMA_GLOBAL_DIR))
     return client
 
 

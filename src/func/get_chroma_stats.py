@@ -3,11 +3,6 @@ from pathlib import Path
 from config.config import JSON_HEALTH_DOC_BASE, WEB_SITES_JSON_HEALTH_DOC_BASE
 from src.func.index_documents_chromadb import get_chroma_client
 
-from config.config import INPUT_DOCX
-p = Path(INPUT_DOCX)
-print("[CFG] INPUT_DOCX =", p, "exists?", p.exists())
-if p.exists():
-    print("[CFG] DOCX list:", [x.name for x in p.glob("*.docx")])
 
 
 def _count_json_recursive(base_dir: str) -> int:
@@ -78,27 +73,7 @@ def get_chroma_index_stats() -> dict:
 
     return stats
 
-    #         try:
-    #             col = _get_first_existing_collection(client, candidates)
-    #             # nombre de chunks
-    #             count = col.count() or 0
-    #             stats[f"{source_type}_chunks"] = count
-    #
-    #             # nombre de fichiers uniques (si métadonnées disponibles)
-    #             metas = col.get(include=["metadatas"]).get("metadatas", []) or []
-    #             unique_sources = {
-    #                 (m.get("source") or m.get("source_url") or m.get("file_path"))
-    #                 for m in metas if m
-    #             }
-    #             stats[f"{source_type}_files"] = len([s for s in unique_sources if s])
-    #         except Exception:
-    #             # collection absente : laissons 0 par défaut
-    #             pass
-    # except Exception:
-    #     # client indisponible : laissons 0 par défaut
-    #     pass
-    #
-    # return stats
+
 
 
 

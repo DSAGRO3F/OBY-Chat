@@ -86,7 +86,24 @@ def run_full_indexing_pipeline():
     print("[DEBUG ✅] clear_index_ready_flag() appelé")
 
     print("🟡 Lancement du pipeline d'indexation...")
-    print(f"🟡 Dossier d'entrée DOCX + nb files: {INPUT_DOCX}, {len(INPUT_DOCX)}")
+    # S'assurer que c'est bien un Path
+    docx_dir = Path(INPUT_DOCX)
+
+    # Vérification ---
+    print("🟡 Vérification existence dossier d'entrée DOCX...")
+    if docx_dir.exists():
+        sample = [p.name for p in docx_dir.glob("*.docx")]
+        print("[CFG] DOCX trouvés (échantillon):", sample[:5])
+    else:
+        print("[CFG] INPUT_DOCX n'existe pas :", docx_dir)
+    # ---
+
+    # Compter les .docx, pas la "longueur" du Path
+    docx_count = 0
+    if docx_dir.exists():
+        docx_count = sum(1 for _ in docx_dir.glob("*.docx"))
+
+    print(f"🟡 Dossier d'entrée DOCX : {docx_dir} — {docx_count} fichier(s) .docx")
 
     # Détection des changements
     changes_dict = detect_changes_and_get_modified_files()
@@ -202,8 +219,8 @@ def run_full_indexing_pipeline():
     if needs_reindex:
         print("🟡 Reconstruction de l'index vectoriel...")
         client = get_chroma_client()
-        rebuild_collection_from_disk(client, "docx", JSON_HEALTH_DOC_BASE)
-        rebuild_collection_from_disk(client, "web", WEB_SITES_JSON_HEALTH_DOC_BASE)
+        rebuild_collection_from_disk(client, "docx", str(JSON_HEALTH_DOC_BASE))
+        rebuild_collection_from_disk(client, "web", str(WEB_SITES_JSON_HEALTH_DOC_BASE))
     else:
         print("✅ Aucun changement détecté, indexation non nécessaire.")
 
