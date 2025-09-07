@@ -40,6 +40,7 @@
 
 from pathlib import Path
 import os, sys, shutil
+import json
 
 from src.utils.convert_fiches_docx_to_json import convert_and_save_fiches
 from config.config import INPUT_DOCX, JSON_HEALTH_DOC_BASE, WEB_SITES_JSON_HEALTH_DOC_BASE, BASE_DIR
@@ -51,6 +52,68 @@ from src.func.scrape_trusted_sites import scrape_all_trusted_sites
 from src.utils.chroma_client import get_chroma_client
 from src.utils.vector_db_utils import mark_index_ready_flag, clear_index_ready_flag
 from src.func.index_documents_chromadb import rebuild_collection_from_disk
+
+
+
+# Audit des JSON web (sections / texte) ---
+def debug_check_web_json(dir_path):
+    p = Path(dir_path)
+    total_files = 0
+    files_with_sections = 0
+    files_with_nonempty = 0
+    total_nonempty_chunks = 0
+
+    no_sections = []
+    only_empty_sections = []
+    examples_nonempty = []
+
+    for fp in p.glob("*.json"):
+        total_files += 1
+        try:
+            data = json.loads(fp.read_text(encoding="utf-8"))
+        except Exception as e:
+            print(f"❌ {fp.name}: JSON invalide ({e})")
+            continue
+
+        fiches = data if isinstance(data, list) else [data]
+        has_sections = False
+        has_nonempty = False
+
+        for fiche in fiches:
+            sections = fiche.get("sections") or []
+            if sections:
+                has_sections = True
+            for s in sections:
+                texte = (s.get("texte") or "").strip()
+                if texte:
+                    has_nonempty = True
+                    total_nonempty_chunks += 1
+                    if len(examples_nonempty) < 5:
+                        examples_nonempty.append((fp.name, fiche.get("titre", "Sans titre")))
+        if not has_sections:
+            no_sections.append(fp.name)
+        elif not has_nonempty:
+            only_empty_sections.append(fp.name)
+        else:
+            files_with_sections += 1
+            files_with_nonempty += 1
+
+    print("\n[🟧 WEB JSON AUDIT]")
+    print(f"- Répertoire        : {p}")
+    print(f"- Fichiers JSON     : {total_files}")
+    print(f"- Avec sections     : {files_with_sections}")
+    print(f"- Avec texte non vide (au moins 1 chunk) : {files_with_nonempty}")
+    print(f"- Total de chunks non vides (somme)     : {total_nonempty_chunks}")
+
+    if no_sections:
+        print(f"• Sans sections ({len(no_sections)}): {no_sections[:5]}{' ...' if len(no_sections)>5 else ''}")
+    if only_empty_sections:
+        print(f"• Sections toutes vides ({len(only_empty_sections)}): {only_empty_sections[:5]}{' ...' if len(only_empty_sections)>5 else ''}")
+    if examples_nonempty:
+        print(f"• Exemples avec texte: {examples_nonempty[:5]}")
+
+
+
 
 
 def run_full_indexing_pipeline():
@@ -202,6 +265,9 @@ def run_full_indexing_pipeline():
 
     else:
         print("✅ Aucun changement web — ni scraping ni réindexation nécessaires.")
+
+    print("[DEBUG] Audit JSON web avant indexation :")
+    debug_check_web_json(WEB_SITES_JSON_HEALTH_DOC_BASE)
 
 
     # Construction index vectoriel si nécessaire

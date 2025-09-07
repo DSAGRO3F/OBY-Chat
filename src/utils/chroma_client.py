@@ -27,39 +27,3 @@ def get_chroma_client():
 
 
 
-
-
-
-
-
-
-
-
-
-# # Dictionnaire interne pour mémoriser les instances selon leur dossier
-# _chroma_clients = {}
-#
-# def get_chroma_client(source: str = "docx") -> Client:
-#     """
-#     Crée et retourne une instance de Chroma Client en fonction de la source documentaire.
-#
-#     Args:
-#         source (str): 'docx' pour les documents Word, 'web' pour les pages web.
-#
-#     Returns:
-#         Client: Instance configurée du client ChromaDB.
-#     """
-#     if source == "docx":
-#         persist_dir = CHROMA_DOCX_DIR
-#     elif source == "web":
-#         persist_dir = CHROMA_WEB_DIR
-#     else:
-#         raise ValueError("Source inconnue. Utiliser 'docx' ou 'web'.")
-#
-#     if persist_dir not in _chroma_clients:
-#         print(f"📦 Initialisation d’un nouveau client ChromaDB pour le dossier : {persist_dir}")
-#         _chroma_clients[persist_dir] = Client(Settings(persist_directory=persist_dir))
-#     else:
-#         print(f"♻️ Client ChromaDB déjà initialisé pour : {persist_dir}")
-#
-#     return _chroma_clients[persist_dir]

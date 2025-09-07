@@ -32,7 +32,7 @@ trusted_sites = [
     "name": "MedG",
     "base_url": "https://medg.fr",
     "start_pages": [
-        "https://www.medg.fr/arthrose/",
+        #"https://www.medg.fr/arthrose/",
         "https://www.medg.fr/cataracte/",
         "https://www.medg.fr/chute-chez-la-personne-agee/",
         "https://www.medg.fr/degenerescence-maculaire-liee-a-lage/",

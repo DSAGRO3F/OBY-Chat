@@ -203,22 +203,20 @@ def _blocked_by_stop_patterns(href: str) -> bool:
 
 
 def is_irrelevant_text(text: str) -> bool:
-    """
-    Filtre conservateur de bruit.
-    - Rejette les blocs vides/ultra courts (< 8).
-    - Si un mot-clé 'bruit' est présent, NE rejette que si le texte est court (< 60 chars).
-    """
     try:
         if not text:
             return True
         t = text.strip()
         if not t:
             return True
-        if len(t) < 8:
+        # passe à 5 au lieu de 8
+        if len(t) < 5:
             return True
         low = t.lower()
+        # si assez long, on garde
         if len(low) >= 60:
             return False
+        # mots-clés de bruit -> on rejette seulement si court
         if any(k in low for k in IRRELEVANT_TEXT_KEYWORDS):
             return True
         return False
@@ -305,16 +303,17 @@ def extract_structured_content(page_url: str) -> Tuple[str, List[Dict[str, str]]
             txt = f"- {txt}"
         if is_irrelevant_text(txt):
             continue
-        sections.append({"tag": tag, "text": txt})
+        sections.append({"tag": tag, "texte": txt})
 
     # Tables -> texte
     for table in root.find_all("table", recursive=True):
         ttxt = _table_to_text(table)
         if ttxt.strip():
-            sections.append({"tag": "table", "text": ttxt})
+            sections.append({"tag": "table", "texte": ttxt})
+
 
     # Filtrage final des sections vides (double barrière)
-    sections = [s for s in sections if s.get("text") and s["text"].strip()]
+    sections = [s for s in sections if s.get("texte") and s["texte"].strip()]
 
     title = _extract_title(soup)
     return title or "Sans titre", sections
@@ -327,7 +326,7 @@ def _extract_minimal_sections_for_bfs(soup: BeautifulSoup) -> List[Dict[str, str
     for el in root.find_all(["h1", "h2", "h3", "h4", "p", "li", "blockquote"], recursive=True):
         txt = _text(el)
         if txt and len(txt) >= 8 and not is_irrelevant_text(txt):
-            sections.append({"tag": el.name, "text": txt})
+            sections.append({"tag": el.name, "texte": txt})
             if len(sections) >= 5:
                 break
     return sections
@@ -358,7 +357,7 @@ def extract_useful_links(start_url: str, base_url: str) -> List[str]:
 
         # Page courante utile ?
         secs = _extract_minimal_sections_for_bfs(soup)
-        non_empty = [s for s in secs if s.get("text") and s["text"].strip()]
+        non_empty = [s for s in secs if s.get("texte") and s["texte"].strip()]
         if non_empty:
             results.append(final_url or url)
 
@@ -402,7 +401,7 @@ def save_page_as_json(
     Sauvegarde un fichier JSON {url, base_url, title, sections, outlinks, saved_at}.
     Ne sauve rien si 'sections' est vide.
     """
-    sections = [s for s in sections if s.get("text") and s["text"].strip()]
+    sections = [s for s in sections if s.get("texte") and s["texte"].strip()]
     if not sections:
         _log_print("warning", "[save] Page sans contenu utile, skip: %s", page_url)
         return ""

@@ -44,8 +44,14 @@ def get_chroma_index_stats() -> dict:
     # ---- Comptage Chroma ----
     try:
         client = get_chroma_client()
+        try:
+            existing = [c.name for c in client.list_collections()]
+            print("🟢 [STATS] Collections existantes:", existing)
+        except Exception as e:
+            print("🔴 [STATS] list_collections absentes:", e)
+
         for source_type, candidates in [
-            ("docx", ["base_docx", "docx"]),  # fallback si le nom diffère entre local/prod
+            ("docx", ["base_docx", "docx"]),
             ("web",  ["base_web",  "web"]),
         ]:
             col = None
