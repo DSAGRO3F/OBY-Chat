@@ -14,15 +14,17 @@ Fonctionnalités :
 
 
 import os
+import re
 import json
 from datetime import datetime
 from pathlib import Path
 # INPUT_DOCX directory des fichiers docx à traiter, JSON_HEALTH_DOC_BASE directory de sortie des fichiers après traitement.
 from config.config import INPUT_DOCX, JSON_HEALTH_DOC_BASE
+from typing import Union
+from docx import Document
 
 
-
-def convert_fiches_docx_to_json(INPUT_DOCX: str) -> list[dict]:
+def convert_fiches_docx_to_json(input_dir: str) -> list[dict]:
     """
     Convertit toutes les fiches DOCX d’un répertoire en dictionnaires JSON.
 
@@ -37,8 +39,8 @@ def convert_fiches_docx_to_json(INPUT_DOCX: str) -> list[dict]:
         List[Dict[str, str]] : Liste de dictionnaires contenant les textes extraits
         de chaque fiche, prêts à être sauvegardés ou indexés.
     """
-    INPUT_DOCX = str(INPUT_DOCX)
-    docx_path = Path(INPUT_DOCX)
+
+    docx_path = Path(input_dir)
 
     print(f"✅ Lecture du fichier : {docx_path}")
     if not docx_path.exists():
@@ -46,13 +48,10 @@ def convert_fiches_docx_to_json(INPUT_DOCX: str) -> list[dict]:
         return []
 
     try:
-        from docx import Document
-        import re
-        doc = Document(INPUT_DOCX)
+        doc = Document(str(docx_path))
     except Exception as e:
         print(f"❌ Erreur d'ouverture du fichier {docx_path} : {type(e).__name__} - {e}")
         return []
-
 
     full_text = "\n".join([para.text.strip() for para in doc.paragraphs if para.text.strip()])
 
@@ -76,7 +75,7 @@ def convert_fiches_docx_to_json(INPUT_DOCX: str) -> list[dict]:
             "fiche_id": fiche_id,
             "titre": titre,
             "type_document": "recommendation_structured",
-            "source_doc": os.path.basename(INPUT_DOCX),
+            "source_doc": docx_path.name,
             "date_indexation": datetime.today().strftime("%Y-%m-%d"),
             "texte_complet": bloc
         }
@@ -100,16 +99,18 @@ def save_fiches_to_json(fiches: list[dict], output_dir: str) -> None:
     """
     print('appel fonction save_fiches_to_json...')
 
+    output_dir = Path(output_dir)
 
-    output_dir = Path(JSON_HEALTH_DOC_BASE)
+    print(f"🟠 Vérification type 'output_dir': {type(output_dir)}")
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_dir = str(output_dir)
+
 
     written: list[str] = []
     for fiche in fiches:
         # fiche_id sûr et zéro-paddé
         fid = str(fiche.get("fiche_id", "000")).zfill(3)
         output_path = output_dir / f"fiche_{fid}.json"
+        print(f"🟠 Vérification type 'output_dir': {type(output_path)}")
 
         # On écrit dans un .tmp puis on remplace
         tmp_path = output_path.with_suffix(".json.tmp")
@@ -119,13 +120,13 @@ def save_fiches_to_json(fiches: list[dict], output_dir: str) -> None:
 
         written.append(str(output_path))
 
-    print(f"💾 {len(written)} fiches sauvegardées dans {output_dir}")
+    print(f"🟢 {len(written)} fiches sauvegardées dans {output_dir}")
     return
 
 
 
-
-def convert_and_save_fiches(INPUT_DOCX: str, output_dir: str) -> None:
+PathLike = Union[str, Path]
+def convert_and_save_fiches(input_dir: PathLike, output_dir: PathLike) -> None:
     """
     Convertit toutes les fiches DOCX d’un répertoire et les enregistre au format JSON.
 
@@ -138,15 +139,16 @@ def convert_and_save_fiches(INPUT_DOCX: str, output_dir: str) -> None:
         JSON_HEALTH_DOC_BASE (str) : Répertoire de destination des fichiers JSON générés.
     """
 
-    output_dir = Path(JSON_HEALTH_DOC_BASE)
+    input_dir = Path(input_dir)
+
+    output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_dir = str(output_dir)
 
-    fiches = convert_fiches_docx_to_json(INPUT_DOCX)
+    fiches = convert_fiches_docx_to_json(str(INPUT_DOCX))
     if not fiches:
-        print("ℹ️ Aucune fiche extraite (conversion vide ou erreur).")
+        print("🔴 Aucune fiche extraite (conversion vide ou erreur).")
 
-    save_fiches_to_json(fiches, output_dir)
+    save_fiches_to_json(fiches, str(JSON_HEALTH_DOC_BASE))
 
 
 

@@ -24,8 +24,6 @@
 # """
 
 
-version: "3.9"
-
 services:
   # === Mode APP (Dash) — démarre par défaut avec: docker compose up -d
   obyia-app:
