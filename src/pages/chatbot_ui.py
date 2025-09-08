@@ -22,8 +22,7 @@ import dash
 from dash import dcc, html, callback, ctx, no_update
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-import markdown
-from dash import MATCH
+import os
 
 
 from src.llm_user_session.session_manager_instance import session_manager_instance
@@ -32,6 +31,73 @@ from src.func.serialize_figs import serialize_figs, deserialize_figs
 from src.utils.vector_db_utils import is_chroma_index_ready
 from src.api.models import ChatResponse
 from src.func.api_core import process_user_input
+
+
+# Fonctions DEBUG -------
+# --- helpers UI-only (placer en haut du fichier) ---
+def _ui_extract_role_text_type(msg):
+    # dict API
+    if isinstance(msg, dict) and "props" not in msg and ("role" in msg or "msg_type" in msg):
+        role = msg.get("role")
+        text = (msg.get("markdown") or msg.get("text") or "")
+        mtyp = msg.get("msg_type")
+        pk   = msg.get("patient_key")
+        uid  = msg.get("user_id")
+        return role, str(text), mtyp, pk, uid
+
+    # dict Dash sérialisé
+    if isinstance(msg, dict) and "props" in msg:
+        props = msg.get("props", {}) or {}
+        cls = props.get("className", "") or ""
+        role = "assistant" if "bot-response" in cls else ("user" if "user-message" in cls else None)
+        pid = props.get("id", {}) or {}
+        mtyp = pid.get("msg_type")
+        pk   = pid.get("patient_key")
+        uid  = pid.get("user_id")
+        ch = props.get("children", None)
+        if isinstance(ch, dict) and "props" in ch:
+            text = ch["props"].get("children", "")
+        elif isinstance(ch, list):
+            text = " ".join(str(x) for x in ch if isinstance(x, (str, int, float)))
+        else:
+            text = ch if isinstance(ch, (str, int, float)) or ch is None else ""
+        return role, str(text or ""), mtyp, pk, uid
+
+    # objet Dash (runtime)
+    cls = getattr(msg, "className", "") or ""
+    role = "assistant" if "bot-response" in cls else ("user" if "user-message" in cls else None)
+    pid = getattr(msg, "id", None)
+    mtyp = pid.get("msg_type") if isinstance(pid, dict) else None
+    pk   = pid.get("patient_key") if isinstance(pid, dict) else None
+    uid  = pid.get("user_id") if isinstance(pid, dict) else None
+    ch = getattr(msg, "children", None)
+    if hasattr(ch, "children"):
+        text = ch.children if ch.children is not None else ""
+    else:
+        text = ch if ch is not None else ""
+    return role, str(text), mtyp, pk, uid
+
+def _ui_listify(obj):
+    if isinstance(obj, (list, tuple)):
+        return list(obj)
+    ch = getattr(obj, "children", None)
+    if isinstance(ch, (list, tuple)):
+        return list(ch)
+    return [] if ch is None else [ch]
+
+def _ui_tail_types(obj, n=4):
+    lst = _ui_listify(obj)
+    return [ _ui_extract_role_text_type(m)[2] for m in lst[-n:] ]
+
+def _ui_patient_keys(obj, n=None):
+    lst = _ui_listify(obj)
+    if n: lst = lst[-n:]
+    pks = []
+    for m in lst:
+        _,_,_,pk,_ = _ui_extract_role_text_type(m)
+        if pk: pks.append(pk)
+    return pks, set(pks)
+# ----------
 
 
 dash.register_page(__name__, path="/chatbot")
@@ -220,7 +286,6 @@ def handle_user_input_or_logout(send_clicks, user_input, chat_history, session_d
     response: ChatResponse = process_user_input(send_clicks, user_input, chat_history, session_data, current_patient)
     print("🔍 ChatResponse:", response)
 
-
     # ⚠️ 2. Si la session est invalide ou non initialisée
     if response.status in ("no_click", "unauthenticated", "no_action"):
         # ne pas écraser le Store, et afficher un message si utile
@@ -243,20 +308,65 @@ def handle_user_input_or_logout(send_clicks, user_input, chat_history, session_d
     anomalies = html.Div(response.anomaly_block) if response.anomaly_block else None
 
 
+
+
     # chat_history= interactions passées stockées dans dcc.Store()
     # S'assurer que delta est une liste plate de composants
     chat_history = chat_history or []
-    # If backend gives a fully prepared display (on patient switch), use it to REPLACE the store + view.
+
+    # -----DEBUG------
+    display = getattr(response, "chat_history_display", None)
+    delta = response.partial_chat_from_user_request or response.chat_history or []
+
+    store_len = len(chat_history)
+    display_len = len(_ui_listify(display)) if display is not None else 0
+    delta_len = len(delta) if isinstance(delta, (list, tuple)) else 0
+
+    print(
+        "🖥️ PID", os.getpid(),
+        "| status:", response.status,
+        "| curr_patient_in:", current_patient,
+        "-> out:", (response.current_patient if response.current_patient is not None else current_patient),
+    )
+    print(
+        "🖼️ UI replace? ", display is not None,
+        "| display_len:", display_len,
+        "| delta_len:", delta_len,
+        "| store_len(before):", store_len,
+    )
+
+    try:
+        print("   • store tail types:", _ui_tail_types(chat_history))
+        if display is not None:
+            print("   • display tail types:", _ui_tail_types(display))
+        print("   • delta types:",
+              [_ui_extract_role_text_type(m)[2] for m in (delta[-4:] if isinstance(delta, (list, tuple)) else [])])
+    except Exception as e:
+        print("   • tail types error:", repr(e))
+
+    # patients détectés (utile pour voir un mélange)
+    store_pks, store_pks_set = _ui_patient_keys(chat_history, n=12)
+    disp_pks, disp_pks_set = _ui_patient_keys(display, n=12) if display is not None else ([], set())
+    delta_pks, delta_pks_set = _ui_patient_keys(delta, n=12) if isinstance(delta, (list, tuple)) else ([], set())
+
+    print("   • store pkeys last:", store_pks, "| uniq:", store_pks_set)
+    if display is not None:
+        print("   • display pkeys last:", disp_pks, "| uniq:", disp_pks_set)
+    print("   • delta pkeys last:", delta_pks, "| uniq:", delta_pks_set)
+    #----------
+
     if getattr(response, "chat_history_display", None) is not None:
-        full_chat_history = response.chat_history_display  # <- replace, do NOT append
+        full_chat_history = response.chat_history_display
         chat_display = html.Div(full_chat_history)
     else:
         # Normal flow: just append the delta
         delta = response.partial_chat_from_user_request or response.chat_history or []
+
         if isinstance(delta, list) and len(delta) == 1 and isinstance(delta[0], list):
             delta = delta[0]
         full_chat_history = chat_history + delta
         chat_display = html.Div(full_chat_history)
+
 
 
     # ✅ 4. Renvoi au layout

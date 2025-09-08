@@ -90,6 +90,6 @@ USER_DATABASE = {
 }
 
 # Valeurs nb chunks
-int_1 = 3
-int_2 = 2
+int_1 = 5
+int_2 = 3
 
