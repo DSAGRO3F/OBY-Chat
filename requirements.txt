@@ -56,4 +56,5 @@ chromadb>=0.5.0
 sentence-transformers>=2.6.1
 transformers>=4.41.0
 huggingface-hub>=0.23.0
+fasteners>=0.19
 

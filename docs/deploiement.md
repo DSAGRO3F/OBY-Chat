@@ -31,7 +31,86 @@ PORT=18050 ./start.sh app
 APP_DEBUG=1 active debug=True + use_reloader=True côté Dash (géré dans app.py).
 Ne pas activer en environnement d’intégration.
 
-## 🟢 Lancement avec Docker Compose
+---
+### Version “agence BlueSoft” -> L'image est créée (build non nécessaire) dans fichier ".tar"
+- 🟢 Lancer avec une image fournie (.tar)
+- Pré-requis
+  - Fichiers transmis : 
+    - oby-ia_v2025.09.25.tar
+    - oby-ia_v2025.09.25.tar.sha256
+    - docker-compose.yml
+    - deploiement.md
+  - Docker / Docker Compose installés
+
+#### Vérifier l’intégrité & charger l’image
+shasum -a 256 -c oby-ia_v2025.09.25.tar.sha256
+docker load -i oby-ia_v2025.09.25.tar
+
+#### Préparer l’environnement
+**1. Remplacer les clés OPENAI_API_KEY, MISTRAL_API_KEY et autres clés par celles de BVIDF (ou BlueSoft) dans .env**
+**2. ```mkdir -p outputs assets```**
+
+#### Démarrer (mode APP par défaut)
+- **dans un terminal :**
+```
+docker compose up -d
+docker compose logs --tail 200
+
+```
+- **docker-compose.yml (runtime, sans build)**
+```
+  services:
+  # === Application Dash (UI) ===
+  obyia-app:
+    image: oby-ia:v2025.09.25
+    container_name: obyia-app
+    command: ["./start.sh", "app"]
+    ports:
+      - "8050:8050"
+    volumes:
+      - ./outputs:/app/outputs
+      - ./assets:/app/assets
+    env_file:
+      - .env
+
+  # === API (Uvicorn) — lancer avec: docker compose --profile api up -d obyia-api
+  obyia-api:
+    image: oby-ia:v2025.09.25
+    container_name: obyia-api
+    command: ["./start.sh", "api"]
+    ports:
+      - "8000:8000"
+    profiles: ["api"]
+    env_file:
+      - .env
+
+  # === DOC (MkDocs) — lancer avec: docker compose --profile doc up -d obyia-doc
+  obyia-doc:
+    image: oby-ia:v2025.09.25
+    container_name: obyia-doc
+    command: ["./start.sh", "doc"]
+    ports:
+      - "8080:8080"
+    profiles: ["doc"]
+    env_file:
+      - .env
+  
+```
+
+- **Arrêt / redémarrage**
+```
+docker compose down            # (garde les volumes/données)
+docker compose up -d --force-recreate
+```
+
+## (Annexe dev) Rebuild local si modification du code
+- **Cette partie ne concerne que les équipes qui reconstruisent l’image.**
+```
+docker compose build --no-cache
+docker compose up -d
+```
+
+### 🟢 Lancement avec Docker Compose
 But : démarrer rapidement le service voulu, sans ambigüité, avec un seul port exposé.
 Par défaut, seul le service app (Dash) démarre. Les services api et doc sont disponibles via des profiles.
 
