@@ -121,59 +121,92 @@ system_prompt = """
 ## 3. Instructions de traitement spécifiques aux tableaux.
     ### **1. Tableaux PPA**.
         - Présenter les **Services et prestations mobilisés** sous forme de **tableaux Markdown standard** pour deux semaines (semaine 1, semaine 2).  
-        - Exemple de format :  
-        - **Respecte exactement les plages horaires (8h00-9h30, 10h00-11h00, etc.) dans l’ordre donné.**
-        - Si tu omets une plage horaire, la réponse est considérée comme incomplète.
-        - Ne change pas la structure du tableau.
+    #### **1. Périmètre & structure**.
+        - Produire 2 tableaux distincts : Semaine 1 et Semaine 2.
+        - Chaque tableau (Semaine 1, Semaine 2) doit avoir **exactement 8 colonnes** au total :
+            - 1) **Créneau horaire**
+            - 2) **Lundi**
+            - 3) **Mardi**
+            - 4) **Mercredi**
+            - 5) **Jeudi**
+            - 6) **Vendredi**
+            - 7) **Samedi**
+            - 8) **Dimanche**
 
-        **Semaine 1.**
-        | Heure        | Lundi                            | Mardi                            | Mercredi                         | Jeudi                            | Vendredi                         | Samedi                           | Dimanche                         |
-        |:-------------|:---------------------------------|:---------------------------------|:---------------------------------|:---------------------------------|:---------------------------------|:---------------------------------|:---------------------------------|
-        | 8h00-9h30    | aide au lever, toilette complète | aide au lever, toilette complète | ...                              | ...                              | ...                              | ...                              | ...                              |
-        | 10h00-11h00  | change, élimination, stimulation  | change, élimination, stimulation  | ...                              | ...                              | ...                              | ...                              | ...                              |
-        | 12h00-13h00  | ...                              | ...                              | ...                              | ...                              | ...                              | ...                              | ...                              |
-        | 14h00-15h30  | ...                              | ...                              | ...                              | ...                              | ...                              | ...                              | ...                              |
-        | 16h00-17h00  | ...                              | ...                              | ...                              | ...                              | ...                              | ...                              | ...                              |
-        | 18h00-19h30  | ...                              | ...                              | ...                              | ...                              | ...                              | ...                              | ...                              |
-        | 20h00-21h00  | ...                              | ...                              | ...                              | ...                              | ...                              | ...                              | ...                              |
-        | nuit         | ...                              | ...                              | ...                              | ...                              | ...                              | ...                              | ...                              |
-    
-        ---
-        
-        **Semaine 2.**
-        Suit le format du tableau **Semaine 1.**     
+        - **En-tête Markdown EXACT à utiliser** (copier-coller tel quel) :
+          | Créneau horaire | Lundi | Mardi | Mercredi | Jeudi | Vendredi | Samedi | Dimanche |
+          |:----------------|:-----:|:-----:|:--------:|:-----:|:--------:|:------:|:--------:|
 
-    - Les **tableaux des services et prestations mobilisés** doivent obligatoirement **reprendre les plages horaires suivantes** pour chaque jour de la semaine :
-      - 8h00-9h30
-      - 10h00-11h00
-      - 12h00-13h00
-      - 14h00-15h30
-      - 16h00-17h00
-      - 18h00-19h30
-      - 20h00-21h00
-      - nuit
-
-    - Chaque plage horaire doit apparaître **même si certaines cellules sont vides** (remplacer par "Non renseigné").
+        - Créneaux (lignes, dans cet ordre strict) :
+            - 8h00-9h30
+            - 10h00-11h00
+            - 12h00-13h00
+            - 14h00-15h30
+            - 16h00-17h00
+            - 18h00-19h30
+            - 20h00-21h00
+            - nuit
+        - Toujours afficher les 8 créneaux même si vides (remplacer par « Non renseigné »).
+        - Aucune balise HTML, pas de fusion de cellules ni d’alias (“Matin/Après-midi”).
+        - Respecter le format Markdown standard (lignes fermées par |, ligne d’alignement |:---|, etc.).
     
-    - Ne pas regrouper ou fusionner les horaires (pas de "Matin", "Après-midi", etc.).
+    #### **2. Source de vérité & priorité du contenu**.
+        - Section JSON à utiliser : poaAutonomie.actions uniquement.
+        - Champ prioritaire : actions (liste d’actions opérationnelles).
+        - Complément : si nécessaire, compléter avec un extrait utile et concis de message.
+        - Règle de priorité pour remplir une cellule :
+            - si actions non vide → utiliser actions (et éventuellement ajouter un court extrait de message si ça précise l’exécution) ;
+            - sinon, si message informatif → utiliser message ;
+            - sinon → « Non renseigné ».
+        - Ne pas halluciner d’actions qui n’apparaissent pas dans le JSON.
     
-    - **Ces horaires doivent toujours être explicitement mentionnés dans le tableau final**.
+    #### **3. Répartition Semaine 1 / Semaine 2**.
+        - Semaine 1 = utiliser les champs :
+            - joursIntervention (jours concernés)
+            - momentJournee (moment)
+        - Semaine 2 = utiliser les champs :
+            - secondJoursIntervention (jours concernés)
+            - secondMomentJournee (moment)
+        - Si secondJoursIntervention ou secondMomentJournee manquent, ne pas copier-coller ceux de la Semaine 1 ; laisser les cases « Non renseigné » pour Semaine 2 si aucune info spécifique n’est fournie.
+        - Si un jour n’est pas mentionné pour une action, ne pas remplir sa cellule avec cette action.
+    
+    #### **4. Mapping moments → créneaux (obligatoire et déterministe)**.
+        - Lever → 8h00-9h30
+        - Matin → 10h00-11h00
+        - Midi / Déjeuner → 12h00-13h00
+        - Après-midi → 14h00-15h30
+        - Fin d’après-midi / Goûter → 16h00-17h00
+        - Soir → 18h00-19h30
+        - Coucher → 20h00-21h00
+        - Nuit → nuit
+        - Si plusieurs moments mappent un même créneau sur un même jour, concaténer les contenus avec “, ” et insérer \n après chaque virgule pour la lisibilité (pas de <br>).
         
-    - Les tableaux doivent avoir un axe horizontal (jours de la semaine) et un axe vertical (heures de la journée).  
-    
-    - Mets dans les cellules les actions à faire pour chaque plage horaire du jour de la semaine.
-    
-    - Les contenus de cellule sont séparés par des virgules `,` ou points-virgules `;` pour énumérer plusieurs actions.
-      
-    - **Aucune balise `<br>` ni HTML** ne doit être insérée, les retours à la ligne sont remplacés par des séparateurs standards (`,` ou `;`). 
-    
-    - Pour améliorer la lisibilité, ajoute des retours à la ligne (\n) après chaque virgule dans les cellules longues. 
+    #### **5. Règles de remplissage des cellules**.
+        - Pour chaque action du JSON, déterminer :
+            - la semaine (1 ou 2) à partir de joursIntervention / secondJoursIntervention ;
+            - le jour (Lundi, Mardi, Mercredi, Jeudi, Vendredi, Samedi, Dimanche) correspondant ;
+            - le créneau via le mapping moments → créneaux (momentJournee / secondMomentJournee).
+        - Dans la cellule cible, lister les éléments de actions séparés par “, ” (et \n après chaque virgule si la cellule devient longue).
+        - Éviter les doublons d’action dans une même cellule.
+        - Ne pas déplacer une action vers un autre créneau que celui défini par le mapping.
+        - Si aucune action ne correspond à un jour/créneau, écrire « Non renseigné ».
         
-    - Les titres de colonnes (`|:---|`) doivent être présents et correctement alignés.  
-    
-    - Les tableaux doivent être parfaitement fermés par `|` à la fin de chaque ligne.
+    #### **6. **Interdictions** :
+        - Ne pas ajouter de colonne intitulée « CRÉNEAUX » ou autre en dehors du schéma ci-dessus.
+        - Ne pas insérer de lignes de texte entre l’en-tête et le tableau (pas de “CRÉNEAUX   LUNDI …” hors Markdown).
+        - Aucune balise HTML, aucune fusion de cellules, aucun alias de créneau.    
         
-    - Laisser un espace entre les tableaux pour la clarté visuelle
+    #### **7. Exhaustivité & contrôle qualité (auto-vérification avant rendu)**.
+        - Les deux tableaux doivent :
+            - contenir exactement 8 lignes de créneaux ;
+            - 7 colonnes de jours (Lundi, Mardi, Mercredi, Jeudi, Vendredi, Samedi, Dimanche) ;
+            - toutes les cellules remplies ou à défaut « Non renseigné » ;
+            - aucune omission de créneau → une omission rend la réponse incomplète.
+            - Ne jamais modifier l’ordre ni les libellés des créneaux.
+            - Chaque ligne du tableau (en-tête inclus) doit contenir **exactement 9 caractères ‘|’** (8 colonnes ⇒ 9 séparateurs).
+            - Chaque ligne de données doit **se terminer** par `|`.
+            - S’il y a plus ou moins de 9 ‘|’ sur une ligne, **corriger** avant de répondre.
+        - Laisser un espace entre le tableau de la semaine 1 et celui de la semaine 2.
     
 
     ### **2. Tableaux Plan d'aide, volet social et volet sanitaire.**
@@ -496,6 +529,7 @@ from langchain_core.output_parsers import StrOutputParser
 from src.llm_user_session.model import llm_model
 from src.func.retrieve_relevant_chunks import retrieve_relevant_chunks
 import traceback
+import re
 
 # /////////////////////////////////////////////////////////////////////////////
 
@@ -590,24 +624,55 @@ def rag_llm_prompt_template_medical_plan():
         {retrieved_chunks}
         ```
 
-        💡 **Instructions importantes** :
-        - Appuie ta réponse sur les extraits ci-dessus.
-        - **Mentionne dans ta réponse le numéro de fiche, le titre et/ou la source** chaque fois que tu utilises une information issue de ces documents.
-        - **Si tu t’appuies sur un extrait en particulier, mentionne le titre et la source de l’extrait utilisé dans ta réponse.** 
-        - Si aucune source ne correspond, indique-le clairement.
-        
+        🟨 **Règles importantes** :
+        - Appuie ta réponse strictement sur les extraits ci-dessus.
+        - Priorise les fiches RBPP (DOCX). Lorsque tu utilises une fiche RBPP, cite « Fiche NN — Titre ».
+        - Ne cite des sources web **que si** des blocs [WEB…] sont présents dans les extraits et qu’ils complètent l’information.
+        - Lorsque tu cites une source web, écris « Titre — Nom du site » et **indique l’URL** (ne jamais inventer d’URL).
+        - Si une source web n’a pas de titre, utilise « [Titre indisponible] — {{domaine}} ».
+        - **Interprète le tag ```[WEB_PERTINENCE]``` uniquement s’il apparaît dans le bloc des extraits {{retrieved_chunks}}** (ignore tout exemple de consignes).
+        - Termine ta réponse par une section « Sources utilisées » :
+            • liste toujours les fiches DOCX présentes dans les extraits en reprenant leur intitulé (ex. « Fiche NN — Titre ») — ne liste jamais un identifiant seul ;
+            • si des blocs [WEB…] sont présents **et utilisés**, liste-les sous la forme « Titre — Site — URL » ;
+            • si des blocs [WEB…] sont présents **mais que tu n’en as cité aucun**, écris exactement : **Aucun lien web pertinent pour cette recherche.**
+                
         À partir de ces informations, rédige directement la réponse en respectant la demande de l'utilisateur.
-        N'ajoute aucune remarque sur l'absence d'informations. Si une information n'est pas présente, indique-le simplement dans la réponse.
+        N'ajoute aucune remarque sur l'absence d'informations. Si une information n'est pas présente, indique-le simplement.
+        
         """)
-    ])
-
+        ]
+    )
     return prompt_template
 
 
+# ---- Fonction pour sécuriser la réponse du LLM, scetion des références citées ----
 
-"""
--------------------------------
-"""
+def ensure_sources_footer(resp: str, retrieved_chunks: str) -> str:
+    # Y avait-il des blocs [WEB…] dans les extraits ?
+    web_in_extracts = bool(re.search(r'^\[WEB\d+\]', retrieved_chunks, flags=re.M))
+    # Le LLM a-t-il cité un URL (approx pour web cité) ?
+    web_cited = bool(re.search(r'https?://', resp))
+    # Le LLM a-t-il listé au moins 1 DOCX avec son titre (approx) ?
+    docx_listed = bool(re.search(r'Fiche\s+\d+\s+—', resp))
+
+    # S'assurer que "Aucun lien web pertinent..." apparaît si des WEB étaient fournis mais aucun n'est cité
+    if web_in_extracts and not web_cited:
+        if "Aucun lien web pertinent pour cette recherche." not in resp:
+            resp += "\n\nAucun lien web pertinent pour cette recherche."
+
+    # (Option) S'assurer que la section "Sources utilisées" liste au moins les DOCX
+    if not docx_listed:
+        # Extraire les titres DOCX des extraits pour les injecter proprement
+        docx_titles = re.findall(r'^\[DOCX\d+\]\s+(.*)\nsource:', retrieved_chunks, flags=re.M)
+        if docx_titles:
+            bloc = "\n".join(f"- {t}" for t in docx_titles)
+            resp += f"\n\nSources utilisées :\n{bloc}"
+
+    return resp
+
+
+# ---- réponse fournie par LLM ----
+
 from config.config import int_1, int_2
 
 def rag_medical_response_from_llm(prompt_template, user_input, poa_content):
@@ -632,6 +697,7 @@ def rag_medical_response_from_llm(prompt_template, user_input, poa_content):
     retrieved_chunks = retrieve_relevant_chunks(query=poa_content, top_k_docx=int_1, top_k_web=int_2, separator="\n\n")
     print("✅ retrieved_chunks OK")
 
+
     print("✅ 2. création des messages")
     try:
         messages = prompt_template.format_messages(
@@ -652,8 +718,10 @@ def rag_medical_response_from_llm(prompt_template, user_input, poa_content):
         print("=========================================\n")
 
         response = llm_model.invoke(messages).content
+        response = ensure_sources_footer(response, retrieved_chunks)
         print("✅ 4. Réponse modèle OK")
         return response
+
 
     except Exception as e:
         print("❌ Erreur dans llm_model.invoke :", e)
@@ -662,7 +730,6 @@ def rag_medical_response_from_llm(prompt_template, user_input, poa_content):
 
 
 # /////////////////////////////////////////////////////////////////////////////
-
 
 
 

@@ -21,8 +21,11 @@ COPY src/ ./src/
 COPY config/ ./config/
 COPY docs/ ./docs/
 COPY scripts/ ./scripts/
-COPY outputs/ ./outputs/
 COPY assets/ ./assets/
+
+# Version déployée
+ARG GIT_SHA
+ENV APP_BUILD_SHA=$GIT_SHA
 
 # Étape 7: Installer Java (nécessaire pour PlantUML)
 RUN apt-get update && apt-get install -y default-jre curl && \

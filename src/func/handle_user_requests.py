@@ -1,66 +1,18 @@
+# src/func/handle_user_requests.py
 """
-Gestion des requêtes utilisateur pour OBY-IA (détection d’intention, confirmation et exécution).
+Gestion des requêtes utilisateur pour OBY-IA (module Dash/API).
 
-Ce module centralise la logique conversationnelle « back-end » entre l’interface
-et les pipelines métier d’OBY-IA. Il orchestre deux étapes clés :
+Ce module orchestre les deux temps de la conversation : requête initiale
+(`handle_initial_request`) avec détection d’intention et question de confirmation,
+puis traitement de la réponse de confirmation (`handle_confirmation_response`)
+avec exécution du pipeline et construction de l’affichage final.
+Les messages sont tagués (patient_key, user_id, msg_type) puis filtrés/retagués
+pour éviter tout mélange d’historiques entre patients, et une vue prête à afficher
+(`chat_history_display`) est renvoyée à l’UI lorsqu’un changement de patient survient.
 
-1) handle_initial_request(...) :
-   - Analyse l’input utilisateur (détection d’intention et extraction éventuelle
-     du nom de patient).
-   - Met en place un état de confirmation (session["intent_confirmation_pending"] = True)
-     et prépare un message de confirmation.
-   - Retourne les éléments nécessaires pour l’affichage / la réponse (historique,
-     tableaux, graphiques, etc.), généralement vides à ce stade.
-
-2) handle_confirmation_response(...) :
-   - Interprète la confirmation (ex.: « oui / non ») lorsque l’intention est en attente.
-   - Déclenche le pipeline adapté :
-       • PPA (generate_ppa_from_poa.process_ppa_request),
-       • Recommandations (generate_structured_medical_plan),
-       • Constantes patient (process_patient_request_with_constants).
-   - Met à jour l’état de session (réinitialisation du flag de confirmation,
-     mémorisation du patient courant, etc.) et assemble la réponse finale.
-
-Modes de sortie :
-    Le paramètre `output_mode` permet d’adapter le format des objets retournés :
-      - "dash" : le module peut retourner des composants Dash (html.Div, dcc.Markdown,
-                 figures Plotly « go.Figure », etc.) pour l’UI interne.
-      - "api"  : le module retourne des structures sérialisables (listes/dicts/strings),
-                 adaptées à FastAPI / JSON (pas d’objets Dash).
-
-Effets de bord :
-    - Mise à jour de la session (ex. intent_confirmation_pending, intent_candidate).
-    - Enrichissement de l’historique de conversation (chat_history / new_chat_history).
-
-Dépendances principales :
-    - src.llm_user_session.session_manager_instance
-    - src.func.extract_user_intent, src.func.extract_patient_name
-    - src.func.generate_ppa_from_poa, src.func.generate_structured_medical_plan
-    - src.func.get_patient_constants_graphs
-    - src.func.serialize_figs (sérialisation des figures)
-    - (optionnel côté UI) dash.html / dash.dcc pour le mode "dash"
-
-Convention de retour :
-    Les fonctions retournent un 7-uplet :
-        (chat_history_ou_new_chat_history,
-         figures_out,
-         table_html,
-         anomaly_block,
-         current_patient,
-         serialized_figs,
-         chat_history_display)
-
-    * En mode "initial", chat_history est renvoyé (nouvel historique cumulé).
-    * En mode "confirmation", new_chat_history est renvoyé (ajouts du tour courant).
-    * Le « full_chat_history » est assemblé par l’appelant si nécessaire.
-
-Ce module est conçu pour être appelé à la fois par l’interface Dash (UI)
-et par la couche API (FastAPI) via une fonction « tronc commun ».
 """
 
-
-import dash
-from dash import dcc, html, callback, ctx, no_update
+from dash import dcc, html
 from typing import Literal
 
 from src.llm_user_session.session_manager_instance import session_manager_instance
@@ -70,7 +22,7 @@ from src.func.llm_prompts import system_prompt, system_prompt_medical_plan
 from src.func.extract_user_intent import detect_user_intent
 from src.func.get_patient_constants_graphs import process_patient_request_with_constants
 from src.func.extract_patient_name import extract_patient_name_llm
-from src.func.serialize_figs import serialize_figs, deserialize_figs
+from src.func.serialize_figs import serialize_figs
 
 
 # ================================================================================================ #
@@ -263,58 +215,18 @@ def handle_initial_request(user_input, session,
                            current_patient, output_mode: Literal["dash", "api"] = "dash"):
 
     """
-    Traite la requête initiale : détection d’intention et demande de confirmation.
-
-    Cette fonction :
-      1. Détecte l’intention de l’utilisateur (ex. generate_ppa, get_constants,
-         get_recommendations) et tente d’identifier le patient mentionné.
-      2. Met à jour la session pour indiquer qu’une confirmation est requise :
-         - session["intent_confirmation_pending"] = True
-         - session["intent_candidate"] = {"intent": <str>, "name": <str|None>, "full_user_input": <str>}
-      3. Construit et ajoute au fil de conversation un message de confirmation
-         (« Je comprends que vous souhaitez… confirmez-vous oui/non ? »).
-
-    Paramètres
-    ----------
-    user_input : str
-        Texte brut saisi par l’utilisateur.
-    session : dict
-        Objet de session récupéré via `session_manager_instance.get_session(...)`.
-    session_data : dict
-        Données de session de l’UI (ex. {"user_id": ..., "session_id": ...}).
-    chat_history : list
-        Historique courant de la conversation (format dépendant de `output_mode`).
-    current_patient : str | None
-        Patient courant, si déjà connu.
-    output_mode : {"dash", "api"}, optionnel
-        Mode de sortie. "dash" peut retourner des composants Dash ;
-        "api" ne retourne que des structures JSON-sérialisables.
-
-    Retours
-    -------
-    tuple
-        Un 7-uplet :
-            chat_history : list
-                Historique mis à jour (intégrant le message de confirmation).
-            figures_out : list
-                Liste de figures (souvent vide à ce stade).
-            table_html : str
-                Table HTML (souvent vide à ce stade).
-            anomaly_block : str
-                Bloc d’anomalies (souvent vide à ce stade).
-            current_patient : str | None
-                Patient détecté ou patient courant.
-            serialized_figs : list | None
-                Figures sérialisées (si `output_mode="dash"` et si présent).
-            chat_history_display : Any
-                Représentation prête à l’affichage (UI), inutilisée en mode API.
-
-    Notes
-    -----
-    - Aucun pipeline métier n’est exécuté à ce stade : la fonction se limite
-      à préparer la confirmation d’intention.
-    - L’appelant est responsable d’afficher `chat_history` et d’attendre la
-      réponse de confirmation de l’utilisateur.
+    - Prépare la phase pré-confirmation : détecte l’intention et le patient, met à jour la session et renvoie le delta d’affichage (requête + question de confirmation).
+    - Paramètres:
+        - user_input (str)
+        - session (dict)
+        - session_data (dict avec "user_id","session_id")
+        - chat_history (list)
+        - current_patient (str|None)
+        - output_mode (Literal["dash","api"]).
+    - Retourne un tuple:
+        - (chat_history: list, figures_out: list, table_html: str, anomaly_block: str, current_patient: str|None, serialized_figs: list|None, chat_history_display: Any|None).
+    Ne lance aucun pipeline métier; lève ValueError si session_data est incomplet.
+    Les messages ajoutés sont tagués (patient_key, user_id, msg_type).
     """
 
     # --- IDs fournis par l’UI ---
@@ -424,69 +336,18 @@ def handle_confirmation_response(user_input, session,
                                  current_patient, output_mode: Literal["dash", "api"] = "dash"):
 
     """
-    Traite la réponse de confirmation et exécute le pipeline métier approprié.
-
-    Cette fonction :
-      1. Lit l’état `session["intent_candidate"]` défini lors de la requête initiale,
-         ainsi que la confirmation utilisateur (ex. « oui », « non »).
-      2. En cas de confirmation :
-         - Exécute le pipeline adapté selon l’intention détectée :
-             * generate_ppa  → process_ppa_request(...)
-             * get_constants → process_patient_request_with_constants(...)
-             * get_recommendations → generate_structured_medical_plan(...)
-         - Met à jour l’historique avec la réponse « bot », les tableaux/figures,
-           et sérialise les figures si nécessaire (mode "dash").
-         - Réinitialise l’état de confirmation dans la session.
-      3. En cas de refus :
-         - Réinitialise l’état de confirmation.
-         - Ajoute un message d’aide avec des exemples de requêtes valides.
-
-    Paramètres
-    ----------
-    user_input : str
-        Texte brut saisi par l’utilisateur (confirmation et/ou compléments).
-    session : dict
-        Objet de session récupéré via `session_manager_instance.get_session(...)`.
-    session_data : dict
-        Données de session de l’UI (ex. {"user_id": ..., "session_id": ...}).
-    chat_history : list
-        Historique de conversation avant ce tour (format dépendant de `output_mode`).
-    current_patient : str | None
-        Patient courant, si déjà connu.
-    output_mode : {"dash", "api"}, optionnel
-        Mode de sortie. "dash" peut retourner des composants Dash ;
-        "api" ne retourne que des structures JSON-sérialisables.
-
-    Retours
-    -------
-    tuple
-        Un 7-uplet :
-            new_chat_history : list
-                Messages ajoutés sur ce tour (à concaténer par l’appelant).
-            figures_out : list
-                Figures produites (listes de go.Figure en "dash", ou dict Plotly en "api").
-            table_html : str
-                Tableau HTML des constantes (si pertinent).
-            anomaly_block : str
-                Bloc d’anomalies (si pertinent).
-            current_patient : str | None
-                Patient courant (éventuellement mis à jour).
-            serialized_figs : list | None
-                Figures sérialisées (utiles au stockage / export en mode UI).
-            chat_history_display : Any
-                Représentation prête à l’affichage (UI), inutilisée en mode API.
-
-    Exceptions
-    ----------
-    Peut lever des exceptions métiers/FS sous-jacentes (lecture des données,
-    génération de graphique, etc.) qui doivent être gérées par l’appelant
-    (selon le contexte UI ou API).
-
-    Remarques
-    ---------
-    - L’appelant est responsable de former le `full_chat_history` en concaténant
-      `chat_history + new_chat_history`.
-    - La fonction remet à plat les drapeaux de confirmation dans `session`.
+   - Traite la réponse de confirmation (oui/non), exécute le pipeline demandé et prépare l’affichage.
+   - Paramètres:
+        - user_input (str)
+        - session (dict)
+        - session_data (dict avec "user_id","session_id")
+        - chat_history (list, snapshot UI)
+        - current_patient (str|None)
+        - output_mode (Literal["dash","api"])
+    - Filtre/retague l’historique par (patient_key, user_id), reconstruit la paire [user_request, confirm_prompt], ajoute le delta [confirm_answer, bot_response], gère le changement de patient et réinitialise les flags d’intention.
+    - Retourne un tuple :
+        - (chat_history: list, figures_out: list, table_html: str, anomaly_block: str, current_patient: str|None, serialized_figs: list|None, chat_history_display: Any).
+    - Lève ValueError si session_data est incomplet.
     """
 
     figs_list: list = []

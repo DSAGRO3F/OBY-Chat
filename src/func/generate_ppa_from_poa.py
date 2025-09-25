@@ -76,20 +76,32 @@ def process_ppa_request(user_input, system_prompt):
         print('No raw_document available')
     cleaned_document = clean_patient_document(raw_document)
     print("✅ Document nettoyé.")
-    # print("🔍 Aperçu du document nettoyé :", json.dumps(cleaned_document, indent=2, ensure_ascii=False)[:1000])
-    # print("🔍 Aperçu du document nettoyé :", json.dumps(cleaned_document, indent=2, ensure_ascii=False)[:])
+    print("🟧 Aperçu du document nettoyé-avant anony. :", json.dumps(cleaned_document, indent=2, ensure_ascii=False)[0:1500])
+
+    # --- test
+    pp = cleaned_document.get("usager", {}) \
+        .get("Informations d'état civil", {}) \
+        .get("personnePhysique", {})
+    print("[AFTER CLEAN] situationFamiliale:",
+          "PRESENT" if "situationFamiliale" in pp else "ABSENTE",
+          "->", pp.get("situationFamiliale", "<NO KEY>"))
+
+    print("🟧 Aperçu (global) :", json.dumps(cleaned_document, indent=2, ensure_ascii=False)[0:3000])
+    # ---
+
+    # print("🟧 Aperçu du document nettoyé :", json.dumps(cleaned_document, indent=2, ensure_ascii=False)[:])
 
     # 4. Bis Anonymisation du POA + conversion dictionnaire en texte
     anonymized_doc, dict_mapping = anonymize_patient_document(cleaned_document, debug=False)
     anonymized_doc, dict_mapping = anonymize_name_mentions_in_free_text(anonymized_doc, dict_mapping, debug=False)
 
     print("✅ Anonymisation effectuée.")
-    print("🔍 Texte anonymisé :", json.dumps(anonymized_doc, indent=2, ensure_ascii=False)[0][:300])
-    # print("🔍 Texte anonymisé :", json.dumps(anonymized_text, indent=2, ensure_ascii=False)[:])
+    print("🟧 Texte anonymisé :", json.dumps(anonymized_doc, indent=2, ensure_ascii=False)[0:1500])
+    # print("🟧 Texte anonymisé :", json.dumps(anonymized_text, indent=2, ensure_ascii=False)[:])
 
-    print("📌 Exemple de mapping :", list(dict_mapping.items())[:10])
+    print("🟧 Exemple de mapping :", list(dict_mapping.items())[:15])
 
-    print(f"Après anonymisation -> {anonymized_doc}")
+    # print(f"🟧 Après anonymisation -> {anonymized_doc}")
 
     anonymized_text = convert_json_to_text(anonymized_doc)
     print("✅ Conversion JSON → texte réussie.")
@@ -126,7 +138,7 @@ def process_ppa_request(user_input, system_prompt):
 
 
     # response = llm_model.invoke(final_prompt)
-    print(f"🟢 Réponse brute du modèle : {response}")
+    print(f"🟢 Réponse brute du modèle avt. dé-anonym. : {response}")
     deanonymized_response, reverse_mapping = deanonymize_fields(response, dict_mapping, debug=True)
 
 

@@ -30,14 +30,20 @@ Ce schéma présente une vue d'ensemble des blocs fonctionnels
 
 ```plantuml
 @startuml
+' ---- Style global ----
 skinparam shadowing false
 skinparam packageStyle rectangle
 skinparam defaultTextAlignment left
 skinparam componentStyle rectangle
 skinparam monochrome false
+skinparam wrapWidth 200
+skinparam maxMessageSize 200
 
+title OBY-IA — Vue d’ensemble des blocs fonctionnels
+
+' ---- Légende des couleurs ----
 legend left
-|= Couleur |= Signification |
+|= Couleur |= Bloc fonctionnel |
 |<#E0F7FA>| Interaction / Intention |
 |<#E8F5E9>| Acquisition & Préparation (POA) |
 |<#E3F2FD>| Génération PPA |
@@ -46,14 +52,17 @@ legend left
 |<#ECEFF1>| Export / Sorties |
 endlegend
 
+' ---- Blocs ----
 package "Interaction & Intention" #E0F7FA {
   [chatbot_ui.py] as CHAT <<UI>>
-  [extract_user_intent.py] as INTENT <<NLU>>
-  [main_api.py] as API <<API>>
+  [extract_user_intent.py\n- detect_intent(generate_ppa / get_constants / generate_recommendations)] as INTENT <<NLU>>
+  [main_api.py\nhandle_user_input_or_logout()] as API <<API>>
 }
 
 package "Acquisition & Préparation (POA)" #E8F5E9 {
-  [poa_patients.py] as POA_LIST <<Data>>
+  [poa_loader.py\n- load_patient_poa] as POA_LOAD <<Data>>
+  [detect_poa_file_path.py\n- detect_poa_file_path] as POA_PATH <<Resolver>>
+  [extract_patient_name.py\n- extract_patient_name] as PNAME <<NLP>>
   [poa_cleaning.py\n- clean_patient_document] as POA_CLEAN <<ETL>>
   [anonymizer.py\n- anonymize_patient_document] as ANON <<Privacy>>
   [convert_json_to_text.py\n- convert_json_to_text] as CONV <<Transform>>
@@ -65,38 +74,58 @@ package "Génération PPA" #E3F2FD {
 
 package "Recommandations de soins" #F3E5F5 {
   [generate_structured_medical_plan.py\n- pipeline: generate_structured_medical_plan] as RECO <<Pipeline>>
-  [get_patient_constants_graphs.py\n- generate_graphs\n- generate_constants_table] as CONSTANTS <<Inputs>>
+  [get_patient_constants_graphs.py\n- generate_graphs\n- generate_constants_table] as CONST_IO <<Inputs>>
+  [analyze_constants.py\n- analyze_constants] as CONST_ANALYZE <<Analytics>>
 }
 
 package "RAG & Connaissances" #FFF8E1 {
   [llm_prompts.py\n- rag_llm_prompt_template_medical_plan] as PROMPT <<Prompt>>
-  [rag_medical_response_from_llm] as RAGCALL <<LLM>>
+  [rag_medical_response_from_llm.py\n- rag_medical_response_from_llm] as RAGCALL <<LLM>>
+  [scrape_trusted_sites.py] as SCRAPER <<Crawler>>
+  [run_full_indexing_pipeline.py] as PIPELINE <<Indexer>>
   [index_documents_chromadb.py] as INDEXER <<Index>>
-  database "ChromaDB\n- base_docx\n- base_web" as CHROMA
+  database "ChromaDB\n• base_docx\n• base_web" as CHROMA
 }
 
 package "Export / Sorties" #ECEFF1 {
-  [export.py] as EXPORT <<Doc>>
+  [export.py\n- build_pdf\n- save_markdown] as EXPORT <<Doc>>
+  [serialize_figs.py\n- fig_to_image\n- embed_figs] as FIGS <<Assets>>
 }
 
+' ---- Flux principaux ----
 API --> CHAT
-CHAT --> INTENT : intention utilisateur\n(generate_ppa / generate_recommendations)
-INTENT --> PPA : si intention == PPA
-INTENT --> RECO : si intention == recommandations
+CHAT --> INTENT : intention utilisateur\n(generate_ppa / get_constants / generate_recommendations)
+INTENT --> PPA : si intention == generate_ppa
+INTENT --> RECO : si intention == generate_recommendations
+INTENT --> CONST_IO : si intention == get_constants
 
-POA_LIST --> POA_CLEAN
+' Chaîne POA -> PPA
+CHAT --> PNAME : nom du patient (extraction)
+PNAME --> POA_PATH : résolution du fichier
+POA_PATH --> POA_LOAD
+POA_LOAD --> POA_CLEAN
 POA_CLEAN --> ANON
 ANON --> CONV
 CONV --> PPA
 
-CONSTANTS --> RECO
+' Constantes -> Recos
+CONST_IO --> CONST_ANALYZE
+CONST_ANALYZE --> RECO
 
+' RAG
 PROMPT --> RAGCALL
 CHROMA --> RAGCALL : passages pertinents
 RAGCALL --> RECO : texte structuré + bonnes pratiques
 
+' Indexation des connaissances
+SCRAPER --> PIPELINE
+PIPELINE --> INDEXER
+INDEXER --> CHROMA
+
+' Exports
 PPA --> EXPORT : PPA (Markdown/PDF)
 RECO --> EXPORT : Recos (Markdown/PDF)
+FIGS --> EXPORT : images/graphes
 
 @enduml
 ```

@@ -1,0 +1,2697 @@
+{
+    "usager": {
+        "Informations d'état civil": {
+            "clientId": "2910",
+            "personnePhysique": {
+                "civilite": "M",
+                "nomFamille": "DELOIN",
+                "prenomsActeNaissance": "ALAIN PASCAL",
+                "premierPrenomActeNaissance": "ALAIN",
+                "nomUtilise": "DELOIN",
+                "prenomUtilise": "ALAIN",
+                "sexe": "M",
+                "dateNaissance": "1945-09-15 00:00:00",
+                "communeNaissance": {
+                    "codePostal": "94100",
+                    "libelleCommune": "75012 Paris 12e Arrondissement",
+                    "inseeCommune": "75112"
+                },
+                "paysNaissance": {
+                    "libellePays": "France",
+                    "inseePays": null
+                },
+                "situationFamiliale": null
+            }
+        },
+        "adresse": {
+            "ligne": "12 avenue caffin",
+            "commentaire": "Accès : ALLEE DANS LE JARDIN, digicode :  - PAVILLON GRILLE VERTE",
+            "codePostal": "94100",
+            "libelleCommune": "LA VARENNE SAINT HILAIRE"
+        },
+        "contactInfosPersonnels": {
+            "domicile": null,
+            "mobile": "0625454121",
+            "mail": "alain.deloin@gmail.com"
+        }
+    },
+    "contacts": [
+        {
+            "typeContact": "Cercle d’aide et de soin",
+            "personnePhysique": {
+                "civilite": "M",
+                "nomUtilise": "PAGEL",
+                "prenomUtilise": "DIDIER",
+                "dateNaissance": ""
+            },
+            "adresse": {
+                "ligne": "15 RUE LOUIS BRAILLE",
+                "commentaire": "Accès : , digicode : ",
+                "codePostal": "94100",
+                "libelleCommune": "SAINT MAUR DES FOSSES"
+            },
+            "contactInfosPersonnels": {
+                "domicile": null,
+                "mobile": "0607684809",
+                "mailMSSANTE": "810108671198@mssante.fr",
+                "mailPro": "didier.pagel@bienvieillir-idf.org"
+            },
+            "titre": "INFIRMIER",
+            "role": "Infirmier",
+            "numRpps": "810108671198",
+            "structure": "BVIDF",
+            "typeStructure": "Réseaux / DAC / CRT / CPTS",
+            "finessET": "889755658",
+            "natureLien": "",
+            "personneConfiance": false,
+            "dateDesignationPersonneConfiance": "",
+            "responsableLegal": false,
+            "dateDesignationResponsableLegal": ""
+        },
+        {
+            "typeContact": "Cercle d’aide et de soin",
+            "personnePhysique": {
+                "civilite": "M",
+                "nomUtilise": "DURANT",
+                "prenomUtilise": "JACQUES",
+                "dateNaissance": ""
+            },
+            "adresse": {
+                "ligne": "14 AVENUE FOCH",
+                "commentaire": "Accès : , digicode : ",
+                "codePostal": "94100",
+                "libelleCommune": "SAINT MAUR DES FOSSES"
+            },
+            "contactInfosPersonnels": {
+                "domicile": null,
+                "mobile": "0148852122",
+                "mailMSSANTE": "4857456357412@mssante.fr",
+                "mailPro": ""
+            },
+            "titre": "DOCTEUR",
+            "role": "Médecin traitant",
+            "numRpps": "4857456357412",
+            "structure": "",
+            "typeStructure": "",
+            "finessET": "",
+            "natureLien": "",
+            "personneConfiance": false,
+            "dateDesignationPersonneConfiance": "",
+            "responsableLegal": false,
+            "dateDesignationResponsableLegal": ""
+        },
+        {
+            "typeContact": "Cercle d’aide et de soin",
+            "personnePhysique": {
+                "civilite": "MME",
+                "nomUtilise": "COMPLEA",
+                "prenomUtilise": "DUFOUR",
+                "dateNaissance": ""
+            },
+            "adresse": {
+                "ligne": "16 bis rue louis Dupré",
+                "commentaire": "Accès : , digicode : ",
+                "codePostal": "94100",
+                "libelleCommune": "SAINT MAUR DES FOSSES"
+            },
+            "contactInfosPersonnels": {
+                "domicile": null,
+                "mobile": "0148850634",
+                "mailMSSANTE": "",
+                "mailPro": "dufour@bienvieillir-idf.org"
+            },
+            "titre": "RESPONSABLE DE SECTEUR",
+            "role": "Accompagnement social/médico-social au soin",
+            "numRpps": "",
+            "structure": "COMPLEA",
+            "typeStructure": "Réseaux / DAC / CRT / CPTS",
+            "finessET": "",
+            "natureLien": "",
+            "personneConfiance": false,
+            "dateDesignationPersonneConfiance": "",
+            "responsableLegal": false,
+            "dateDesignationResponsableLegal": ""
+        },
+        {
+            "typeContact": "Entourage",
+            "personnePhysique": {
+                "civilite": "MME",
+                "nomUtilise": "DELOIN",
+                "prenomUtilise": "ANNE",
+                "dateNaissance": "1950-05-18 00:00:00"
+            },
+            "adresse": {
+                "ligne": "12 AVENUE CAFFIN",
+                "commentaire": "Accès : , digicode : ",
+                "codePostal": "94210",
+                "libelleCommune": "LA VARENNE SAINT HILAIRE"
+            },
+            "contactInfosPersonnels": {
+                "domicile": null,
+                "mobile": "0624245252",
+                "mailMSSANTE": "ANNE.DELOIN@GMAIL.COM",
+                "mailPro": ""
+            },
+            "titre": "",
+            "role": "",
+            "numRpps": "",
+            "structure": "",
+            "typeStructure": "",
+            "finessET": "",
+            "natureLien": "Conjoint",
+            "personneConfiance": true,
+            "dateDesignationPersonneConfiance": "2024-01-02 00:00:00",
+            "responsableLegal": false,
+            "dateDesignationResponsableLegal": ""
+        },
+        {
+            "typeContact": "Autre",
+            "personnePhysique": {
+                "civilite": "MME",
+                "nomUtilise": "FORTIN",
+                "prenomUtilise": "Sandrine",
+                "dateNaissance": ""
+            },
+            "adresse": {
+                "ligne": "rue de Paris",
+                "commentaire": "Accès : , digicode : ",
+                "codePostal": "94220",
+                "libelleCommune": "SAINT-MAUR"
+            },
+            "contactInfosPersonnels": {
+                "domicile": null,
+                "mobile": "030300303",
+                "mailMSSANTE": "test.fortin@test.fr",
+                "mailPro": ""
+            },
+            "titre": "",
+            "role": "",
+            "numRpps": "",
+            "structure": "",
+            "typeStructure": "",
+            "finessET": "",
+            "natureLien": "Femme de ménage",
+            "personneConfiance": false,
+            "dateDesignationPersonneConfiance": "",
+            "responsableLegal": false,
+            "dateDesignationResponsableLegal": ""
+        },
+        {
+            "typeContact": "Entourage",
+            "personnePhysique": {
+                "civilite": "MME",
+                "nomUtilise": "DUCEN",
+                "prenomUtilise": "Fabrice",
+                "dateNaissance": ""
+            },
+            "adresse": {
+                "ligne": "",
+                "commentaire": "Accès : , digicode : ",
+                "codePostal": "",
+                "libelleCommune": ""
+            },
+            "contactInfosPersonnels": {
+                "domicile": null,
+                "mobile": "7777777777",
+                "mailMSSANTE": "",
+                "mailPro": ""
+            },
+            "titre": "",
+            "role": "",
+            "numRpps": "",
+            "structure": "",
+            "typeStructure": "",
+            "finessET": "",
+            "natureLien": "Ami(e)",
+            "personneConfiance": true,
+            "dateDesignationPersonneConfiance": "2025-08-06 00:00:00",
+            "responsableLegal": false,
+            "dateDesignationResponsableLegal": ""
+        },
+        {
+            "typeContact": "Autre",
+            "personnePhysique": {
+                "civilite": "MME",
+                "nomUtilise": "VERNON",
+                "prenomUtilise": "ALAIN",
+                "dateNaissance": ""
+            },
+            "adresse": {
+                "ligne": "",
+                "commentaire": "Accès : , digicode : ",
+                "codePostal": "",
+                "libelleCommune": ""
+            },
+            "contactInfosPersonnels": {
+                "domicile": null,
+                "mobile": "7777777777",
+                "mailMSSANTE": "",
+                "mailPro": ""
+            },
+            "titre": "",
+            "role": "",
+            "numRpps": "",
+            "structure": "",
+            "typeStructure": "",
+            "finessET": "",
+            "natureLien": "un peu ami",
+            "personneConfiance": true,
+            "dateDesignationPersonneConfiance": "2025-07-29 00:00:00",
+            "responsableLegal": false,
+            "dateDesignationResponsableLegal": ""
+        }
+    ],
+    "aggir": {
+        "GIR": 4,
+        "dateModification": "19/05/2025",
+        "TempsAide24H": "1h36min",
+        "AggirVariable": [
+            {
+                "Nom": "Transferts",
+                "Resultat": "B",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "oui"
+                    }
+                ]
+            },
+            {
+                "Nom": "Déplacements intérieurs",
+                "Resultat": "B",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "oui"
+                    }
+                ]
+            },
+            {
+                "Nom": "Toilette",
+                "Resultat": "B",
+                "AggirSousVariable": [
+                    {
+                        "Nom": "Haut",
+                        "Resultat": "B",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "oui"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    },
+                    {
+                        "Nom": "Bas",
+                        "Resultat": "B",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "oui"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "oui"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "oui"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Nom": "Élimination",
+                "Resultat": "B",
+                "AggirSousVariable": [
+                    {
+                        "Nom": "Urinaire",
+                        "Resultat": "B",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "oui"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "oui"
+                            }
+                        ]
+                    },
+                    {
+                        "Nom": "Fécale",
+                        "Resultat": "B",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "oui"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "oui"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "oui"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Nom": "Habillage",
+                "Resultat": "B",
+                "AggirSousVariable": [
+                    {
+                        "Nom": "Haut",
+                        "Resultat": "B",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "oui"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "oui"
+                            }
+                        ]
+                    },
+                    {
+                        "Nom": "Moyen",
+                        "Resultat": "B",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "oui"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "oui"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "oui"
+                            }
+                        ]
+                    },
+                    {
+                        "Nom": "Bas",
+                        "Resultat": "B",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "oui"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "oui"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "oui"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Nom": "Cuisine",
+                "Resultat": "A",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "non"
+                    }
+                ]
+            },
+            {
+                "Nom": "Alimentation",
+                "Resultat": "B",
+                "AggirSousVariable": [
+                    {
+                        "Nom": "Se servir",
+                        "Resultat": "B",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "oui"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "oui"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    },
+                    {
+                        "Nom": "Manger",
+                        "Resultat": "B",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Nom": "Suivi du traitement",
+                "Resultat": "B",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "non"
+                    }
+                ]
+            },
+            {
+                "Nom": "Ménage",
+                "Resultat": "B",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "non"
+                    }
+                ]
+            },
+            {
+                "Nom": "Alerter",
+                "Resultat": "A",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "non"
+                    }
+                ]
+            },
+            {
+                "Nom": "Déplacements extérieurs",
+                "Resultat": "B",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "oui"
+                    }
+                ]
+            },
+            {
+                "Nom": "Transports",
+                "Resultat": "C",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "oui"
+                    }
+                ]
+            },
+            {
+                "Nom": "Activités de temps libre",
+                "Resultat": "B",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "oui"
+                    }
+                ]
+            },
+            {
+                "Nom": "Achats",
+                "Resultat": "B",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "oui"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "non"
+                    }
+                ]
+            },
+            {
+                "Nom": "Gestion",
+                "Resultat": "A",
+                "Commentaires": "",
+                "AggirAdverbes": [
+                    {
+                        "Question": "S",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "T",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "C",
+                        "Reponse": "non"
+                    },
+                    {
+                        "Question": "H",
+                        "Reponse": "non"
+                    }
+                ]
+            },
+            {
+                "Nom": "Orientation",
+                "Resultat": "A",
+                "AggirSousVariable": [
+                    {
+                        "Nom": "Temps",
+                        "Resultat": "A",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    },
+                    {
+                        "Nom": "Espace",
+                        "Resultat": "A",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Nom": "Cohérence",
+                "Resultat": "B",
+                "AggirSousVariable": [
+                    {
+                        "Nom": "Communication",
+                        "Resultat": "B",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    },
+                    {
+                        "Nom": "Comportement",
+                        "Resultat": "B",
+                        "Commentaires": "",
+                        "AggirAdverbes": [
+                            {
+                                "Question": "S",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "T",
+                                "Reponse": "non"
+                            },
+                            {
+                                "Question": "C",
+                                "Reponse": "oui"
+                            },
+                            {
+                                "Question": "H",
+                                "Reponse": "non"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "social": {
+        "blocs": [
+            {
+                "nom": "Contexte",
+                "questionReponse": [
+                    {
+                        "question": "NATURE DE LA DEMANDE",
+                        "reponse": "Admission en urgence"
+                    },
+                    {
+                        "question": "ORIGINE DE LA DEMANDE",
+                        "reponse": "Hôpital"
+                    },
+                    {
+                        "question": "ÉVÈNEMENTS ET SITUATION DE RUPTURE",
+                        "reponse": "Dégradation de l'état de santé Hospitalisation récente"
+                    },
+                    {
+                        "question": "Autres demandes en cours",
+                        "reponse": "Aucune SSIAD"
+                    },
+                    {
+                        "question": "TIERS PRÉSENT OU CONTACT POUR CETTE ÉVALUATION",
+                        "reponse": "Oui"
+                    },
+                    {
+                        "question": "Commentaires du tiers présent ou du contact principal",
+                        "reponse": "Mme anne deloin son epouse est presente - voir fiche contact pour les coordonnees"
+                    },
+                    {
+                        "question": "Expression de la personne (souhaits, projets, attentes,…)",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "Précisions sur l'origine de l'orientation vers nos services",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "Date de la demande",
+                        "reponse": "2025-04-01"
+                    },
+                    {
+                        "question": "Date du rendez-vous",
+                        "reponse": "2025-04-03"
+                    },
+                    {
+                        "question": "Heure du rendez-vous",
+                        "reponse": "10:45"
+                    },
+                    {
+                        "question": "Commentaires de l'évaluateur sur le contexte de la demande",
+                        "reponse": "Monsieur sort de l'hôpital après un accident vasculaire cérébral survenu le mois dernier"
+                    }
+                ]
+            },
+            {
+                "nom": "Habitat",
+                "questionReponse": [
+                    {
+                        "question": "LOCALISATION",
+                        "reponse": "Urbain"
+                    },
+                    {
+                        "question": "TYPE DE LOGEMENT",
+                        "reponse": "Maison"
+                    },
+                    {
+                        "question": "STATUT",
+                        "reponse": "Propriétaire"
+                    },
+                    {
+                        "question": "ÉLÉMENTS D'ACCESSIBILITÉ AU LOGEMENT",
+                        "reponse": "Marches"
+                    },
+                    {
+                        "question": "SURFACE APPROXIMATIVE DU LOGEMENT",
+                        "reponse": "> 100 M2"
+                    },
+                    {
+                        "question": "COMMERCES ET SERVICES DE PROXIMITÉ ( À MOINS DE 10 MN DE MARCHE)",
+                        "reponse": "superette"
+                    },
+                    {
+                        "question": "MOYENS DE TRANSPORT À PROXIMITÉ (A MOINS DE 10 MN À PIED - INDIQUEZ SI POSSIBLE LES LIGNES ET ARRÊTS)",
+                        "reponse": "bus a 300 metres"
+                    },
+                    {
+                        "question": "Lesquels ?",
+                        "reponse": "Oui"
+                    },
+                    {
+                        "question": "Commentaires de l'évaluateur sur l'habitat et l'environnement de proximité",
+                        "reponse": "l'habitat est confortable mais nécessite des aides techniques au vu de l'état d'autonomie actuelle de monsieur"
+                    },
+                    {
+                        "question": "Composition du logement",
+                        "reponse": "Séjour=1;&; Chambre=2;&; SDB=1;&; WC=1;&; Couloirs=1"
+                    },
+                    {
+                        "question": "Eléments posant des difficultés au sein du logement",
+                        "reponse": "Séjour1=1;&; Chambre1=0;&; Chambre2=0;&; SDB1=0;&; WC1=1;&; Couloirs1=1"
+                    },
+                    {
+                        "question": "Elèments posant des difficultés dans [Piece] [numero]",
+                        "reponse": "Chambre1=la chambre n'est pas équipée pour l'autonomie actuelle; il faut débarrasser et installer un lit médicalisé; elle est cependant au RDC , SDB1;&; SDB1=barre d'appui a installer dans la douche;&; Chambre2=porte trop petite"
+                    }
+                ]
+            },
+            {
+                "nom": "Vie Sociale",
+                "questionReponse": [
+                    {
+                        "question": "SITUATION FAMILIALE",
+                        "reponse": "Marié(e)"
+                    },
+                    {
+                        "question": "MODE DE VIE",
+                        "reponse": "Vit avec personne autonome"
+                    },
+                    {
+                        "question": "MESURE DE PROTECTION",
+                        "reponse": "Mesure accompagnement social ou judiciaire"
+                    },
+                    {
+                        "question": "PRÉSENCE D'UN ANIMAL DE COMPAGNIE",
+                        "reponse": "Non"
+                    },
+                    {
+                        "question": "PRÉCAUTIONS A PRENDRE VIS-À-VIS DE L'ANIMAL DE COMPAGNIE",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "LA PERSONNE REÇOIT-ELLE DES VISITES DE PROCHES ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Participation à des activités à l’extérieur",
+                        "reponse": "Oui"
+                    },
+                    {
+                        "question": "SOUHAIT D'AUTRES ACTIVITÉS",
+                        "reponse": "NSP"
+                    },
+                    {
+                        "question": "Si oui lesquelles?",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "LA PERSONNE ÉPROUVE-T-ELLE UN SENTIMENT D'ISOLEMENT OU DE SOLITUDE ?",
+                        "reponse": "Non"
+                    },
+                    {
+                        "question": "DESCRIPTION DES ACTIVITES AU DOMICILE",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "DESCRIPTION DES ACTIVITES A L'EXTÉRIEUR",
+                        "reponse": "jusqu'a présent Mr faisait du jardinage - faisait ses courses lui même avec son épouse, et sortait de temps en temps au restaurant"
+                    },
+                    {
+                        "question": "Commentaire de l'évaluateur sur la participation social",
+                        "reponse": "Mr était parfaitement autonome avant son AVC."
+                    }
+                ]
+            },
+            {
+                "nom": "PEC",
+                "questionReponse": [
+                    {
+                        "question": "PLAN D'AIDE EN COURS",
+                        "reponse": "Aucun"
+                    },
+                    {
+                        "question": "AIDE EXTRA LÉGALE EN COURS",
+                        "reponse": "Aucune"
+                    },
+                    {
+                        "question": "COORDONNÉES DE L'ORGANISME INTERVENANT DANS LE FINANCEMENT",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "NUMÉRO DE DOSSIER",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "DROITS OUVERTS DU",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "AU",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "CLASSEMENT GIR RETENU",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "TAUX DE PARTICIP. USAGER",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "MODE D'INTERVENTION DE L'AIDE HUMAINE",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Autres éléments inscrits au plan d'aide",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "INFORMATIONS SUPPLEMENTAIRES SUR LES AIDES EXTRA LEGALES",
+                        "reponse": "Non renseigné"
+                    },
+                    {
+                        "question": "Commentaires de l'évaluateur sur la prise en charge (préciser si le médecin traitant est informé de la démarche)",
+                        "reponse": "il faut mettre en place une demande d'APA"
+                    }
+                ]
+            }
+        ]
+    },
+    "materiels": [
+        {
+            "materiel": "Barre d'appui WC",
+            "statut": "A PREVOIR"
+        },
+        {
+            "materiel": "Barre d'appui douche",
+            "statut": "A PREVOIR"
+        },
+        {
+            "materiel": "Bassin de lit",
+            "statut": "A PREVOIR"
+        },
+        {
+            "materiel": "Fauteuil de douche roulant",
+            "statut": "A PREVOIR"
+        },
+        {
+            "materiel": "Lit médicalisé à hauteur variable",
+            "statut": "A PREVOIR"
+        },
+        {
+            "materiel": "Potence de lit fixe pour lit médicalisé",
+            "statut": "A PREVOIR"
+        }
+    ],
+    "sante": {
+        "blocs": [
+            {
+                "nom": "Anxiété",
+                "questionReponse": [
+                    {
+                        "question": "Le patient vit-il beaucoup dans l’inquiétude ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Un rien le dérange ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Le patient se considère-t-il comme étant de nature inquiète ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Le patient se sent-il souvent nerveux ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Lui arrive-t-il souvent que ses propres pensées suscitent de l’anxiété chez lui ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Ajouter un commentaire :",
+                        "reponse": ""
+                    }
+                ],
+                "test": [
+                    {
+                        "nom": "TEST GAI (Geriatric Anxiety Inventory)",
+                        "resultat": "Le test fait état d'une anxiété"
+                    },
+                    {
+                        "nom": "Interprétation du test GAI-SF",
+                        "resultat": "Le patient présente des signes d'anxiété significative. Une attention particulière aux symptômes liés à l'anxiété et au stress est recommandée afin de proposer un suivi adapté"
+                    },
+                    {
+                        "nom": "TEST GAI (Geriatric Anxiety Inventory)",
+                        "resultat": "29/07/2025"
+                    }
+                ]
+            },
+            {
+                "nom": "Cardio-respiratoire",
+                "questionReponse": [
+                    {
+                        "question": "Le patient a-t-il des difficultés pour respirer ?",
+                        "reponse": "Jamais"
+                    },
+                    {
+                        "question": "Le patient reçoit-il de l'oxygène sur prescription médicale ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Le patient dort-il en position demi assise ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Le patient est-il porteur(se) d'un Pace maker ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Le patient a-t-il les jambes qui gonflent ?",
+                        "reponse": "Non"
+                    },
+                    {
+                        "question": "Le patient dort-il avec les jambes surélevées et/ou porte-t-il des bas de contention ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Ajouter un commentaire :",
+                        "reponse": "pace maker posé en février 2025."
+                    }
+                ]
+            },
+            {
+                "nom": "Cognition",
+                "questionReponse": [
+                    {
+                        "question": "Le patient perd-il ses mots quand il s'exprime ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Le patient présente-t-il une aphasie ?",
+                        "reponse": "Oui"
+                    },
+                    {
+                        "question": "Le patient présente-t-il une aphasie ?",
+                        "reponse": "Origine vasculaire"
+                    },
+                    {
+                        "question": "Voici un cercle, qui représente une horloge. Pouvez vous y écrire les heures (seuls 12-3-6-9 ok), puis dessiner 11 heures 10 (pas besoin de préciser si petite ou grande aiguille) :",
+                        "reponse": "Dessin non réussi"
+                    },
+                    {
+                        "question": "Pouvez-vous me redonner les 3 mots que je vous ai cité tout à l'heure ?",
+                        "reponse": "Village"
+                    },
+                    {
+                        "question": "Ajouter un commentaire :",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Télécharger le dessin réalisé :",
+                        "reponse": ""
+                    }
+                ],
+                "test": [
+                    {
+                        "nom": "Dépistage cognitif ICOPE",
+                        "resultat": "08/09/2025"
+                    },
+                    {
+                        "nom": "Dépistage cognitif ICOPE",
+                        "resultat": "Les tests de mémorisation du programme ICOPE sont perturbés"
+                    },
+                    {
+                        "nom": "Dépistage cognitif ICOPE",
+                        "resultat": " une évaluation complète de ce domaine est recommandée"
+                    },
+                    {
+                        "nom": "Mini-cog",
+                        "resultat": "Mr DELOIN  a eu un test mini-cog de 1/5. La mémoire et les capacités de réflexion semblent significativement perturbées et nécessitent d'être complétées par une exploration spécialisée."
+                    }
+                ]
+            },
+            {
+                "nom": "Dépression",
+                "questionReponse": [
+                    {
+                        "question": "Le patient se sent-il découragé et triste ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Le patient est-il heureux la plupart du temps ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "A-t-il le sentiment que sa vie est vide, qu’il a perdu l'intérêt ou le plaisir de faire les choses ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Le patient a-t-il l'impression que sa situation est désespérée ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Cela l'empêche-t-il de s'engager dans des activités ou d'entreprendre certaines choses ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Ajouter un commentaire :",
+                        "reponse": ""
+                    }
+                ],
+                "test": [
+                    {
+                        "nom": "Dépistage des symptômes dépressifs ICOPE",
+                        "resultat": " "
+                    },
+                    {
+                        "nom": "Dépistage des symptômes dépressifs ICOPE",
+                        "resultat": "29/07/2025"
+                    },
+                    {
+                        "nom": "Mini GDS (Gériatric Depressive Syndrome)",
+                        "resultat": "Monsieur DELOIN  a un test mini-GDS de 1/4. Monsieur DELOIN  indique ne pas être heureux(se) la plupart du temps."
+                    },
+                    {
+                        "nom": "Mini GDS (Gériatric Depressive Syndrome)",
+                        "resultat": "29/07/2025"
+                    }
+                ]
+            },
+            {
+                "nom": "Elimination",
+                "questionReponse": [
+                    {
+                        "question": "Le patient est-il stomisé ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Si oui, de quel(s) type(s) de stomie(s) s'agit-il ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Qui gère les changements de poche ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Qui gère les changements de support de la stomie ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Le patient ressent-il des troubles du transit intestinal ?",
+                        "reponse": "Constipation"
+                    },
+                    {
+                        "question": "Le patient est-il porteur d'une sonde vésicale à demeure ou d'un étui pénien ?",
+                        "reponse": "Non"
+                    },
+                    {
+                        "question": "Qui gère les changements du collecteur d'urine ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Le patient éprouve-t-il habituellement des difficultés pour uriner ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Port de protection :",
+                        "reponse": "Change complet"
+                    },
+                    {
+                        "question": "Port de protection :",
+                        "reponse": "La nuit"
+                    },
+                    {
+                        "question": "Ajouter un commentaire :",
+                        "reponse": "met une protection la nuit par sécurité a sa demande"
+                    }
+                ]
+            },
+            {
+                "nom": "Général et ressenti",
+                "questionReponse": [
+                    {
+                        "question": "Recueil de la personne sur son état de santé, ses maladies ?",
+                        "reponse": "sort de l'hôpital avec une perte d'autonomie quasi complète de l'hémicorps gauche"
+                    },
+                    {
+                        "question": "Par rapport aux personnes du même âge, comment le patient, juge-t-il son état de santé ?",
+                        "reponse": "Plutôt moins bon"
+                    },
+                    {
+                        "question": "Le patient a-t-il été hospitalisé au cours des 6 derniers mois ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Ajouter un commentaire :",
+                        "reponse": "séjour de 45 jours en aigu puis en SSR"
+                    }
+                ]
+            },
+            {
+                "nom": "Préparations et prise médicamenteuse",
+                "questionReponse": [
+                    {
+                        "question": "Contre-indications médicamenteuses ?",
+                        "reponse": "NE SAIT PAS"
+                    },
+                    {
+                        "question": "Lesquelles ? Précisez les contre-indications médicamenteuses :",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Fréquence de la prise médicamenteuse",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Quels traitements ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Préparation et dispensation des médicaments",
+                        "reponse": "Utilisation d'un semainier"
+                    },
+                    {
+                        "question": "Préparation et dispensation des médicaments",
+                        "reponse": "Préparé par une infirmière"
+                    },
+                    {
+                        "question": "Ajouter un commentaire :",
+                        "reponse": ""
+                    }
+                ]
+            },
+            {
+                "nom": "Mobilité",
+                "questionReponse": [
+                    {
+                        "question": "Présence d'un déficit moteur ?",
+                        "reponse": "A droite"
+                    },
+                    {
+                        "question": "Présence d'un déficit moteur ?",
+                        "reponse": "Membre supérieur"
+                    },
+                    {
+                        "question": "Présence d'un déficit moteur ?",
+                        "reponse": "Membre inférieur"
+                    },
+                    {
+                        "question": "Présence d'un déficit moteur ?",
+                        "reponse": "Incomplet"
+                    },
+                    {
+                        "question": "Présence d'un déficit moteur ?",
+                        "reponse": "Origine vasculaire"
+                    },
+                    {
+                        "question": "Difficulté à certains efforts ou ports de charges de la vie quotidienne ?",
+                        "reponse": "Beaucoup"
+                    },
+                    {
+                        "question": "Description de la prothèse ou de l'orthèse :",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Ajouter des commentaires :",
+                        "reponse": "a un appui instable et ne peut se lever sans aide"
+                    },
+                    {
+                        "question": "Porte des chaussures orthopédiques ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Porte des prothèses ou orthèses ?",
+                        "reponse": "NON"
+                    }
+                ],
+                "test": [
+                    {
+                        "nom": "Test du lever de chaise",
+                        "resultat": "Le test du lever de chaise a été réalisé en 12:62 secondes soit 3 points / 4 : Mobilité correcte"
+                    },
+                    {
+                        "nom": "Test d'équilibre",
+                        "resultat": "Le test de l'équilibre a été réalisé en 21:82 secondes soit 1 points / 4 : Test d'équilibre très perturbée"
+                    },
+                    {
+                        "nom": "Test de la vitesse de marche sur 4 mètres",
+                        "resultat": "Le test de la marche a été réalisé en 14:64 secondes soit 0 points / 4 : Mobilité très ralentie ou impossible"
+                    },
+                    {
+                        "nom": "Test du lever de chaise",
+                        "resultat": "29/07/2025"
+                    },
+                    {
+                        "nom": "Test d'équilibre",
+                        "resultat": "29/07/2025"
+                    },
+                    {
+                        "nom": "Test de la vitesse de marche sur 4 mètres",
+                        "resultat": "29/07/2025"
+                    }
+                ]
+            },
+            {
+                "nom": "Nutrition",
+                "questionReponse": [
+                    {
+                        "question": "Le patient s'alimente-t-il via une sonde ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Quel type de sonde est utilisée pour sa nutrition ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Le patient a-t-il présenté une baisse des prises alimentaires ces 3 derniers mois ?",
+                        "reponse": "Légère baisse des prises alimentaires"
+                    },
+                    {
+                        "question": "Le patient a-t-il eu une perte récente de poids au cours des 3 derniers mois ?",
+                        "reponse": "Ne sait pas"
+                    },
+                    {
+                        "question": "Le patient a-t-il eu une maladie aigüe ou un stress psychologique au cours des 3 derniers mois :",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Un régime est-il médicalement prescrit et suivi par le patient ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Si oui quel type de régime (plusieurs choix possibles) :",
+                        "reponse": "Hyper protidique"
+                    },
+                    {
+                        "question": "Le patient est-il allergique à certains aliments ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Quels aliments ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Le patient éprouve-t-il des difficultés pour mâcher ou avaler les aliments ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Quelles difficultés pour mâcher ou avaler les aliments ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Sous quelle forme de texture les aliments vous sont-ils présentés ?",
+                        "reponse": "Normale"
+                    },
+                    {
+                        "question": "Le patient porte-t-il un appareil dentaire ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Continue-t-il à s'hydrater par la bouche ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Qui s'occupe de sa nutrition entérale ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Taille (en cm) :",
+                        "reponse": "173"
+                    },
+                    {
+                        "question": "Poids (en kg) :",
+                        "reponse": "76"
+                    },
+                    {
+                        "question": "Ajouter un commentaire :",
+                        "reponse": ""
+                    }
+                ],
+                "test": [
+                    {
+                        "nom": "IMC",
+                        "resultat": "25.4"
+                    },
+                    {
+                        "nom": "Interprétation IMC",
+                        "resultat": "Monsieur DELOIN  est en Surpoids"
+                    },
+                    {
+                        "nom": "Interprétation IMC",
+                        "resultat": "08/08/2025"
+                    },
+                    {
+                        "nom": "ICOPE NUTRITION",
+                        "resultat": "Légère baisse des prises alimentaires - Ne sait pas | ICOPE NUTRITION légèrement perturbé à surveiller"
+                    },
+                    {
+                        "nom": "ICOPE NUTRITION",
+                        "resultat": "08/08/2025"
+                    },
+                    {
+                        "nom": "Test de dépistage du MNA",
+                        "resultat": "Etat de dénutrition avérée"
+                    },
+                    {
+                        "nom": "Test de dépistage du MNA",
+                        "resultat": " suivi médical fortement recommandé"
+                    },
+                    {
+                        "nom": "Test de dépistage du MNA",
+                        "resultat": "08/08/2025"
+                    }
+                ]
+            },
+            {
+                "nom": "Douleur",
+                "questionReponse": [
+                    {
+                        "question": "Le patient est-il en mesure de communiquer sur ses douleurs ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Le patient signale-t-il des douleurs ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Sur une échelle de 0 (pas de douleurs) à 10 (douleur insupportable), où le patient situe-t-il l'intensité de ses douleurs ?",
+                        "reponse": "6"
+                    },
+                    {
+                        "question": "Nature des douleurs :",
+                        "reponse": "Occasionnelles"
+                    },
+                    {
+                        "question": "Nature des douleurs :",
+                        "reponse": "Le jour"
+                    },
+                    {
+                        "question": "Nature des douleurs :",
+                        "reponse": "Lors de la mobilisation"
+                    },
+                    {
+                        "question": "Manifestations somatiques de la douleur :",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Description  des manifestations somatiques de la douleur :",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Ajouter un commentaire (localisation, description, mode d'apparition, etc..) :",
+                        "reponse": "les douleurs sont localisées a l'épaule et au bras paralysé"
+                    }
+                ]
+            },
+            {
+                "nom": "Polymédications",
+                "questionReponse": [
+                    {
+                        "question": "Le patient prend-il des médicaments ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Le patient prend-il plus de 5 médicaments par jour ? (prescrits ou non)",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "L’ordonnance comprend-elle 1 benzodiazépine ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "L’ordonnance comprend-elle 1 neuroleptique ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "L’ordonnance comprend-elle 1 antidépresseur ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "L’ordonnance comprend-elle 1 AINS per os ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Le patient prend-il des antalgiques de palier 2 ou 3 ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Le patient prend-il des anticholinergiques ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Le patient prend-il des anticoagulants ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Ajouter un commentaire :",
+                        "reponse": ""
+                    }
+                ]
+            },
+            {
+                "nom": "Sensoriel",
+                "questionReponse": [
+                    {
+                        "question": "Le patient porte-t-il des lunettes ou des lentilles de contact ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Le patient a-t-il des problèmes oculaires et non oculaires, des difficultés pour voir de loin ou pour lire ? Des maladies oculaires ? Du diabète ? De l'HTA ?",
+                        "reponse": "OUI"
+                    },
+                    {
+                        "question": "Le patient a-t-il des troubles de la sensibilité ?",
+                        "reponse": "Aucune perte ou sensation douloureuse au toucher"
+                    },
+                    {
+                        "question": "Précisez la localisation :",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Le patient a-t-il l'impression que son audition a baissé au cours des 4 derniers mois ou depuis votre dernière évaluation ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Le patient a-t-il un appareil auditif ?",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Résultat du test Oreille Droite :",
+                        "reponse": "Répète incorrectement ou ne répète pas"
+                    },
+                    {
+                        "question": "Résultat du test Oreille Gauche :",
+                        "reponse": "Répète incorrectement ou ne répète pas"
+                    },
+                    {
+                        "question": "Ajouter un commentaire :",
+                        "reponse": ""
+                    }
+                ],
+                "test": [
+                    {
+                        "nom": "Icope déficience visuelle",
+                        "resultat": "Une évaluation complète de la vue est recommandée"
+                    },
+                    {
+                        "nom": "Icope audition",
+                        "resultat": "Une évaluation complète de l'ouie est recommandée"
+                    },
+                    {
+                        "nom": "Icope déficience visuelle",
+                        "resultat": "29/07/2025"
+                    },
+                    {
+                        "nom": "Icope audition",
+                        "resultat": "29/07/2025"
+                    }
+                ]
+            },
+            {
+                "nom": "Peau",
+                "questionReponse": [
+                    {
+                        "question": "Le patient a-t-il des antécédents d'escarres ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Présence actuelle d'escarres :",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Localisation actuelle des escarres :",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Le patient possède-t-il d’autres problèmes de peau et téguments ?",
+                        "reponse": "NON"
+                    },
+                    {
+                        "question": "Description des autres problèmes de peau et téguments :",
+                        "reponse": ""
+                    },
+                    {
+                        "question": "Ajouter un commentaire :",
+                        "reponse": "neanmoins surveiller l'état cutané aux point de pression"
+                    }
+                ],
+                "test": [
+                    {
+                        "nom": "Evaluation du risque d'escarre selon l'échelle de Norton (Basé sur l'évaluation AGGIR)",
+                        "resultat": "Mr DELOIN  présente un risque modéré d'escarre"
+                    },
+                    {
+                        "nom": "Evaluation du risque d'escarre selon l'échelle de Norton (Basé sur l'évaluation AGGIR)",
+                        "resultat": "29/07/2025"
+                    }
+                ]
+            },
+            {
+                "nom": "Seuils",
+                "seuil": [
+                    {
+                        "type": "Fréquence cardiaque",
+                        "max": 90,
+                        "min": 70,
+                        "unit": "BMP/min",
+                        "surveillance": "2 fois par jour"
+                    },
+                    {
+                        "type": "Tension artérielle systolique",
+                        "max": 145,
+                        "min": 110,
+                        "unit": "mmHg",
+                        "surveillance": "1 fois par jour"
+                    },
+                    {
+                        "type": "Tension artérielle diastolique",
+                        "max": 80,
+                        "min": 60,
+                        "unit": "mmHg",
+                        "surveillance": "1 fois par jour"
+                    },
+                    {
+                        "type": "Glycémie capillaire (hémoglucotest)",
+                        "max": 1.7,
+                        "min": 0.9,
+                        "unit": "g/L",
+                        "surveillance": "Non"
+                    },
+                    {
+                        "type": "Hémoglucotest post-prandial",
+                        "max": 1.7,
+                        "min": 1.2,
+                        "unit": "g/L",
+                        "surveillance": "Non"
+                    },
+                    {
+                        "type": "Poids",
+                        "max": 700,
+                        "min": 3,
+                        "unit": "Kg",
+                        "surveillance": "1 fois par mois"
+                    }
+                ]
+            },
+            {
+                "nom": "Comorbidités",
+                "comorbidites": [
+                    {
+                        "Affection": "Affection Neurologiques",
+                        "Etat pathologique": "AVC Ischémique ou hémorragique",
+                        "Etat": "Suspicion",
+                        "Date de diagnostic": "2025-02-15",
+                        "Diagnostique": "",
+                        "Commentaires": "sequelles importantes hémiplégie gauche avec aphasie partielle"
+                    },
+                    {
+                        "Affection": "Affection Cardio-vasculaires",
+                        "Etat pathologique": "Insuffisance cardiaque",
+                        "Etat": "Suspicion",
+                        "Date de diagnostic": "2025-09-01",
+                        "Diagnostique": "Classe II : limitation modérée de l'activité physique, symptômes avec l'effort.",
+                        "Commentaires": null
+                    }
+                ]
+            },
+            {
+                "nom": "Saisir les mesures des constantes",
+                "mesureConstante": [
+                    {
+                        "type": "Fréquence cardiaque",
+                        "value": "86",
+                        "unite": "BMP/min",
+                        "status": "normale",
+                        "dateSaisie": "2025-07-29 10:55:00"
+                    },
+                    {
+                        "type": "Tension artérielle systolique",
+                        "value": "140/80",
+                        "unite": "/ mm Hg",
+                        "status": "abnormal",
+                        "dateSaisie": "2025-07-29 10:55:00"
+                    },
+                    {
+                        "type": "Saturation en Oxygène",
+                        "value": "95",
+                        "unite": "%",
+                        "status": "normale",
+                        "dateSaisie": "2025-07-29 10:55:00"
+                    },
+                    {
+                        "type": "Fréquence respiratoire",
+                        "value": "18",
+                        "unite": "cycles/min",
+                        "status": "normale",
+                        "dateSaisie": "2025-07-29 10:51:00"
+                    },
+                    {
+                        "type": "Poids",
+                        "value": "76",
+                        "unite": "Kg",
+                        "status": "normale",
+                        "dateSaisie": "2025-07-29 10:55:00"
+                    }
+                ]
+            }
+        ]
+    },
+    "dispositifs": [
+        {
+            "dispositif": "Appareils auditifs",
+            "statut": "EXISTANT",
+            "datePose": "2020-01-01",
+            "dateControle": "2025-07-01",
+            "dateRetrait": "2030-01-01",
+            "notes": "se plaint de grésillements"
+        },
+        {
+            "dispositif": "pace-maker",
+            "statut": "PREVOIR",
+            "datePose": "2025-08-01",
+            "dateControle": null,
+            "dateRetrait": null,
+            "notes": "\tessoufflement répétés\t"
+        }
+    ],
+    "poaSocial": {
+        "problemes": [
+            {
+                "nomBloc": "Contexte",
+                "statut": "Actif",
+                "problemePose": "Événements et situations de rupture : Dégradation de l'état de santé\nÉvénements et situations de rupture : Hospitalisation récente",
+                "objectifs": "Travail en coordination avec le cercle de soin en vue d'améliorer ou maintenir l'état de santé.\nPrévenir une nouvelle hospitalisation.",
+                "preoccupationPatient": "Élevée",
+                "preoccupationProfessionel": "Assez élevée",
+                "planActions": [
+                    {
+                        "nomAction": "Informer Médecin et les autres professionnels de santé de notre intervention",
+                        "detailAction": "",
+                        "personneChargeAction": "Madame COMPLEA DUFOUR - Accompagnement social/médico-social au soin; ",
+                        "dateDebutAction": "2025-07-10",
+                        "dureeAction": "5 jour",
+                        "recurrenceAction": " Pas de récurrence",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "Surveiller et alerter de toute modification de l'état de santé",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": "2 année",
+                        "recurrenceAction": "1 Jour",
+                        "momentJournee": [
+                            "Matin"
+                        ]
+                    },
+                    {
+                        "nomAction": "Contacter un SSIAD ou une IDEL",
+                        "detailAction": "",
+                        "personneChargeAction": "Madame COMPLEA DUFOUR - Accompagnement social/médico-social au soin; ",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Pas de récurrence",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "Adapter la prise en charge après l'hospitalisation",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Pas de récurrence",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "Informer le coordinateur",
+                        "detailAction": "",
+                        "personneChargeAction": "Madame COMPLEA DUFOUR - Accompagnement social/médico-social au soin; ",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    }
+                ],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Habitat",
+                "statut": "Actif",
+                "problemePose": "Accessibilité du logement : Marches\nAccessibilité et problèmes liés à l'habitat dans : Chambre1=la chambre n'est pas équipée pour l'autonomie actuelle; il faut débarrasser et installer un lit médicalisé; elle est cependant au RDC , SDB1, SDB1=barre d'appui a installer dans la douche, Chambre2=porte trop petite",
+                "objectifs": "Permettre une circulation et une déambulation aisée et sans risques.",
+                "preoccupationPatient": "Faible",
+                "preoccupationProfessionel": "Faible",
+                "planActions": [
+                    {
+                        "nomAction": "Contacter un ergothérapeute",
+                        "detailAction": "",
+                        "personneChargeAction": "Madame COMPLEA DUFOUR - Accompagnement social/médico-social au soin; Madame COMPLEA DUFOUR - Accompagnement social/médico-social au soin; ",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "faire installer une rampe d'accès pour les 2 marches d'accès au logement pour permettre le passage du fauteuil roulant",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "contacter le médecin pour ordonnance lit médicalisé et matelas",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "faire venir un ergotéhrapeute pour selectionner les emplcaments des aides techniques",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "mettre des barres de relevage et un réhausseur de wc",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "faire intervenir un électritien",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    }
+                ],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Vie Sociale",
+                "statut": "Actif",
+                "problemePose": "Mesures existantes : Mesure accompagnement social ou judiciaire\nAidants\nMesures à proposer",
+                "objectifs": "Que la personne soit informée et puisse faire le choix sur les dispositifs de protection dont elle pourrait bénéficier.\nGarantir la sécurité des intervenants et celle de l'animal de compagnie.\nSoutenir les aidants, lutter contre l'épuisement.\nPermettre la mise en place des activités sociales souhaitées par la personne.",
+                "preoccupationPatient": "Assez faible",
+                "preoccupationProfessionel": "Faible",
+                "planActions": [
+                    {
+                        "nomAction": "Communiquer le numéro national pour les proches aidants de personnes handicapées pour se renseigner sur leurs droits et solutions 0 800 360 360",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "Communiquer le numéro national pour les proches aidants de personnes âgées pour se renseigner sur leurs droits et solutions 0 800 10 39 39 ",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    }
+                ],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Prise En Charge",
+                "statut": "Actif",
+                "problemePose": "Prise en charge actuelle : Aucun",
+                "objectifs": "Mettre en place un plan d'aide adapté aux besoins de la personne.",
+                "preoccupationPatient": "Faible",
+                "preoccupationProfessionel": "Faible",
+                "planActions": [
+                    {
+                        "nomAction": "APA",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    }
+                ],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Aides techniques",
+                "statut": "Actif",
+                "problemePose": "Matériel à prévoir : Barre d'appui WC\nMatériel à prévoir : Barre d'appui douche\nMatériel à prévoir : Bassin de lit\nMatériel à prévoir : Fauteuil de douche roulant\nMatériel à prévoir : Lit médicalisé à hauteur variable\nMatériel à prévoir : Potence de lit fixe pour lit médicalisé",
+                "objectifs": "Améliorer l'autonomie et la,prévention des TMS par des aides techniques appropriées.",
+                "preoccupationPatient": "Faible",
+                "preoccupationProfessionel": "Faible",
+                "planActions": [
+                    {
+                        "nomAction": "Demander l'avis et/ou l'ordonnance du médecin",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "Contacter un ergothérapeute",
+                        "detailAction": "",
+                        "personneChargeAction": "Madame COMPLEA DUFOUR - Accompagnement social/médico-social au soin; Madame COMPLEA DUFOUR - Accompagnement social/médico-social au soin; ",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    }
+                ],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            }
+        ]
+    },
+    "poaSante": {
+        "problemes": [
+            {
+                "nomBloc": "Cardio-Respiratoire",
+                "statut": "Inactif",
+                "problemePose": "",
+                "objectifs": "",
+                "preoccupationPatient": "",
+                "preoccupationProfessionel": "",
+                "planActions": [],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Nutrition",
+                "statut": "Actif",
+                "problemePose": "IMC : 25.4 Monsieur DELOIN  est en Surpoids\nMNA de dépistage : 7 / 14 : NON,Légère baisse des prises alimentaires,Ne sait pas,OUI,25.4,Etat de dénutrition avérée,suivi médical fortement recommandé\nICOPE NUTRITION : - Perte d'appétit récente : Légère baisse des prises alimentaires - Perte de poids récente : Ne sait pas\nRégime : Hyper protidique",
+                "objectifs": "IMC compris entre 18,5 et 25.\nAider à la prise en charge des problèmes nutritionnels.\nAider au respect du régime.",
+                "preoccupationPatient": "Assez élevée",
+                "preoccupationProfessionel": "Assez faible",
+                "planActions": [
+                    {
+                        "nomAction": "Orienter vers le médecin traitant",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "2025-08-04",
+                        "dureeAction": "10 non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "Peser régulièrement la personne",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    }
+                ],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Elimination",
+                "statut": "Actif",
+                "problemePose": "Troubles digestifs : Constipation\nProtections hygiéniques : Change complet,La nuit",
+                "objectifs": "Aider la personne à la prise en charge des problèmes digestifs.\nMaintenir l'hygiène intime de la personne.",
+                "preoccupationPatient": "Assez élevée",
+                "preoccupationProfessionel": "Assez faible",
+                "planActions": [
+                    {
+                        "nomAction": "Communiquer aux intervenant(es) une fiche technique sur les troubles de l'élimination fécale",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "Surveiller les troubles et prévenir le médecin en cas de modification ",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "Communiquer aux intervenant(es) une fiche technique sur les protections hygiéniques",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "Etablir un plan de changement des protections hygiéniques",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    }
+                ],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Mobilité",
+                "statut": "Actif",
+                "problemePose": "Déficit moteur : A droite,Membre supérieur,Membre inférieur,Incomplet,Origine vasculaire\nICOPE MOBILITE : Troubles dela marche: Test de la marche Le test de la marche a été réalisé en 14:64 secondes soit 0 points / 4 : Mobilité très ralentie ou impossible",
+                "objectifs": "Permettre à la personne de maintenir son autonomie en sécurité.",
+                "preoccupationPatient": "Assez faible",
+                "preoccupationProfessionel": "Assez élevée",
+                "planActions": [
+                    {
+                        "nomAction": "Communiquer aux intervenant(es) une fiche technique sur les conduites à tenir face aux déficits moteur",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "Surveiller les troubles et prévenir le médecin ",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "Proposer un atelier d'activité physique adaptée ou de prévention des chutes",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "Proposer une activité physqiue adaptée ou de prévention des chutes au domicile",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "Proposer une activité de TAI CHI / QI QONG au domicile",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "Proposer une consultation d'ergothérapie",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    }
+                ],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Peau",
+                "statut": "Actif",
+                "problemePose": "Echelle de NORTON : 13,Mr DELOIN  présente un risque modéré d'escarre",
+                "objectifs": "Prévenir le risque d'escarre(s).",
+                "preoccupationPatient": "Assez élevée",
+                "preoccupationProfessionel": "Assez faible",
+                "planActions": [
+                    {
+                        "nomAction": "Communiquer aux intervenant(es) une fiche technique sur l'accompagnement des personnes a risque d'escarre(s)",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "Surveiller l'état cutané et prévenir le médecin de toute anomalie",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    }
+                ],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Sensoriel",
+                "statut": "Actif",
+                "problemePose": "ICOPE DEFICIENCE VISUELLE : OUI :\nTest de WHISPER OD : r2 - Test de WHISPER OG : Non renseignée - ICOPE DEFICIENCE AUDITIVE : Une évaluation complète de l'ouie est recommandée",
+                "objectifs": "Prendre en charge la déficience visuelle et ses conséquences.\nPrendre en charge la déficience auditive et ses conséquences.",
+                "preoccupationPatient": "Faible",
+                "preoccupationProfessionel": "Assez faible",
+                "planActions": [
+                    {
+                        "nomAction": "Prendre RDV chez un ophtalmologue",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "Prendre RDV chez un ORL",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    }
+                ],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Douleur",
+                "statut": "Actif",
+                "problemePose": "Douleur : Occasionnelles,Le jour,Lors de la mobilisation - Echelle EVA de la douleur : 6 / 10",
+                "objectifs": "Prendre en charge les douleurs signalées par le patient.",
+                "preoccupationPatient": "Assez faible",
+                "preoccupationProfessionel": "Assez faible",
+                "planActions": [
+                    {
+                        "nomAction": "Surveiller et noter les douleurs et prévenir le médecin ou l'infirmère",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    }
+                ],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Cognition",
+                "statut": "Actif",
+                "problemePose": "MINI COG : Mr DELOIN  a eu un test mini-cog de 1/5. La mémoire et les capacités de réflexion semblent significativement perturbées et nécessitent d'être complétées par une exploration spécialisée.\nICOPE COGNITION : Les tests de mémorisation du programme ICOPE sont perturbés, une évaluation complète de ce domaine est recommandée\nMINI GDS : Monsieur DELOIN  a un test mini-GDS de 1/4. Monsieur DELOIN  indique ne pas être heureux(se) la plupart du temps.\nTEST GAI (Geriatric Anxiety Inventory) - Résultat : Le test fait état d'une anxiété",
+                "objectifs": "Ralentir, accompagner les troubles mnésiques et cognitifs, et les troubles de l'humeur.\nRéduire l'anxiété.",
+                "preoccupationPatient": "Assez faible",
+                "preoccupationProfessionel": "Assez élevée",
+                "planActions": [
+                    {
+                        "nomAction": "Proposer une prise en charge psychologique",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    }
+                ],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Polymédications",
+                "statut": "Actif",
+                "problemePose": "le nombre de médicament est supérieur à 5.",
+                "objectifs": "Permettre une bonne observance et éviter les risques iatrogéniques.\nAvoir un médecin traitant déclaré.",
+                "preoccupationPatient": "Assez faible",
+                "preoccupationProfessionel": "Assez faible",
+                "planActions": [
+                    {
+                        "nomAction": "Encourager la personne à prendre un médecin traitant",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    },
+                    {
+                        "nomAction": "Proposer l'utilisation d'un semainier",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    }
+                ],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            },
+            {
+                "nomBloc": "Appareillages et Dispositifs Médicaux",
+                "statut": "Actif",
+                "problemePose": "Matériel à prévoir : pace-maker",
+                "objectifs": "Améliorer l'autonomie et la prévention des TMS par des aides techniques appropriées.",
+                "preoccupationPatient": "Faible",
+                "preoccupationProfessionel": "Assez faible",
+                "planActions": [
+                    {
+                        "nomAction": "Commander l'Appareillage ou Dispositif Médical",
+                        "detailAction": "",
+                        "personneChargeAction": "",
+                        "dateDebutAction": "",
+                        "dureeAction": " non renseigné",
+                        "recurrenceAction": " Non renseigné",
+                        "momentJournee": []
+                    }
+                ],
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            }
+        ]
+    },
+    "poaAutonomie": {
+        "preoccupationPatient": "Assez faible",
+        "preoccupationProfessionel": "Assez élevée",
+        "actions": [
+            {
+                "typeAction": "Aide à domicile",
+                "personneChargeAction": [
+                    "Employé de maison"
+                ],
+                "joursIntervention": [
+                    "Lundi",
+                    "Mardi",
+                    "Mercredi",
+                    "Jeudi",
+                    "Vendredi",
+                    "Samedi",
+                    "Dimanche"
+                ],
+                "secondJoursIntervention": [
+                    "Lundi",
+                    "Mardi",
+                    "Mercredi",
+                    "Jeudi",
+                    "Vendredi",
+                    "Samedi",
+                    "Dimanche"
+                ],
+                "dateDebutAction": "2025-09-23",
+                "dureeAction": "3 mois",
+                "dureePassage": "60mn",
+                "momentJournee": [
+                    "Lever"
+                ],
+                "secondMomentJournee": [
+                    "Lever"
+                ],
+                "typeAide": [
+                    "Aide partielle",
+                    "Tout faire"
+                ],
+                "actions": [
+                    "Aide au lever et/ou coucher",
+                    "Aide aux transferts",
+                    "Aide aux déplacements intérieurs",
+                    "Aide à la toilette",
+                    "Aide à l'hygiène de l'élimination"
+                ],
+                "detailAction": "non renseigné",
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": "Aide au lever (transfert lit / fauteuil), Accompagnement aux WC ou gestion du bassin / protection (élimination), Aide à la toilette complète (haut et bas du corps), Aide complète à l’habillage, Déplacement assisté jusqu’à la salle à manger, Aide à l’alimentation (petit-déjeuner donné), Surveillance cognitive continue"
+            },
+            {
+                "typeAction": "Aide à domicile",
+                "personneChargeAction": [
+                    "Famille"
+                ],
+                "joursIntervention": [
+                    "Lundi",
+                    "Mardi",
+                    "Mercredi",
+                    "Jeudi",
+                    "Vendredi",
+                    "Samedi",
+                    "Dimanche"
+                ],
+                "secondJoursIntervention": [
+                    "Lundi",
+                    "Mardi",
+                    "Mercredi",
+                    "Jeudi",
+                    "Vendredi",
+                    "Samedi",
+                    "Dimanche"
+                ],
+                "dateDebutAction": "2025-09-23",
+                "dureeAction": "3 mois",
+                "dureePassage": "60mn",
+                "momentJournee": [
+                    "Lever",
+                    "Matin"
+                ],
+                "secondMomentJournee": [
+                    "Lever",
+                    "Matin"
+                ],
+                "typeAide": [],
+                "actions": [
+                    "Aide à l'hygiène de l'élimination",
+                    "Aide aux activités de loisirs"
+                ],
+                "detailAction": "non renseigné",
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": " Vérification de la continence / change si nécessaire, Stimulation douce (lecture, musique, etc.)"
+            },
+            {
+                "typeAction": "Aide à domicile",
+                "personneChargeAction": [
+                    "Employé de maison"
+                ],
+                "joursIntervention": [
+                    "Lundi",
+                    "Mardi",
+                    "Mercredi",
+                    "Jeudi",
+                    "Vendredi",
+                    "Samedi",
+                    "Dimanche"
+                ],
+                "secondJoursIntervention": [
+                    "Lundi",
+                    "Mardi",
+                    "Mercredi",
+                    "Jeudi",
+                    "Vendredi",
+                    "Samedi",
+                    "Dimanche"
+                ],
+                "dateDebutAction": "2025-09-23",
+                "dureeAction": "3 mois",
+                "dureePassage": "30mn",
+                "momentJournee": [
+                    "Midi"
+                ],
+                "secondMomentJournee": [
+                    "Midi"
+                ],
+                "typeAide": [
+                    "Aide partielle",
+                    "Tout faire"
+                ],
+                "actions": [
+                    "Aide aux transferts",
+                    "Aide à l'hygiène de l'élimination",
+                    "Aide à la prise des repas"
+                ],
+                "detailAction": "non renseigné",
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": "Transfert vers la salle à manger,\nAide à l’alimentation (repas donné),\nAccompagnement aux WC ou gestion de la protection"
+            },
+            {
+                "typeAction": "Aide à domicile",
+                "personneChargeAction": [
+                    "Employé de maison"
+                ],
+                "joursIntervention": [
+                    "Lundi",
+                    "Mardi",
+                    "Mercredi",
+                    "Jeudi",
+                    "Vendredi",
+                    "Samedi",
+                    "Dimanche"
+                ],
+                "secondJoursIntervention": [
+                    "Lundi",
+                    "Mardi",
+                    "Mercredi",
+                    "Jeudi",
+                    "Vendredi",
+                    "Samedi",
+                    "Dimanche"
+                ],
+                "dateDebutAction": "2025-09-23",
+                "dureeAction": "3 mois",
+                "dureePassage": "60mn",
+                "momentJournee": [
+                    "Après-midi"
+                ],
+                "secondMomentJournee": [
+                    "Après-midi"
+                ],
+                "typeAide": [
+                    "Aide partielle",
+                    "Tout faire"
+                ],
+                "actions": [
+                    "Aide à l'hygiène de l'élimination",
+                    "Aide à la prise des repas",
+                    "Aide aux activités de loisirs"
+                ],
+                "detailAction": "non renseigné",
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": "Aide à l’élimination, Accompagnement à une activité encadrée, Hydratation / goûter"
+            },
+            {
+                "typeAction": "Aide à domicile",
+                "personneChargeAction": [
+                    "Employé de maison"
+                ],
+                "joursIntervention": [
+                    "Lundi",
+                    "Mardi",
+                    "Mercredi",
+                    "Jeudi",
+                    "Vendredi",
+                    "Samedi",
+                    "Dimanche"
+                ],
+                "secondJoursIntervention": [
+                    "Lundi",
+                    "Mardi",
+                    "Mercredi",
+                    "Jeudi",
+                    "Vendredi",
+                    "Samedi",
+                    "Dimanche"
+                ],
+                "dateDebutAction": "2025-09-23",
+                "dureeAction": "3 mois",
+                "dureePassage": "60mn",
+                "momentJournee": [
+                    "Soir"
+                ],
+                "secondMomentJournee": [
+                    "Soir"
+                ],
+                "typeAide": [
+                    "Aide partielle",
+                    "Tout faire"
+                ],
+                "actions": [
+                    "Aide au lever et/ou coucher",
+                    "Aide aux transferts",
+                    "Aide à l'hygiène de l'élimination",
+                    "Aide à la prise des repas"
+                ],
+                "detailAction": "non renseigné",
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": "Transfert vers la salle à manger,\nAide à l’alimentation (repas donné),\nÉlimination et change si nécessaire"
+            },
+            {
+                "typeAction": "Aide à domicile",
+                "personneChargeAction": [
+                    "Employé de maison"
+                ],
+                "joursIntervention": [
+                    "Lundi",
+                    "Mardi",
+                    "Mercredi",
+                    "Jeudi",
+                    "Vendredi",
+                    "Samedi",
+                    "Dimanche"
+                ],
+                "secondJoursIntervention": [
+                    "Lundi",
+                    "Mardi",
+                    "Mercredi",
+                    "Jeudi",
+                    "Vendredi",
+                    "Samedi",
+                    "Dimanche"
+                ],
+                "dateDebutAction": "2025-09-23",
+                "dureeAction": "3 mois",
+                "dureePassage": "60mn",
+                "momentJournee": [
+                    "Nuit"
+                ],
+                "secondMomentJournee": [
+                    "Nuit"
+                ],
+                "typeAide": [
+                    "Aide partielle",
+                    "Tout faire"
+                ],
+                "actions": [
+                    "Aide à l'hygiène de l'élimination",
+                    "Garde de jour et/ou de nuit"
+                ],
+                "detailAction": "non renseigné",
+                "critereEvaluation": "",
+                "resultatActions": "",
+                "message": ""
+            }
+        ]
+    }
+}

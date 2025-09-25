@@ -52,6 +52,8 @@ from src.func.scrape_trusted_sites import scrape_all_trusted_sites
 from src.utils.chroma_client import get_chroma_client
 from src.utils.vector_db_utils import mark_index_ready_flag, clear_index_ready_flag
 from src.func.index_documents_chromadb import rebuild_collection_from_disk
+from config.config import CHROMA_GLOBAL_DIR
+print(f"🟧[DEBUG] CHROMA_GLOBAL_DIR = {CHROMA_GLOBAL_DIR.resolve()}")
 
 
 

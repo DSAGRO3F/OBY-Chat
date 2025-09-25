@@ -1,16 +1,10 @@
-# src/func/anonymize_usager_persona.py
-"""
-Anonymisation de l'usager via persona française (session-aléatoire).
+# src/func/anonymizer.py
+"""Outils d’anonymisation pour documents patient (JSON).
 
-Ce module fournit :
-- Des pools de valeurs françaises (prénoms, noms, voies, codes postaux/communes).
-- La création d'une persona cohérente pour l'usager (prénom selon le genre, nom, adresse, CP/commune).
-- Des utilitaires pour lire/écrire dans un dictionnaire JSON par chemins imbriqués.
-- Une anonymisation ciblée des champs usager que vous avez listés.
-- La construction d'un mapping {valeur_anonymisée: valeur_originale} pour la désanonymisation.
-
-Entrée : dict JSON (document patient).
-Sortie : Tuple[Any, Dict[str, str]] -> (document anonymisé, mapping).
+Masque les champs sensibles (identité, coordonnées, adresses, situationFamiliale)
+tout en préservant la structure du document et la lisibilité des sorties.
+Maintient un mapping bijectif {anonymisé -> original} avec suffixes anti-collision.
+Gère les tokens neutres (« Non renseigné ») et fournit des helpers de parcours avec logs.
 """
 
 from __future__ import annotations
@@ -19,6 +13,7 @@ import datetime as dt
 import math
 import bisect
 import random
+import unicodedata
 from typing import Any, Dict, List, Tuple, Sequence, TypeVar, Optional
 T = TypeVar("T")
 
@@ -34,52 +29,88 @@ Ces pools servent de base à la génération aléatoire sécurisée (session-bas
 # --------- POOLS FR (≥ 20 valeurs chacun) ---------
 FIRST_NAMES_M: List[str] = [
     "Jean","Pierre","Michel","Alain","Bernard","André","Jacques","Louis","Philippe","François",
-    "Daniel","Christian","René","Claude","Gérard","Paul","Marcel","Raymond","Roger","Henri"
+    "Daniel","Christian","René","Claude","Gérard","Paul","Marcel","Raymond","Roger","Henri",
+    "Laurent", "Olivier", "Nicolas", "Pascal", "Bruno", "Vincent", "Thierry", "Frédéric",
+    "Christophe"
 ]
 FIRST_NAMES_F: List[str] = [
     "Marie","Jeanne","Monique","Françoise","Nicole","Catherine","Madeleine","Sylvie","Martine","Anne",
-    "Hélène","Danielle","Colette","Jacqueline","Suzanne","Michèle","Yvette","Yvonne","Nathalie","Chantal"
+    "Hélène","Danielle","Colette","Jacqueline","Suzanne","Michèle","Yvette","Yvonne","Nathalie","Chantal",
+    "Sophie", "Isabelle", "Catherine", "Nathalie", "Valérie", "Sandrine", "Véronique",
+    "Caroline", "Hélène"
 ]
 LAST_NAMES: List[str] = [
-    "Martin","Bernard","Dubois","Thomas","Robert","Richard","Petit","Durand","Leroy","Moreau",
-    "Laurent","Simon","Michel","Garcia","David","Bertrand","Roux","Vincent","Fournier","Morel"
+    "Flaubert","Spinoza","Dubois","Descartes","Eluard","Balzac","Berri","Durand","Leroy","Moreau",
+    "Joules","Bringer","Jousset","Garcia","Bouvet","Chauvet","Roux","Duroul","Fournier","Morel",
+    "Hugo", "Proust", "Sand", "Camus", "Zola", "Duras", "Saint-Exupery", "Mauriac", "Colette"
 ]
 # 20 noms de voie FR usuels
 STREET_NAMES: List[str] = [
     "rue de la Paix","avenue Victor Hugo","boulevard Saint-Michel","rue des Écoles","rue de la République",
     "avenue de Verdun","rue Nationale","rue de la Gare","rue du Moulin","rue du Château",
     "rue Pasteur","rue Jules Ferry","rue des Lilas","rue Victor Hugo","rue de l'Église",
-    "avenue de la Liberté","rue de la Mairie","rue des Acacias","rue du Stade","rue des Fleurs"
+    "avenue de la Liberté","rue de la Mairie","rue des Acacias","rue du Stade","rue des Fleurs",
+    "avenue de l'Europe", "allée de L'osier ", "Rue des Grands Varays ", "avenue Pierre Mendès-France ",
+    "Route des Docteurs Devillers ", "ZI de la Briquetterie ", "rue Blondel", "Boulevard de l'Europe", "Rue Auguste Delaune "
 ]
 # Couples (CP, Commune) FR plausibles (20)
 POSTCODES_COMMUNES: List[Tuple[str, str]] = [
     ("75001","Paris"),("13001","Marseille"),("69001","Lyon"),("31000","Toulouse"),("44000","Nantes"),
     ("33000","Bordeaux"),("59000","Lille"),("67000","Strasbourg"),("34000","Montpellier"),("35000","Rennes"),
     ("21000","Dijon"),("06000","Nice"),("72000","Le Mans"),("49000","Angers"),("86000","Poitiers"),
-    ("37000","Tours"),("02000","Laon"),("02100","Saint-Quentin"),("80000","Amiens"),("51100","Reims")
+    ("37000","Tours"),("02000","Laon"),("02100","Saint-Quentin"),("80000","Amiens"),("51100","Reims"),
+    ("01230", "Saint-Rambert-en-Bugey"), ("01310", "Polliat"), ("01540", "Vonnas",), ("02000", "Laon"),
+    ("02120", "Guise"), ("02140", "Vervins"), ("02240", "Ribemont"), ("02300", "Chauny"), ("02430", "Gauchy")
 ]
 
 NON_INFORMATIF = {"", "non renseigné", "null"}
 
+# jeux de valeurs reconnues (après normalisation)
+_MALE_TOKENS = {
+    "m", "h", "homme", "m.", "mr", "monsieur", "masculin", "male", "mister"
+}
+_FEMALE_TOKENS = {
+    "f", "femme", "mme", "madame", "mlle", "melle", "mademoiselle",
+    "feminin", "feminin.", "féminin", "female"
+}
 
-def _normalize_case(s: str) -> str:
+# ---
+# --------- Fonctions annexes -------------
+def _normalize_token(s: str) -> str:
+    """minuscule, accents retirés, espaces/ponctuation enlevés aux extrémités"""
+    s = s.strip()
+    # NFKD pour séparer lettres/accents, puis suppression des accents
+    s = unicodedata.normalize("NFKD", s)
+    s = "".join(ch for ch in s if not unicodedata.combining(ch))
+    s = s.lower().strip(" .,-_/\\")
+    return s
+
+
+def _detect_from_fields(sexe_raw: Optional[str], civilite_raw: Optional[str]) -> Optional[str]:
     """
-    Normalise la casse d’une chaîne de caractères.
+    Détermine 'M'/'F' en priorisant le champ 'sexe' s'il est exploitable,
+    sinon en se rabattant sur 'civilite'. Retourne None si indéterminé.
+    """
+    # 1) tenter depuis 'sexe'
+    if sexe_raw:
+        t = _normalize_token(str(sexe_raw))
+        if t in _MALE_TOKENS:   return "M"
+        if t in _FEMALE_TOKENS: return "F"
 
-    Convertit la valeur en minuscules et supprime les espaces superflus
-    en début et fin de chaîne. Cela permet de comparer les chaînes de
-    manière insensible à la casse.
+        # cas très fréquents "m"/"f" même sans appartenance stricte
+        if t == "m": return "M"
+        if t == "f": return "F"
 
-    Args:
-        value (str): La chaîne de caractères à normaliser.
+    # 2) sinon tenter depuis 'civilité'
+    if civilite_raw:
+        t = _normalize_token(str(civilite_raw))
+        if t in _MALE_TOKENS:   return "M"
+        if t in _FEMALE_TOKENS: return "F"
+        if t == "m":  return "M"
+        if t == "f":  return "F"
 
-    Returns:
-        str: La chaîne transformée en minuscules et sans espaces inutiles.
-
-    Exemple:
-        >>> _normalize_case("Bonjour ")
-        'bonjour'    """
-    return s.strip().casefold()
+    # 3) sinon indéterminé (laisser le reste du pipeline gérer un prénom neutre/initiales)
+    return None
 
 
 def _is_non_informatif(s: Any) -> bool:
@@ -96,11 +127,8 @@ def _is_non_informatif(s: Any) -> bool:
     Returns:
         bool: True si la valeur est non informative, False sinon.
 
-    Exemple:
-        >>> _is_non_informatif("Non renseigné")
-        True
     """
-    return isinstance(s, str) and _normalize_case(s) in NON_INFORMATIF
+    return isinstance(s, str) and _normalize_token(s) in NON_INFORMATIF
 
 
 """Section: PERSONA USAGER
@@ -127,7 +155,7 @@ def pick(options: Sequence[T], debug: bool = False) -> T:
         T: L’élément choisi aléatoirement dans la séquence.
 
     Exemple:
-        >>> pick(["Alice", "Bob", "Charlie"])
+        pick(["Alice", "Bob", "Charlie"])
         'Bob'
     """
     choice = secrets.choice(options)
@@ -135,10 +163,10 @@ def pick(options: Sequence[T], debug: bool = False) -> T:
         print(f"[DEBUG] Picked value: {choice}")
     return choice
 
+# ------
 
-# I.a =======Construction date de naissance fictive pour l'usager et les contacts de l'usager==============#
 
-
+# I.a -------- Construction date de naissance fictive pour l'usager et les contacts de l'usager -----------
 _sysrand = random.SystemRandom()
 
 def _gaussian_age_weights(mu: int = 83, sigma: float = 6.5, lo: int = 60, hi: int = 100) -> tuple[list[int], list[float]]:
@@ -215,27 +243,8 @@ def _sample_dob_from_age(age: int, today: dt.date | None = None) -> dt.date:
     return dt.date(year, month, day)
 
 
-
+# -------- I.a Date naissance usager -----------
 def _anonymize_usager_dob_full(doc: dict, path: list[str], mapping: dict[str, str], debug: bool = False) -> None:
-    """
-        Anonymise la date de naissance complète de la section 'usager'
-        dans un document patient.
-
-        Cette fonction remplace la date de naissance originale par une
-        date synthétique générée à partir d’un âge pseudo-aléatoire.
-        Le dictionnaire de correspondance entre valeurs originales et
-        anonymisées est mis à jour pour permettre une désanonymisation
-        ultérieure.
-
-        Args:
-            usager (Dict[str, Any]): Le dictionnaire contenant les informations du patient.
-            mapping (Dict[str, str]): Le dictionnaire stockant les correspondances d’anonymisation.
-            debug (bool, optionnel): Si True, affiche des messages de débogage. Par défaut False.
-
-        Returns:
-            Dict[str, Any]: Le dictionnaire 'usager' mis à jour avec la date de naissance anonymisée.
-    """
-
     original = _get_at_path(doc, path, debug=debug)
     if debug:
         print(f"[DEBUG] DOB original at {path}: {original!r}")
@@ -247,32 +256,23 @@ def _anonymize_usager_dob_full(doc: dict, path: list[str], mapping: dict[str, st
     if debug:
         print(f"[DEBUG] DOB full -> {anon_value!r} (âge simulé ≈ {age})")
 
-    _replace_and_map(doc, path, anon_value, mapping, debug=debug)
+    _replace_and_map(
+        doc=doc,
+        path=path,
+        original_value=original,
+        anonymized_value=anon_value,
+        mapping_anon_to_orig=mapping,
+        debug=debug,
+    )
 
 
-
-# I.b =======Construction date de naissance fictive pour un contact de l'usager=========
-
-
-
+# -------- I.b Date naissance pour un contact de l'usager  -----------
 def _anonymize_contact_dob_full(
     doc: Dict[str, Any],
     path: List[str],
     mapping: Dict[str, str],
     debug: bool = False
 ) -> None:
-    """
-    Remplace la date de naissance du contact par une date fictive.
-
-    Utilise la distribution d’âges (gaussienne tronquée 60–100, μ≈83, σ≈6.5),
-    puis construit une date ISO (YYYY-MM-DD) avec jour 1–28 et mois 1–12.
-
-    Args:
-        doc (Dict[str, Any]): Document JSON complet (modifié sur place).
-        path (List[str]): Chemin du champ date de naissance du contact.
-        mapping (Dict[str, str]): Mapping {valeur_anon: valeur_originale}.
-        debug (bool, optionnel): Active les traces de débogage.
-    """
     original = _get_at_path(doc, path, debug=debug)
     if debug:
         print(f"[DEBUG] Contact DOB original at {path}: {original!r}")
@@ -282,72 +282,70 @@ def _anonymize_contact_dob_full(
     if debug:
         print(f"[DEBUG] Contact DOB full -> {dob!r} (âge simulé ≈ {age})")
 
-    _replace_and_map(doc, path, dob, mapping, debug=debug)
+    _replace_and_map(
+        doc=doc,
+        path=path,
+        original_value=original,
+        anonymized_value=dob,
+        mapping_anon_to_orig=mapping,
+        debug=debug,
+    )
 
 
-
-# II.a =======Construction d'un persona fictif pour l'usager==============#
-
-
-def build_usager_persona(gender: str | None = None, debug: bool = False) -> Dict[str, Any]:
+# -------- II.a Construction d'un persona fictif pour l'usager -----------
+def build_usager_persona(
+    gender: str | None = None,
+    sexe: str | None = None,
+    civilite: str | None = None,
+    debug: bool = False
+) -> Dict[str, Any]:
     """
     Construit une identité fictive (« persona ») pour l’usager.
-
-    Génère des informations cohérentes pour les champs à anonymiser
-    (nom, prénom, adresse, code postal, commune). Le choix des prénoms
-    tient compte du sexe si celui-ci est précisé.
-
-    Args:
-        gender (str | None, optionnel): Sexe détecté de l’usager
-            ("Masculin" ou "Féminin"). Si None, le sexe est choisi au hasard.
-        debug (bool, optionnel): Si True, affiche les valeurs choisies.
-            Par défaut False.
-
-    Returns:
-        Dict[str, Any]: Dictionnaire contenant les champs anonymisés
-        (nom, prénom, adresse, etc.).
+    Le choix du prénom tient compte du genre détecté via _detect_from_fields(sexe, civilite).
     """
 
-    try:
-        if gender:
-            gender = _normalize_case(gender)
-    except Exception as e:
-        if debug:
-            print(f"❌ Le sexe de l'usager n'est pas renseigné -> A renseigner ! : {e}")
-            gender = None
+    # 1) Détection robuste du genre
+    detected = _detect_from_fields(sexe_raw=sexe, civilite_raw=civilite)
 
-    if gender == "masculin":
+    # Si rien trouvé et qu'on t'a passé un "gender" legacy (ex: "Masculin"/"Féminin"),
+    # on réutilise _detect_from_fields en lui donnant 'gender' comme 'sexe'.
+    if detected is None and gender:
+        detected = _detect_from_fields(sexe_raw=gender, civilite_raw=None)
+
+    # 2) Choix du prénom en fonction du genre détecté
+    if detected == "M":
         first = pick(FIRST_NAMES_M, debug=debug)
-    elif gender == "féminin":
+    elif detected == "F":
         first = pick(FIRST_NAMES_F, debug=debug)
     else:
+        # genre inconnu : on pioche dans la liste mixte
         first = pick(FIRST_NAMES_M + FIRST_NAMES_F, debug=debug)
+
+    # 3) Nom + adresse
     last = pick(LAST_NAMES, debug=debug)
 
-    # Adresse simple: numéro 1..199 + nom de voie
     number = secrets.randbelow(199) + 1
     street = pick(STREET_NAMES, debug=debug)
     addr_line = f"{number} {street}"
 
     cp, commune = pick(POSTCODES_COMMUNES, debug=debug)
-
-    # Commentaire d'accès générique (pas d'infos sensibles)
     commentaire = "Accès : interphone"
-
-    # Identifiant client neutre (facultatif)
     client_id = f"CLT-{secrets.token_hex(4).upper()}"
 
     persona = {
         "first_name": first,
         "last_name": last,
-        "address_line": addr_line,   # pour usager.adresse.ligne[0]
+        "address_line": addr_line,
         "postcode": cp,
         "commune": commune,
         "commentaire": commentaire,
         "client_id": client_id,
+        "domicile": "domicile_1",
+        "mobile": "mobile_1",
+        "mail": "mail_1"
     }
     if debug:
-        print(f"[DEBUG] build_usager_persona(gender={gender}) -> {persona}")
+        print(f"[DEBUG] build_usager_persona(gender={gender}, sexe={sexe}, civilite={civilite}) -> {persona}")
     return persona
 
 
@@ -358,9 +356,7 @@ et pour effectuer les remplacements en maintenant un mapping.
 
 
 
-# II.b =======Construction d'un persona fictif pour les contacts de l'usager==============#
-
-
+# -------- II.b Construction d'un persona fictif pour les contacts de l'usager -----------
 # Données de contacts qu'in décide de ne pas anonymiser (pas de données sensibles)
 CONTACTS_STATIC_KEEP = {
     "typeContact",
@@ -372,79 +368,88 @@ CONTACTS_STATIC_KEEP = {
 }
 
 
-# Détection du genre du contact
-def detect_genre_contact(contact: Dict[str, Any]) -> Optional[str]:
+# ---------- Détection du genre du contact ------------
+def detect_genre_contact(contact: dict) -> Optional[str]:
     """
-    Détecte le genre d’un contact à partir de sa civilité.
-
-    Essaie d’interpréter `contact['personnePhysique']['civilite']`
-    (ex. « M. », « Monsieur », « Mme », « Madame ») pour retourner
-    « Masculin » ou « Féminin ». Si indéterminé, renvoie None.
-
-    Args:
-        contact (Dict[str, Any]): Dictionnaire du contact.
-
-    Returns:
-        Optional[str]: « Masculin », « Féminin » ou None.
+    Retourne 'M', 'F' ou None si indéterminé.
+    Cherche dans contact['personnePhysique'] (et tolère l'absence de 'sexe' côté contacts).
     """
-    try:
-        civ = contact.get("personnePhysique", {}).get("civilite")
-        if isinstance(civ, str):
-            s = civ.strip().casefold()
-            # on tolère « m. », « monsieur », etc.
-            if s.startswith("m") and not s.startswith("mme"):
-                return "Masculin"
-            if s.startswith("mme") or s.startswith("madame"):
-                return "Féminin"
-    except Exception:
-        pass
-    return None
+    pp = (contact or {}).get("personnePhysique", {})
+
+    # côté contacts, 'sexe' est souvent absent ; on se repose donc surtout sur 'civilite'
+    sexe     = pp.get("sexe") or pp.get("Sexe")
+    civilite = pp.get("civilite") or pp.get("Civilite")
+
+    return _detect_from_fields(sexe, civilite)
 
 
-# Construction d'un persona pour un contact de l'usager
-def build_contact_persona(gender: Optional[str] = None, debug: bool = False) -> Dict[str, Any]:
+# ------------- Construction d'un persona pour un contact de l'usager ------------
+from typing import Optional, Dict, Any
+
+def build_contact_persona(
+    gender: Optional[str] = None,
+    sexe: Optional[str] = None,
+    civilite: Optional[str] = None,
+    debug: bool = False
+) -> Dict[str, Any]:
     """
     Construit une persona française pour un contact.
 
-    Génère un prénom (selon le genre si connu), un nom, et une date
-    de naissance fictive cohérente avec la distribution d’âges
-    (gaussienne tronquée 60–100, moyenne ~83).
+    Génère un prénom (selon le genre si connu), un nom, une civilité cohérente,
+    et une date de naissance fictive raisonnable.
 
     Args:
-        gender (Optional[str]): « Masculin », « Féminin » ou None.
-        debug (bool, optionnel): Si True, affiche les valeurs choisies.
+        gender: Valeur historique ("Masculin"/"Féminin") — utilisée seulement si `sexe`/`civilite` absents.
+        sexe:   Champ 'sexe' du contact s'il existe (p.ex. "M", "F", "masculin", "féminin", etc.).
+        civilite: Champ 'civilite' du contact s'il existe (p.ex. "M", "M.", "Monsieur", "Mme", "Madame").
+        debug:  Active des impressions de debug.
 
     Returns:
-        Dict[str, Any]: Dictionnaire de persona pour le contact.
+        Dict[str, Any]: { "civilite", "first_name", "last_name", "dob" }
     """
-    if gender == "Masculin":
+    # 1) Détection robuste via même logique que pour l’usager
+    detected = _detect_from_fields(sexe_raw=sexe, civilite_raw=civilite)
+    if detected is None and gender:
+        detected = _detect_from_fields(sexe_raw=gender, civilite_raw=None)
+
+    # 2) Choix du prénom en fonction du genre détecté
+    if detected == "M":
         first = pick(FIRST_NAMES_M, debug=debug)
-        civilite = "M."
-    elif gender == "Féminin":
+    elif detected == "F":
         first = pick(FIRST_NAMES_F, debug=debug)
-        civilite = "Mme"
     else:
         first = pick(FIRST_NAMES_M + FIRST_NAMES_F, debug=debug)
-        # civilité neutre par défaut ; tu peux la laisser originale si tu préfères ne pas la anonymiser
-        civilite = pick(["M.", "Mme"], debug=debug)
 
+    # 3) Civilité cohérente
+    #    - Si on avait une civilité source (paramètre), on génère une civilité anonymisée cohérente
+    #      avec le genre détecté (ou neutre si inconnu).
+    #    - Sinon, on choisit une civilité par défaut cohérente.
+    if detected == "M":
+        civilite_out = "M."
+    elif detected == "F":
+        civilite_out = "Mme"
+    else:
+        # genre inconnu -> civilité neutre parmi M./Mme
+        civilite_out = pick(["M.", "Mme"], debug=debug)
+
+    # 4) Nom + date de naissance
     last = pick(LAST_NAMES, debug=debug)
 
     age = _sample_age()
     dob = _sample_dob_from_age(age).isoformat()
 
     persona = {
-        "civilite": civilite,
+        "civilite": civilite_out,
         "first_name": first,
         "last_name": last,
         "dob": dob,
     }
     if debug:
-        print(f"[DEBUG] build_contact_persona(gender={gender}) -> {persona}")
+        print(f"[DEBUG] build_contact_persona(gender={gender}, sexe={sexe}, civilite={civilite}) -> {persona}")
     return persona
 
 
-# Construire les chemins des données à anonymiser dans un dictionnaire pour un contact
+# ------------ Construire les chemins des données à anonymiser dans un dictionnaire pour un contact -------------
 def _contact_paths(index: int) -> Dict[str, List[str]]:
     """
     Construit les chemins (paths) à anonymiser pour un contact donné.
@@ -464,8 +469,7 @@ def _contact_paths(index: int) -> Dict[str, List[str]]:
         "prenomUtilise": ["contacts", f"[{index}]", "personnePhysique", "prenomUtilise"],
         "dateNaissance": ["contacts", f"[{index}]", "personnePhysique", "dateNaissance"],
 
-        # champs conservés : présents ici uniquement si tu veux (par ex. pour lecture),
-        # mais on NE les remplace PAS lors de l’anonymisation.
+        # champs conservés : mais on NE les remplace PAS lors de l’anonymisation.
         "typeContact": ["contacts", f"[{index}]", "typeContact"],
         "titre": ["contacts", f"[{index}]", "titre"],
         "role": ["contacts", f"[{index}]", "role"],
@@ -476,10 +480,7 @@ def _contact_paths(index: int) -> Dict[str, List[str]]:
 
 
 
-# =======Construction des dictionnaires==============#
-
-
-
+# ------------ Construction des dictionnaires ----------------#
 def _ensure_path_dict(d: Dict[str, Any], path: List[str]) -> Dict[str, Any] | None:
     """
     Crée récursivement les clés manquantes dans un dictionnaire pour un chemin donné.
@@ -495,10 +496,10 @@ def _ensure_path_dict(d: Dict[str, Any], path: List[str]) -> Dict[str, Any] | No
         Dict[str, Any]: Le dictionnaire correspondant à la dernière clé du chemin.
 
     Exemple:
-        >>> data = {}
-        >>> _ensure_path_dict(data, ["usager", "adresse"])
+        data = {}
+        _ensure_path_dict(data, ["usager", "adresse"])
         {}
-        >>> data
+        data
         {'usager': {'adresse': {}}}
     """
 
@@ -522,8 +523,8 @@ def _get_at_path(d: Dict[str, Any], path: List[str], debug: bool = False) -> Any
         Any: La valeur trouvée ou None si une clé du chemin n’existe pas.
 
     Exemple:
-        >>> data = {"usager": {"nom": "Durand"}}
-        >>> _get_at_path(data, ["usager", "nom"])
+        data = {"usager": {"nom": "Durand"}}
+        _get_at_path(data, ["usager", "nom"])
         'Durand'
     """
 
@@ -560,9 +561,9 @@ def _set_at_path(d: Dict[str, Any], path: List[str], new_value: Any, debug: bool
         value (Any): La valeur à affecter.
 
     Exemple:
-        >>> data = {}
-        >>> _set_at_path(data, ["usager", "nom"], "Martin")
-        >>> data
+        data = {}
+        _set_at_path(data, ["usager", "nom"], "Martin")
+        data
         {'usager': {'nom': 'Martin'}}
     """
 
@@ -608,70 +609,52 @@ def _set_at_path(d: Dict[str, Any], path: List[str], new_value: Any, debug: bool
     return False
 
 
-# =======Construction du mapping; correspondance entre valeurs originelles et valeurs fictives==============#
 
-
-
+# -------------- Construction du mapping; correspondance entre valeurs originelles et valeurs fictives -----------#
 def _replace_and_map(
-    doc: Dict[str, Any],
-    path: List[str],
-    anon_value: Any,
-    mapping: Dict[str, str],
-    debug: bool = False
-) -> None:
+    doc: dict,
+    path: list,
+    original_value,
+    anonymized_value,
+    mapping_anon_to_orig: dict,
+    debug: bool = False,
+):
     """
-    Remplace une valeur dans un dictionnaire et met à jour le mapping anonymisation.
-
-    La valeur originale est enregistrée dans `mapping` pour conserver une trace
-    de l’anonymisation effectuée.
-
-    Args:
-        d (Dict[str, Any]): Le dictionnaire à modifier.
-        path (List[str]): Liste des clés menant à la valeur à remplacer.
-        new_value (Any): La valeur anonymisée qui remplace l’ancienne.
-        mapping (Dict[str, str]): Dictionnaire de correspondance
-            {valeur_anonymisée: valeur_originale}.
-        debug (bool, optionnel): Si True, affiche les valeurs remplacées.
-            Par défaut False.
-
-    Exemple:
-        >>> data = {"usager": {"nom": "Durand"}}
-        >>> mapping = {}
-        >>> _replace_and_map(data, ["usager", "nom"], "Martin", mapping)
-        >>> data
-        {'usager': {'nom': 'Martin'}}
-        >>> mapping
-        {'Martin': 'Durand'}
+    Remplace la valeur à `path` par la version anonymisée et met à jour le mapping {anon -> orig}.
+    Garde la bijectivité : jamais deux originaux pour le même anonymisé (ajoute un suffixe si collision).
     """
-
-    original = _get_at_path(doc, path, debug=debug)
-    if original is None:
-        if debug:
-            print(f"[DEBUG] _replace_and_map: path not found, skip -> {path}")
+    if original_value is None:
         return
 
-    if isinstance(original, str) and _is_non_informatif(original):
-        if debug:
-            print(f"[DEBUG] _replace_and_map: non-informative at {path}, replacing without mapping "
-                  f"({original!r} -> {anon_value!r})")
-        _set_at_path(doc, path, anon_value, debug=debug)
-        return
+    orig = str(original_value)
+    anon = str(anonymized_value)
 
-    if isinstance(original, (str, int, float, bool)):
+    # collision ? on suffixe jusqu'à unicité (et on remplace la valeur par la version suffixée)
+    if anon in mapping_anon_to_orig and mapping_anon_to_orig[anon] != orig:
+        base = anon
+        i = 2
+        while anon in mapping_anon_to_orig and mapping_anon_to_orig[anon] != orig:
+            anon = f"{base}#{i}"
+            i += 1
         if debug:
-            print(f"[DEBUG] _replace_and_map: mapping {path} -> {original!r} => {anon_value!r}")
-        _set_at_path(doc, path, anon_value, debug=debug)
-        mapping[str(anon_value)] = str(original)
-    else:
-        if debug:
-            print(f"[DEBUG] _replace_and_map: complex structure at {path}, replacing without mapping")
-        _set_at_path(doc, path, anon_value, debug=debug)
+            print(f"[DEBUG] Collision détectée : '{base}' déjà utilisé. Nouvelle valeur : '{anon}'")
+
+    # écrire la valeur suffixée (le cas échéant) dans le document
+    _set_at_path(doc, path, anon, debug=debug)
+
+    # enregistrer la correspondance
+    mapping_anon_to_orig[anon] = orig
+
+    if debug:
+        print(f"[DEBUG] Map: '{anon}' -> '{orig}'")
 
 
 """Section: ANONYMISATION USAGER (champs listés)
 Déclare les chemins à anonymiser pour l'usager et expose la fonction
 principale `anonymize_usager_fields` qui applique la persona et construit le mapping.
 """
+
+
 
 # --------- ANONYMISATION USAGER (champs listés) ---------
 USAGER_PATHS = {
@@ -685,6 +668,11 @@ USAGER_PATHS = {
     "dateNaissance": ["usager", "Informations d'état civil", "personnePhysique", "dateNaissance"],
     "situationFamiliale": ["usager","Informations d'état civil","personnePhysique","situationFamiliale"],
 
+    # infos personnelles (domicile, mobile, mail)
+    "contactInfosPersonnels_domicile": ["usager", "contactInfosPersonnels", "domicile"],
+    "contactInfosPersonnels_mobile": ["usager", "contactInfosPersonnels", "mobile"],
+    "contactInfosPersonnels_mail": ["usager", "contactInfosPersonnels", "mail"],
+
     # adresse
     "adresse_ligne0": ["usager","adresse","ligne","[0]"],   # list index 0
     "adresse_codePostal": ["usager","adresse","codePostal"],
@@ -694,54 +682,39 @@ USAGER_PATHS = {
 
 
 
-# =======Détection genre de l'usager pour choix du prénom==============#
-
-
-
-def detect_genre_usager(usager_dict: Dict[str, Any]) -> str | None:
+# ------------ Détection genre de l'usager pour choix du prénom ----------------#
+def detect_genre_usager(usager: dict) -> Optional[str]:
     """
-    Détecte le sexe de l’usager à partir de la structure JSON.
-
-    La fonction tente de lire la clé :
-        usager['Informations d'état civil']['personnePhysique']['sexe']
-    puis interprète sa valeur de manière robuste et insensible à la casse
-    (et aux accents) pour retourner « Masculin » ou « Féminin ».
-    Si la valeur est absente ou non conforme, la fonction renvoie None.
-
-    Args:
-        usager_dict (Dict[str, Any]): Le sous-dictionnaire représentant la
-            section « usager » du document JSON.
-
-    Returns:
-        str | None: « Masculin », « Féminin » ou None si indéterminé.
-
-    Exemple:
-        >>> usager = {
-        ...     "Informations d'état civil": {
-        ...         "personnePhysique": {"sexe": "féminin"}
-        ...     }
-        ... }
-        >>> detect_genre_usager(usager)
-        'Féminin'
+    Retourne 'M', 'F' ou None si indéterminé.
+    Cherche d'abord dans usager['Informations d'état civil']['personnePhysique'].
     """
+    info = (usager or {}).get("Informations d'état civil", {})
+    pp   = (info or {}).get("personnePhysique", {})
 
-    try:
-        sexe = usager_dict["Informations d'état civil"]["personnePhysique"].get("sexe")
-        if isinstance(sexe, str):
-            s = _normalize_case(sexe)
-            if s.startswith("mascul"):
-                return "Masculin"
-            if s.startswith("fémin") or s.startswith("femin"):
-                return "Féminin"
-    except Exception:
-        pass
-    return None
+    # Les clés que l'on voit dans tes JSON
+    sexe      = pp.get("sexe") or pp.get("Sexe")
+    civilite  = pp.get("civilite") or pp.get("Civilite")
+
+    return _detect_from_fields(sexe, civilite)
 
 
+# ------------- Construction dictionnaire des valeurs fictives ---------------#
+def _replace_with_original(
+    doc: Dict[str, Any],
+    path: List[str],
+    anon_value: Any,
+    mapping: Dict[str, str],
+    debug: bool = False,
+) -> None:
+    orig = _get_at_path(doc, path, debug=debug)
+    _replace_and_map(doc=doc, path=path,
+                     original_value=orig, anonymized_value=str(anon_value),
+                     mapping_anon_to_orig=mapping, debug=debug)
 
-# =======Construction dictionnaire des valeurs fictives==============#
 
-
+# ================================================#
+# ======== Fonction principale USAGERS ===========#
+# ================================================#
 
 def anonymize_usager_fields(
     doc: Dict[str, Any],
@@ -772,33 +745,64 @@ def anonymize_usager_fields(
     mapping: Dict[str, str] = {}
 
     usager = doc.get("usager", {})
-    gender = detect_genre_usager(usager)
-    if debug:
-        print(f"[DEBUG] Detected gender: {gender!r}")
 
-    persona = build_usager_persona(gender, debug=debug)
+    pp = usager.get("Informations d'état civil", {}).get("personnePhysique", {})
+    persona = build_usager_persona(
+        sexe=pp.get("sexe") or pp.get("Sexe"),
+        civilite=pp.get("civilite") or pp.get("Civilite"),
+        debug=True
+    )
 
-    # Remplacements (état civil)
-    _replace_and_map(doc, USAGER_PATHS["clientId"], persona["client_id"], mapping, debug=debug)
-    _replace_and_map(doc, USAGER_PATHS["nomFamille"], persona["last_name"], mapping, debug=debug)
-    _replace_and_map(doc, USAGER_PATHS["nomUtilise"], persona["last_name"], mapping, debug=debug)
-    _replace_and_map(doc, USAGER_PATHS["prenomsActeNaissance"], persona["first_name"], mapping, debug=debug)
-    _replace_and_map(doc, USAGER_PATHS["premierPrenomActeNaissance"], persona["first_name"], mapping, debug=debug)
-    _replace_and_map(doc, USAGER_PATHS["prenomUtilise"], persona["first_name"], mapping, debug=debug)
+    # --- État civil ---
+    _replace_with_original(doc, USAGER_PATHS["clientId"], persona["client_id"], mapping, debug)
+    _replace_with_original(doc, USAGER_PATHS["nomFamille"], persona["last_name"], mapping, debug)
+    _replace_with_original(doc, USAGER_PATHS["nomUtilise"], persona["last_name"], mapping, debug)
+    _replace_with_original(doc, USAGER_PATHS["prenomsActeNaissance"], persona["first_name"], mapping, debug)
+    _replace_with_original(doc, USAGER_PATHS["premierPrenomActeNaissance"], persona["first_name"], mapping, debug)
+    _replace_with_original(doc, USAGER_PATHS["prenomUtilise"], persona["first_name"], mapping, debug)
 
-    # Situation familiale : si non-informative, on laisse tel quel; sinon on neutralise (ex. "Marié(e)")
+    # --- Situation familiale : neutraliser si informative
     sit = _get_at_path(doc, USAGER_PATHS["situationFamiliale"], debug=debug)
-    if isinstance(sit, str) and not _is_non_informatif(sit):
-        _replace_and_map(doc, USAGER_PATHS["situationFamiliale"], "Marié(e)", mapping, debug=debug)
+    if sit is None:
+        # pas de mapping quand original == None, on écrit directement
+        _set_at_path(doc, USAGER_PATHS["situationFamiliale"], "Non renseigné", debug=debug)
+    elif isinstance(sit, str) and not _is_non_informatif(sit):
+        # valeur informative -> neutraliser avec mapping
+        _replace_with_original(doc, USAGER_PATHS["situationFamiliale"], "Non renseigné", mapping, debug)
 
-    # ... (remplacements état civil + adresse)
-    _anonymize_usager_dob_full(doc, USAGER_PATHS["dateNaissance"], mapping, debug=debug)
 
-    # Adresse (ligne[0], codePostal, libelleCommune, commentaire)
-    _replace_and_map(doc, USAGER_PATHS["adresse_ligne0"], persona["address_line"], mapping, debug=debug)
-    _replace_and_map(doc, USAGER_PATHS["adresse_codePostal"], persona["postcode"], mapping, debug=debug)
-    _replace_and_map(doc, USAGER_PATHS["adresse_libelleCommune"], persona["commune"], mapping, debug=debug)
-    _replace_and_map(doc, USAGER_PATHS["adresse_commentaire"], persona["commentaire"], mapping, debug=debug)
+    # --- Date de naissance
+    _anonymize_usager_dob_full(doc, USAGER_PATHS["dateNaissance"], mapping, debug)
+
+    # --- Adresse ---
+    _replace_with_original(doc, USAGER_PATHS["adresse_ligne0"], persona["address_line"], mapping, debug)
+    _replace_with_original(doc, USAGER_PATHS["adresse_codePostal"], persona["postcode"], mapping, debug)
+    _replace_with_original(doc, USAGER_PATHS["adresse_libelleCommune"], persona["commune"], mapping, debug)
+    _replace_with_original(doc, USAGER_PATHS["adresse_commentaire"], persona["commentaire"], mapping, debug)
+
+    # --- Infos personnelles
+    # domicile
+    v = _get_at_path(doc, USAGER_PATHS["contactInfosPersonnels_domicile"], debug=debug)
+    if v is None or (isinstance(v, str) and _is_non_informatif(v)):
+        _set_at_path(doc, USAGER_PATHS["contactInfosPersonnels_domicile"], "Non renseigné", debug=debug)
+    else:
+        _replace_with_original(doc, USAGER_PATHS["contactInfosPersonnels_domicile"], persona["domicile"], mapping,
+                               debug)
+
+    # mobile
+    v = _get_at_path(doc, USAGER_PATHS["contactInfosPersonnels_mobile"], debug=debug)
+    if v is None or (isinstance(v, str) and _is_non_informatif(v)):
+        _set_at_path(doc, USAGER_PATHS["contactInfosPersonnels_mobile"], "Non renseigné", debug=debug)
+    else:
+        _replace_with_original(doc, USAGER_PATHS["contactInfosPersonnels_mobile"], persona["mobile"], mapping, debug)
+
+    # mail
+    v = _get_at_path(doc, USAGER_PATHS["contactInfosPersonnels_mail"], debug=debug)
+    if v is None or (isinstance(v, str) and _is_non_informatif(v)):
+        _set_at_path(doc, USAGER_PATHS["contactInfosPersonnels_mail"], "Non renseigné", debug=debug)
+    else:
+        _replace_with_original(doc, USAGER_PATHS["contactInfosPersonnels_mail"], persona["mail"], mapping, debug)
+
 
     if debug:
         preview = list(mapping.items())[:10]
@@ -808,36 +812,15 @@ def anonymize_usager_fields(
     return doc, mapping
 
 
-
-# ================Fonction principale qui appelle plusieurs fonctions pour produire
+# ================================================#
+# ======== Fonction principale CONTACTS ==========#
+# ================================================#
 
 def anonymize_contacts_fields(
     doc: Dict[str, Any],
     mapping: Dict[str, str],
     debug: bool = False,
 ) -> Dict[str, Any]:
-    """
-    Anonymise les champs des contacts (0..N) et alimente le mapping.
-
-    Pour chaque contact, la fonction :
-      1) Détecte le genre via la civilité (si possible).
-      2) Construit une persona (civilité, prénom, nom, DOB fictive).
-      3) Remplace uniquement les champs **non marqués (*)** :
-         - personnePhysique.prenomUtilise
-         - personnePhysique.nomUtilise
-         - personnePhysique.civilite (optionnel)
-         - personnePhysique.dateNaissance
-      4) Laisse intacts les champs marqués `(*)` :
-         - typeContact, titre, role, natureLien, personneConfiance, responsableLegal
-
-    Args:
-        doc (Dict[str, Any]): Document JSON du patient (modifié sur place).
-        mapping (Dict[str, str]): Mapping global {valeur_anon: valeur_originale}.
-        debug (bool, optionnel): Active les messages de débogage.
-
-    Returns:
-        Dict[str, Any]: Le document JSON modifié (pour chaînage éventuel).
-    """
     contacts = doc.get("contacts")
     if not isinstance(contacts, list) or not contacts:
         if debug:
@@ -852,31 +835,40 @@ def anonymize_contacts_fields(
 
         paths = _contact_paths(i)
 
-        # Détection du genre du contact
-        g = detect_genre_contact(contact)
-        if debug:
-            print(f"[DEBUG] Contact[{i}] genre détecté: {g!r}")
+        # On récupère les champs utiles pour la détection via _detect_from_fields(...)
+        pp = (contact or {}).get("personnePhysique", {})
+        persona = build_contact_persona(
+            sexe=pp.get("sexe") or pp.get("Sexe"),
+            civilite=pp.get("civilite") or pp.get("Civilite"),
+            debug=debug,
+        )
 
-        persona = build_contact_persona(g, debug=debug)
+        # log de contrôle
+        if debug:
+            g_detected = detect_genre_contact(contact)
+            print(f"[DEBUG] Contact[{i}] genre détecté (source doc): {g_detected!r}")
+            print(f"[DEBUG] Contact[{i}] persona -> {persona}")
 
         # Remplacements des champs anonymisés
-        # civilité : si tu souhaites conserver l'originale, commente la ligne ci-dessous
-        _replace_and_map(doc, paths["civilite"], persona["civilite"], mapping, debug=debug)
+        # civilité : pour conserver l'originale, commenter ligne ci-dessous
+        _replace_with_original(doc, paths["civilite"], persona["civilite"], mapping, debug)
 
-        _replace_and_map(doc, paths["prenomUtilise"], persona["first_name"], mapping, debug=debug)
-        _replace_and_map(doc, paths["nomUtilise"], persona["last_name"], mapping, debug=debug)
+        _replace_with_original(doc, paths["prenomUtilise"], persona["first_name"], mapping, debug)
+        _replace_with_original(doc, paths["nomUtilise"], persona["last_name"], mapping, debug)
 
-        _anonymize_contact_dob_full(doc, paths["dateNaissance"], mapping, debug=debug)
+        # Date de naissance (utilise la fonction dédiée déjà mise à jour)
+        _anonymize_contact_dob_full(doc, paths["dateNaissance"], mapping, debug)
 
-        # Champs marqués (*) : ne pas remplacer
+        # Champs marqués (*) : ne pas remplacer (on les log pour contrôle)
         if debug:
             kept = {k: _get_at_path(doc, v, debug=False) for k, v in paths.items() if k in CONTACTS_STATIC_KEEP}
             print(f"[DEBUG] Contact[{i}] champs conservés (*) -> {kept}")
 
     return doc
 
-
-# =============Fonction principale=====================
+# ===================================================== #
+# =============Fonction principale===================== #
+# ===================================================== #
 
 def anonymize_patient_document(doc: Dict[str, Any], debug: bool = False) -> Tuple[Dict[str, Any], Dict[str, str]]:
     """
@@ -887,12 +879,15 @@ def anonymize_patient_document(doc: Dict[str, Any], debug: bool = False) -> Tupl
     return doc_anon, mapping
 
 
-
-# =============Fonction inverse de désanonymisation==============
+# ======================================================================= #
+# =============Fonction inverse de désanonymisation ===================== #
+# ======================================================================= #
 
 import re
 from typing import Dict
 
+
+_WORDLIKE_RE = re.compile(r"^[\wÀ-ÖØ-öø-ÿ]+(?:[ '\-][\wÀ-ÖØ-öø-ÿ]+)*$", re.UNICODE)
 
 def deanonymize_fields(
         text: str,
@@ -902,39 +897,47 @@ def deanonymize_fields(
     """
     Remplace dans 'text' toutes les valeurs anonymisées par leurs valeurs originales
     en utilisant le mapping {anonymisé -> original}.
-
-    Args:
-        text (str): Le texte potentiellement contenant des valeurs anonymisées.
-        mapping_anon_to_orig (Dict[str, str]): Dictionnaire des correspondances.
-        debug (bool, optionnel): Affiche les substitutions effectuées si True.
-
-    Returns:
-        Tuple[str, Dict[str, str]]:
-            - Texte désanonymisé (chaîne de caractères).
-            - Reverse mapping {original -> anonymisé} pour usage ultérieur.
+    Retourne aussi {original -> anonymisé}.
     """
     if not mapping_anon_to_orig:
         return text, {}
 
-    # Trie les clés anonymisées par longueur décroissante (évite collisions partielles)
+    # 1) Trie par longueur décroissante (évite collisions partielles)
     keys = sorted(mapping_anon_to_orig.keys(), key=len, reverse=True)
-    pattern = re.compile("|".join(re.escape(k) for k in keys))
 
-    def _sub(m):
-        k = m.group(0)
-        original = mapping_anon_to_orig.get(k, k)
-        if debug:
-            print(f"[DEBUG] Remplacement '{k}' -> '{original}'")
-        return original
+    # 2) Sépare tokens "type mot" vs autres
+    wordlike_keys = [k for k in keys if _WORDLIKE_RE.match(k)]
+    other_keys    = [k for k in keys if k not in wordlike_keys]
 
-    deanonymized_text = pattern.sub(_sub, text)
+    # 3) Passe 1 : tokens "autres" (dates, codes, ponctuation) - pas de bornes
+    if other_keys:
+        pattern_other = re.compile("|".join(re.escape(k) for k in other_keys))
+        def _sub_other(m):
+            k = m.group(0)
+            original = mapping_anon_to_orig.get(k, k)
+            if debug:
+                print(f"[DEBUG] Remplacement '{k}' -> '{original}'")
+            return original
+        text = pattern_other.sub(_sub_other, text)
 
-    # Construction du reverse mapping {original -> anonymisé}
+    # 4) Passe 2 : tokens "mot-like" avec bornes non-alphanumériques
+    if wordlike_keys:
+        pattern_word = re.compile(
+            r"(?<!\w)(" + "|".join(re.escape(k) for k in wordlike_keys) + r")(?!\w)",
+            flags=re.UNICODE
+        )
+        def _sub_word(m):
+            k = m.group(1)
+            original = mapping_anon_to_orig.get(k, k)
+            if debug:
+                print(f"[DEBUG] Remplacement '{k}' -> '{original}'")
+            return original
+        text = pattern_word.sub(_sub_word, text)
+
+    # 5) reverse mapping (utile pour ré-anonymiser un extrait après coup)
     reverse_mapping = {v: k for k, v in mapping_anon_to_orig.items()}
 
-    return deanonymized_text, reverse_mapping
-
-
+    return text, reverse_mapping
 
 
 

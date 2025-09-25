@@ -19,6 +19,22 @@ Sortie :
 from typing import Dict, Any, List, Tuple, Union
 
 NON_INFORMATIF = {"", "non renseigné", "null"}
+PRESERVE_NULL_KEYS = {"situationFamiliale"}  # clés à préserver même si v est None
+PRESERVE_NULL_PATHS = {
+    "usager.Informations d'état civil.personnePhysique.situationFamiliale",
+    "usager.contactInfosPersonnels.domicile",
+    "usager.contactInfosPersonnels.mobile",
+    "usager.contactInfosPersonnels.mail",
+}
+
+# --- Debug
+DEBUG_CLEANING = True  # passe à False quand tu as fini de tracer
+
+def _dbg(path: str, msg: str):
+    if DEBUG_CLEANING:
+        print(f"[CLEAN][DEBUG] {path or '<root>'}: {msg}")
+
+# ---
 
 
 def _is_empty_scalar(v: Any) -> bool:
@@ -105,32 +121,26 @@ def _ensure_dict(d: Dict[str, Any], *path) -> Dict[str, Any]:
 
 
 def _clean_rec(value: Any, changes: List[str] | None = None, path: str = "") -> Any:
-    """
-    Nettoie récursivement les valeurs vides dans une structure.
-
-    Supprime les None, chaînes vides et conteneurs vides
-    (listes, dictionnaires) dans une structure imbriquée.
-    Les suppressions peuvent être enregistrées pour audit.
-
-    Args:
-        value (Any): La valeur à nettoyer (dict, list ou scalaire).
-        changes (List[str] | None, optionnel): Liste des chemins supprimés.
-        path (str, optionnel): Chemin courant utilisé pour la traçabilité.
-
-    Returns:
-        Any: La valeur nettoyée, ou None si vide.
-    """
-
     if isinstance(value, dict):
+        _dbg(path, f"enter dict: keys={list(value.keys())!r}")
         out = {}
         for k, v in value.items():
             cur_path = f"{path}.{k}" if path else k
+
+            # trace spéciale pour situationFamiliale
+            if k == "situationFamiliale":
+                _dbg(cur_path, f"BEFORE value={v!r} (type={type(v).__name__})")
+
             if isinstance(v, str):
                 if _is_empty_scalar(v):
                     if changes is not None:
                         changes.append(f"Removed empty value at: {cur_path}")
+                    _dbg(cur_path, f"REMOVED empty string-like: {v!r}")
                     continue
                 out[k] = v
+                if k == "situationFamiliale":
+                    _dbg(cur_path, f"KEPT string value: {v!r}")
+
             elif isinstance(v, (dict, list)):
                 cleaned = _clean_rec(v, changes, cur_path)
                 if cleaned not in (None, {}, [], ""):
@@ -138,15 +148,30 @@ def _clean_rec(value: Any, changes: List[str] | None = None, path: str = "") -> 
                 else:
                     if changes is not None:
                         changes.append(f"Removed empty container at: {cur_path}")
+                    _dbg(cur_path, "REMOVED empty container")
             else:
+                # v est un scalaire non-str (None, int, bool, etc.)
                 if v is not None:
                     out[k] = v
                 else:
-                    if changes is not None:
-                        changes.append(f"Removed null at: {cur_path}")
+                    # Conserver certains nulls par clé ou par chemin complet
+                    if (k in PRESERVE_NULL_KEYS) or (cur_path in PRESERVE_NULL_PATHS):
+                        out[k] = None
+                        if changes is not None:
+                            changes.append(f"Kept null at preserved key/path: {cur_path}")
+                        _dbg(cur_path, "KEPT None (preserve list match)")
+                    else:
+                        if changes is not None:
+                            changes.append(f"Removed null at: {cur_path}")
+                        _dbg(cur_path, "REMOVED None")
+
+        if "personnePhysique" in (path or "") or path.endswith("personnePhysique"):
+            _dbg(path, f"AFTER dict keys={list(out.keys())!r} (situationFamiliale in out? {'situationFamiliale' in out})")
+
         return out
 
     if isinstance(value, list):
+        _dbg(path, f"enter list: len={len(value)}")
         cleaned_list = []
         for idx, item in enumerate(value):
             cur_path = f"{path}[{idx}]"
@@ -154,8 +179,10 @@ def _clean_rec(value: Any, changes: List[str] | None = None, path: str = "") -> 
                 if _is_empty_scalar(item):
                     if changes is not None:
                         changes.append(f"Removed empty value at: {cur_path}")
+                    _dbg(cur_path, f"REMOVED empty string-like in list: {item!r}")
                     continue
                 cleaned_list.append(item)
+
             elif isinstance(item, (dict, list)):
                 cleaned = _clean_rec(item, changes, cur_path)
                 if cleaned not in (None, {}, [], ""):
@@ -163,25 +190,30 @@ def _clean_rec(value: Any, changes: List[str] | None = None, path: str = "") -> 
                 else:
                     if changes is not None:
                         changes.append(f"Removed empty container at: {cur_path}")
+                    _dbg(cur_path, "REMOVED empty container in list")
             else:
                 if item is not None:
                     cleaned_list.append(item)
                 else:
                     if changes is not None:
                         changes.append(f"Removed null at: {cur_path}")
+                    _dbg(cur_path, "REMOVED None in list")
         return cleaned_list
 
     # scalaires
     if isinstance(value, str) and _is_empty_scalar(value):
         if changes is not None:
             changes.append(f"Removed empty scalar at: {path or '<root>'}")
+        _dbg(path, f"REMOVED empty scalar at root: {value!r}")
         return None
     return value
 
 
+
 def _remove_usager_sensitive_fields(data: Dict[str, Any], changes: List[str] | None = None) -> None:
     """
-    Supprime les champs sensibles dans la section 'usager' d’un document patient.
+    Supprime les champs sensibles ET/ou non nécessaires au LLM (contexte patient)
+    dans la section 'usager' d’un document patient.
 
     Les champs supprimés concernent les informations identifiantes
     (adresse, téléphone, identifiants, etc.). Les suppressions peuvent
@@ -210,10 +242,10 @@ def _remove_usager_sensitive_fields(data: Dict[str, Any], changes: List[str] | N
         for k in ("libellePays", "inseePays"):
             _pop_in(pn, k, changes, f"{base_path}.paysNaissance")
 
-    # 3) usager.contactInfosPersonnels : domicile, mobile, mail
-    cip = _ensure_dict(data, "usager", "contactInfosPersonnels")
-    for k in ("domicile", "mobile", "mail"):
-        _pop_in(cip, k, changes, "usager.contactInfosPersonnels")
+    # # 3) usager.contactInfosPersonnels : domicile, mobile, mail
+    # cip = _ensure_dict(data, "usager", "contactInfosPersonnels")
+    # for k in ("domicile", "mobile", "mail"):
+    #     _pop_in(cip, k, changes, "usager.contactInfosPersonnels")
 
     # 4) usager.mouvement : service, secteur
     mou = _ensure_dict(data, "usager", "mouvement")
@@ -223,7 +255,8 @@ def _remove_usager_sensitive_fields(data: Dict[str, Any], changes: List[str] | N
 
 def _remove_contacts_sensitive_fields(data: Dict[str, Any], changes: List[str] | None = None) -> None:
     """
-    Supprime les champs sensibles dans la section 'contacts' d’un document patient.
+    Supprime les champs sensibles ET/ou non néssaires au LLM (contexte patient)
+    dans la section 'contacts' d’un document patient.
 
     L’anonymisation ne s’applique qu’aux contacts de type
     'Cercle d'aide et de soin' ou 'Entourage'. Certains champs
@@ -257,38 +290,55 @@ def _remove_contacts_sensitive_fields(data: Dict[str, Any], changes: List[str] |
         if isinstance(cip, dict):
             _pop_in(cip, "domicile", changes, f"contacts[{i}].contactInfosPersonnels")
             _pop_in(cip, "mobile", changes, f"contacts[{i}].contactInfosPersonnels")
-            _pop_in(cip, "mail", changes, f"contacts[{i}].contactInfosPersonnels")
+            _pop_in(cip, "mailMSSANTE", changes, f"contacts[{i}].contactInfosPersonnels")
+            _pop_in(cip, "mailPro", changes, f"contacts[{i}].contactInfosPersonnels")
 
-        # 3) contact.numRpps
+        # 3) contact.numRpps, contact.structure, contact.typeStructure, contact.finessET
         _pop_in(c, "numRpps", changes, f"contacts[{i}]")
+        _pop_in(c, "structure", changes, f"contacts[{i}]")
+        _pop_in(c, "typeStructure", changes, f"contacts[{i}]")
+        _pop_in(c, "finessET", changes, f"contacts[{i}]")
+        _pop_in(c, "dateDesignationPersonneConfiance", changes, f"contacts[{i}]")
+        _pop_in(c, "dateDesignationResponsableLegal", changes, f"contacts[{i}]")
+
 
 
 def _prune_empty_containers(d: Any, changes: List[str] | None = None, path: str = "") -> Any:
     """
-    Supprime récursivement les conteneurs vides (dictionnaires ou listes).
-
-    Parcourt la structure et supprime les conteneurs devenus vides
-    après nettoyage. Les suppressions peuvent être enregistrées pour traçabilité.
-
-    Args:
-        d (Any): La structure à nettoyer (dict, list, scalaire).
-        changes (List[str] | None, optionnel): Liste des chemins supprimés.
-        path (str, optionnel): Chemin courant utilisé pour la traçabilité.
-
-    Returns:
-        Any: La structure nettoyée, ou None si elle est vide.
+    Supprime récursivement les conteneurs vides (dictionnaires ou listes),
+    mais préserve certaines clés/chemins marqués même si leur valeur est None.
     """
-
     if isinstance(d, dict):
         pruned = {}
         for k, v in d.items():
             cur_path = f"{path}.{k}" if path else k
-            pruned_v = _prune_empty_containers(v, changes, cur_path)
-            if pruned_v not in (None, {}, [], ""):
-                pruned[k] = pruned_v
+
+            # Cas conteneur : on prune récursivement
+            if isinstance(v, (dict, list)):
+                pruned_v = _prune_empty_containers(v, changes, cur_path)
+                # S'il reste quelque chose, on garde
+                if pruned_v not in (None, {}, [], ""):
+                    pruned[k] = pruned_v
+                else:
+                    # Si le conteneur est vide, on le retire
+                    if changes is not None:
+                        changes.append(f"Removed empty container at: {cur_path}")
+                continue
+
+            # Cas scalaire
+            if v is None:
+                # ✅ Préserve si clé/chemin whitelists
+                if (k in PRESERVE_NULL_KEYS) or (cur_path in PRESERVE_NULL_PATHS):
+                    pruned[k] = None
+                    if changes is not None:
+                        changes.append(f"Kept null at preserved key/path (prune): {cur_path}")
+                else:
+                    if changes is not None:
+                        changes.append(f"Removed null at: {cur_path}")
             else:
-                if changes is not None:
-                    changes.append(f"Removed empty container at: {cur_path}")
+                # Valeur non None -> on garde telle quelle
+                pruned[k] = v
+
         return pruned
 
     if isinstance(d, list):
@@ -303,7 +353,9 @@ def _prune_empty_containers(d: Any, changes: List[str] | None = None, path: str 
                     changes.append(f"Removed empty container at: {cur_path}")
         return pruned_list
 
+    # Scalaire non conteneur : on renvoie tel quel
     return d
+
 
 
 def clean_patient_document(

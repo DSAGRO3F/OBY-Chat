@@ -1,12 +1,14 @@
+# src/utils/vector_db_utils.py
 """
-Module utilitaire pour la gestion de l'état de l'indexation ChromaDB.
+Utilitaires pour la base vectorielle (Chroma) : flags et E/S atomiques.
 
-Ce module contient des fonctions permettant de :
-- Vérifier si l'indexation ChromaDB est terminée (via un fichier flag).
-- Créer ou supprimer ce flag selon les besoins.
-
-Ce mécanisme permet à l'application (ex. interface Dash) de savoir si les bases
-vectorielles sont prêtes à être interrogées par les utilisateurs.
+Ce module regroupe des helpers pour gérer les drapeaux de statut
+(`index_ready.flag`, `.force_full_index`), avec des écritures atomiques
+et une suppression tolérante aux erreurs. Il peut fournir des fonctions
+comme `mark_index_ready_flag()` et `clear_index_ready_flag()` basées
+sur les chemins centralisés de `config.config`. L’objectif est d’éviter
+les états incohérents pendant les resets/rebuilds et d’offrir une API
+simple et sûre aux autres modules (scheduler, UI, pipelines).
 """
 
 from config.config import INDEX_READY_FLAG_PATH
@@ -36,7 +38,7 @@ def mark_index_ready_flag():
     """
     INDEX_READY_FLAG_PATH.parent.mkdir(parents=True, exist_ok=True)
     INDEX_READY_FLAG_PATH.touch(exist_ok=True)
-    print(f"[DEBUG ✅] Flag écrit à : {INDEX_READY_FLAG_PATH.resolve()}")
+    # print(f"[DEBUG ✅] Flag écrit à : {INDEX_READY_FLAG_PATH.resolve()}")
 
 
 def clear_index_ready_flag() -> None:

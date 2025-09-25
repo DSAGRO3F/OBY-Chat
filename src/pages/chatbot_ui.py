@@ -34,7 +34,7 @@ from src.func.api_core import process_user_input
 
 
 # Fonctions DEBUG -------
-# --- helpers UI-only (placer en haut du fichier) ---
+# --- helpers UI ---
 def _ui_extract_role_text_type(msg):
     # dict API
     if isinstance(msg, dict) and "props" not in msg and ("role" in msg or "msg_type" in msg):

@@ -31,7 +31,6 @@ import dash_bootstrap_components as dbc
 from src.llm_user_session.session_manager_instance import session_manager_instance
 from config.config import USER_DATABASE
 from src.func.get_chroma_stats import get_chroma_index_stats
-from src.utils.vector_db_utils import is_chroma_index_ready
 
 dash.register_page(__name__, path="/")
 
@@ -220,36 +219,73 @@ def display_admin_controls(session_data):
 
 @dash.callback(
     Output("chroma-stats-box", "children"),
-    Input("refresh-stats-btn", "n_clicks")
+    Input("refresh-stats-btn", "n_clicks"),
+    prevent_initial_call=False
 )
 def update_chroma_stats(_):
     stats = get_chroma_index_stats()
+
+    # Récupération robuste (fallback = 0 / None)
+    docx_files   = stats.get("docx_files", 0)
+    docx_chunks  = stats.get("docx_chunks", 0)
+    docx_json    = stats.get("docx_json_files", 0)
+    docx_fiches  = stats.get("docx_fiches")          # peut ne pas exister
+
+    web_pages    = stats.get("web_files", 0)         # = URLs uniques
+    web_chunks   = stats.get("web_chunks", 0)
+    web_json     = stats.get("web_json_files", 0)
+    web_domains  = stats.get("web_domains")          # peut ne pas exister
+
+    li_items = [
+        html.Li([
+            html.Img(src="/assets/icons/message.png?v=1", className="icon-inline me-2"),
+            f"Fichiers DOCX indexés : {docx_files} fichier{'s' if docx_files != 1 else ''} – {docx_chunks} chunk{'s' if docx_chunks != 1 else ''}"
+        ]),
+    ]
+
+    # (Optionnel) Fiches DOCX extraites si la clé est disponible
+    if docx_fiches is not None:
+        li_items.append(
+            html.Li([
+                html.Img(src="/assets/icons/message.png?v=1", className="icon-inline me-2"),
+                f"Fiches DOCX extraites : {docx_fiches} fiche{'s' if (docx_fiches or 0) != 1 else ''}"
+            ])
+        )
+
+    li_items.append(
+        html.Li([
+            html.Img(src="/assets/icons/robot.png?v=1", className="icon-inline me-2"),
+            f"Pages web indexées : {web_pages} URL{'s' if web_pages != 1 else ''} – {web_chunks} chunk{'s' if web_chunks != 1 else ''}"
+        ])
+    )
+
+    # (Optionnel) Sites web indexés (domaines uniques) si la clé est disponible
+    if web_domains is not None:
+        li_items.append(
+            html.Li([
+                html.Img(src="/assets/icons/robot.png?v=1", className="icon-inline me-2"),
+                f"Sites web indexés : {web_domains} domaine{'s' if (web_domains or 0) != 1 else ''}"
+            ])
+        )
+
+    # JSON sur disque
+    li_items.extend([
+        html.Li([
+            html.Img(src="/assets/icons/table.png?v=1", className="icon-inline me-2"),
+            f"Fichiers JSON issus de DOCX : {docx_json}"
+        ]),
+        html.Li([
+            html.Img(src="/assets/icons/table.png?v=1", className="icon-inline me-2"),
+            f"Fichiers JSON issus du web : {web_json}"
+        ]),
+    ])
+
     return html.Div([
         html.Div([
             html.Img(src="/assets/icons/statistics.png?v=1", className="icon-inline"),
             html.H4("Statistiques indexation ChromaDB", className="d-inline-block ms-2")
         ], className="d-flex align-items-center mb-3"),
-
-        html.Ul([
-            html.Li([
-                html.Img(src="/assets/icons/message.png?v=1", className="icon-inline me-2"),
-                f"Fichiers DOCX indexés : {stats['docx_files']} fichiers – {stats['docx_chunks']} chunks"
-            ]),
-            html.Li([
-                html.Img(src="/assets/icons/robot.png?v=1", className="icon-inline me-2"),
-                f"Pages web indexées : {stats['web_files']} URLs – {stats['web_chunks']} chunks"
-            ]),
-            html.Li([
-                html.Img(src="/assets/icons/table.png?v=1", className="icon-inline me-2"),
-                f"Fichiers JSON issus de DOCX : {stats['docx_json_files']}"
-            ]),
-            html.Li([
-                html.Img(src="/assets/icons/table.png?v=1", className="icon-inline me-2"),
-                f"Fichiers JSON issus du web : {stats['web_json_files']}"
-            ]),
-        ])
+        html.Ul(li_items)
     ])
-
-
 
 

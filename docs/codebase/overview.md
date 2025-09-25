@@ -221,13 +221,17 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ## 📄 Module : `func.anonymizer`
 
 > **Rôle :**
-> Ce module permet :
-> - d'anonymiser des champs sensibles dans une structure JSON (ex. : prénoms, adresses, contacts),
-> - de générer un dictionnaire de correspondance entre valeurs originales et anonymisées,
-> - de désanonymiser un texte produit à partir des données en réinjectant les valeurs originales.
+> Anonymisation de l'usager via persona française (session-aléatoire).
 > 
-> L’anonymisation repose à la fois sur des règles dynamiques (ex. : prénom selon le sexe)
-> et sur des valeurs codées en dur (HARDCODED_VALUES).
+> Ce module fournit :
+> - Des pools de valeurs françaises (prénoms, noms, voies, codes postaux/communes).
+> - La création d'une persona cohérente pour l'usager (prénom selon le genre, nom, adresse, CP/commune).
+> - Des utilitaires pour lire/écrire dans un dictionnaire JSON par chemins imbriqués.
+> - Une anonymisation ciblée des champs usager et contacts.
+> - La construction d'un mapping {valeur_anonymisée: valeur_originale} pour la désanonymisation.
+> 
+> Entrée : dict JSON (document patient).
+> Sortie : Tuple[Any, Dict[str, str]] -> (document anonymisé, mapping).
 
 ---
 
@@ -257,18 +261,6 @@ _Cette page fournit une description concise des principaux modules Python du pro
 > 
 > Vérifie les modifications dans les fichiers DOCX et les pages web médicales,
 > et lance l'indexation via ChromaDB uniquement si des changements sont détectés.
-
----
-
-
-## 📄 Module : `func.detect_genre`
-
-> **Rôle :**
-> Module de génération de prénoms anonymisés à partir du sexe renseigné.
-> 
-> Ce module permet de produire des prénoms fictifs cohérents avec le sexe (masculin, féminin ou inconnu)
-> dans le cadre d’un processus d’anonymisation de données personnelles.
-> Il inclut également des valeurs codées en dur pour compléter des structures anonymisées.
 
 ---
 
@@ -312,6 +304,33 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ---
 
 
+## 📄 Module : `func.free_text_name_anonymizer`
+
+> **Rôle :**
+> Module free_text_name_anonymizer
+> 
+> Ce module gère l’anonymisation et la désanonymisation des mentions libres
+> du nom et prénom du patient dans un POA (Plan d’Objectifs et d’Actions).
+> 
+> Contrairement à l’anonymisation structurée (sections « usager » et « contacts »),
+> les informations saisies manuellement par les évaluateurs peuvent contenir
+> le nom ou le prénom du patient dans des champs texte libres
+> (ex. « Mme Anne Dupont, son épouse est présente »).
+> 
+> Fonctionnalités principales :
+>     - Normalisation des chaînes (suppression des accents, casse insensible,
+>       gestion des espaces Unicode).
+>     - Construction de variantes (nom, prénom, « Prénom Nom », « Nom Prénom »,
+>       civilités + nom, civilités + prénom + nom).
+>     - Parcours récursif des structures de type dict/list pour détecter
+>       les chaînes contenant le nom/prénom du patient.
+>     - Remplacement par l’alias choisi lors de l’anonymisation structurée.
+>     - Mise à jour du mapping {alias -> original} pour permettre la
+>       désanonymisation correcte de la réponse du LLM.
+
+---
+
+
 ## 📄 Module : `func.generate_ppa_from_poa`
 
 > **Rôle :**
@@ -339,17 +358,52 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ## 📄 Module : `func.get_chroma_stats`
 
 > **Rôle :**
-> Statistiques sur les données indexées dans ChromaDB et les fichiers JSON préparés.
-> 
->     Returns:
->         dict: {
->             "docx_files": int,        # Fichiers uniques indexés depuis docx
->             "web_files": int,         # Fichiers uniques indexés depuis web
+> Collecte et expose des statistiques d’index Chroma pour l’UI.
+>     
+>     Ce module fournit une fonction principale, :func:`get_chroma_index_stats`, qui
+>     retourne des compteurs utiles à l’interface (nb de fichiers/chunks DOCX & Web,
+>     nb de JSON locaux, etc.) sans perturber l’indexation en cours.
+>     
+>     Comportement clé
+>     ----------------
+>     - **Aucun accès Chroma pendant l’indexation** : si l’un des drapeaux
+>       ``FORCE_FULL_INDEX_FLAG`` ou ``INDEXING_FLAG_FILE`` est présent, la fonction
+>       n’instancie pas de client Chroma et renvoie simplement les compteurs de fichiers
+>       JSON présents sur disque, avec ``indexing=True``.
+>     - **Accès Chroma en lecture seule sinon** : une fois l’index prêt
+>       (flags absents), le cache client est invalidé puis un client Chroma est créé
+>       pour lire les collections (``base_docx`` / ``base_web``) et calculer les
+>       compteurs (chunks, fichiers, domaines).
+>     - **Aucun effet de bord à l’import** : le module n’ouvre jamais Chroma au
+>       chargement. Toute lecture Chroma se fait *uniquement* à l’appel de la fonction.
+>     
+>     Valeur de retour
+>     ----------------
+>     La fonction :func:`get_chroma_index_stats` renvoie un ``dict`` du type :
+>     
+>         {
+>             "docx_files": int,
 >             "docx_chunks": int,
+>             "docx_json_files": int,
+>             "web_files": int,
 >             "web_chunks": int,
->             "docx_json_files": int,   # Fichiers JSON générés depuis les DOCX
->             "web_json_files": int     # Fichiers JSON générés depuis le web
+>             "web_json_files": int,
+>             "docx_fiches": int,
+>             "web_domains": int,
+>             "indexing": bool,  # True si un rebuild est demandé/en cours
 >         }
+>     
+>     Dans les cas d’erreur de lecture Chroma, la fonction reste tolérante et
+>     renvoie simplement les compteurs JSON avec les autres valeurs à 0.
+>     
+>     Dépendances & conventions
+>     -------------------------
+>     - Ce module s’appuie sur les chemins/flags centralisés dans ``config.config`` :
+>       ``FORCE_FULL_INDEX_FLAG``, ``INDEXING_FLAG_FILE``, ``JSON_HEALTH_DOC_BASE``,
+>       ``WEB_SITES_JSON_HEALTH_DOC_BASE``.
+>     - L’accès client est **centralisé** via ``src.utils.chroma_client`` :
+>       ``get_chroma_client`` et ``reset_chroma_client_cache``.
+>     - Les noms de collections attendues sont ``base_docx`` et ``base_web``.
 
 ---
 
@@ -374,63 +428,43 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ## 📄 Module : `func.handle_user_requests`
 
 > **Rôle :**
-> Gestion des requêtes utilisateur pour OBY-IA (détection d’intention, confirmation et exécution).
+> Gestion des requêtes utilisateur pour OBY-IA (module Dash/API).
 > 
-> Ce module centralise la logique conversationnelle « back-end » entre l’interface
-> et les pipelines métier d’OBY-IA. Il orchestre deux étapes clés :
+> Ce module orchestre les deux temps de la conversation : requête initiale
+> (`handle_initial_request`) avec détection d’intention et question de confirmation,
+> puis traitement de la réponse de confirmation (`handle_confirmation_response`)
+> avec exécution du pipeline et construction de l’affichage final.
+> Les messages sont tagués (patient_key, user_id, msg_type) puis filtrés/retagués
+> pour éviter tout mélange d’historiques entre patients, et une vue prête à afficher
+> (`chat_history_display`) est renvoyée à l’UI lorsqu’un changement de patient survient.
 > 
-> 1) handle_initial_request(...) :
->    - Analyse l’input utilisateur (détection d’intention et extraction éventuelle
->      du nom de patient).
->    - Met en place un état de confirmation (session["intent_confirmation_pending"] = True)
->      et prépare un message de confirmation.
->    - Retourne les éléments nécessaires pour l’affichage / la réponse (historique,
->      tableaux, graphiques, etc.), généralement vides à ce stade.
+> **1. handle_initial_request(...) :**
+>     - Prépare la phase pré-confirmation : détecte l’intention et le patient, met à jour la session et renvoie le delta d’affichage (requête + question de confirmation).
+>     - Paramètres:
+>         - user_input (str)
+>         - session (dict)
+>         - session_data (dict avec "user_id","session_id")
+>         - chat_history (list)
+>         - current_patient (str|None)
+>         - output_mode (Literal["dash","api"]).
+>     - Retourne un tuple:
+>         - (chat_history: list, figures_out: list, table_html: str, anomaly_block: str, current_patient: str|None, serialized_figs: list|None, chat_history_display: Any|None).
+>     Ne lance aucun pipeline métier; lève ValueError si session_data est incomplet.
+>     Les messages ajoutés sont tagués (patient_key, user_id, msg_type).
 > 
-> 2) handle_confirmation_response(...) :
->    - Interprète la confirmation (ex.: « oui / non ») lorsque l’intention est en attente.
->    - Déclenche le pipeline adapté :
->        • PPA (generate_ppa_from_poa.process_ppa_request),
->        • Recommandations (generate_structured_medical_plan),
->        • Constantes patient (process_patient_request_with_constants).
->    - Met à jour l’état de session (réinitialisation du flag de confirmation,
->      mémorisation du patient courant, etc.) et assemble la réponse finale.
-> 
-> Modes de sortie :
->     Le paramètre `output_mode` permet d’adapter le format des objets retournés :
->       - "dash" : le module peut retourner des composants Dash (html.Div, dcc.Markdown,
->                  figures Plotly « go.Figure », etc.) pour l’UI interne.
->       - "api"  : le module retourne des structures sérialisables (listes/dicts/strings),
->                  adaptées à FastAPI / JSON (pas d’objets Dash).
-> 
-> Effets de bord :
->     - Mise à jour de la session (ex. intent_confirmation_pending, intent_candidate).
->     - Enrichissement de l’historique de conversation (chat_history / new_chat_history).
-> 
-> Dépendances principales :
->     - src.llm_user_session.session_manager_instance
->     - src.func.extract_user_intent, src.func.extract_patient_name
->     - src.func.generate_ppa_from_poa, src.func.generate_structured_medical_plan
->     - src.func.get_patient_constants_graphs
->     - src.func.serialize_figs (sérialisation des figures)
->     - (optionnel côté UI) dash.html / dash.dcc pour le mode "dash"
-> 
-> Convention de retour :
->     Les fonctions retournent un 7-uplet :
->         (chat_history_ou_new_chat_history,
->          figures_out,
->          table_html,
->          anomaly_block,
->          current_patient,
->          serialized_figs,
->          chat_history_display)
-> 
->     * En mode "initial", chat_history est renvoyé (nouvel historique cumulé).
->     * En mode "confirmation", new_chat_history est renvoyé (ajouts du tour courant).
->     * Le « full_chat_history » est assemblé par l’appelant si nécessaire.
-> 
-> Ce module est conçu pour être appelé à la fois par l’interface Dash (UI)
-> et par la couche API (FastAPI) via une fonction « tronc commun ».
+> **2. handle_confirmation_response(...) :**
+>    - Traite la réponse de confirmation (oui/non), exécute le pipeline demandé et prépare l’affichage.
+>    - Paramètres:
+>         - user_input (str)
+>         - session (dict)
+>         - session_data (dict avec "user_id","session_id")
+>         - chat_history (list, snapshot UI)
+>         - current_patient (str|None)
+>         - output_mode (Literal["dash","api"])
+>     - Filtre/retague l’historique par (patient_key, user_id), reconstruit la paire [user_request, confirm_prompt], ajoute le delta [confirm_answer, bot_response], gère le changement de patient et réinitialise les flags d’intention.
+>     - Retourne un tuple :
+>         - (chat_history: list, figures_out: list, table_html: str, anomaly_block: str, current_patient: str|None, serialized_figs: list|None, chat_history_display: Any).
+>     - Lève ValueError si session_data est incomplet.
 
 ---
 
@@ -438,30 +472,25 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ## 📄 Module : `func.index_documents_chromadb`
 
 > **Rôle :**
-> Module d'indexation des documents de santé dans une base vectorielle ChromaDB.
+> Outils d’indexation ChromaDB pour OBY-IA.
 > 
-> Ce module prend en entrée des fichiers JSON représentant soit des documents issus de fichiers DOCX,
-> soit des pages web structurées, puis les segmente et les insère dans une collection ChromaDB.
->     Indexe les documents JSON contenus dans un répertoire dans une collection ChromaDB.
+>     Ce module expose des utilitaires pour (ré)indexer des collections ChromaDB
+>     à partir de répertoires de JSON structurés :
+>     - `base_docx` : documents dérivés de fiches DOCX,
+>     - `base_web`  : documents dérivés du scraping de sites de confiance.
 > 
->     Chaque document est découpé en sections (ou chunk unique dans le cas d'un fichier DOCX complet),
->     puis inséré dans une base vectorielle avec ses métadonnées.
+>     Fournit notamment une fonction de reconstruction qui
+>     supprime la collection ciblée puis la reconstruit à partir des fichiers
+>     présents sur disque, garantissant l’absence de documents « fantômes »
+>     lorsqu’il y a des suppressions ou des changements de configuration.
 > 
->     Args:
->         source_dir (str): Chemin du dossier contenant les fichiers JSON à indexer.
->         source_type (str): Type de document à indexer, soit 'docx' soit 'web'.
->         client (Client): Instance du client ChromaDB utilisée pour la persistance des données.
-> 
->     Entrées :
->         - source_dir (str) : Dossier contenant les fichiers JSON.
->         - source_type (str) : 'docx' ou 'web' (détermine la collection cible).
-> 
->     Sorties :
->         - Indexation des chunks dans une collection nommée selon la source.
-> 
-> 
->     Raises:
->         ValueError: Si le type de source est invalide (autre que 'docx' ou 'web').
+>     Fonctions attendues dans ce module (ou importées) :
+>     - `index_documents(source_dir, source_type, client)`: effectue l’indexation
+>       à partir d’un répertoire JSON (crée la collection si nécessaire).
+>     - `collection_name_for(source_type)`: mappe 'docx'/'web' vers le nom
+>       de collection ChromaDB (p. ex. 'base_docx' / 'base_web').
+>     - `rebuild_collection_from_disk(client, source_type, source_dir)`: supprime
+>       la collection puis réindexe depuis le disque (cf. docstring ci-dessous).
 
 ---
 
@@ -493,8 +522,19 @@ _Cette page fournit une description concise des principaux modules Python du pro
 > **Rôle :**
 > Module de nettoyage des documents POA (Plan d’Objectifs et d’Actions).
 > 
-> Ce module filtre les champs non informatifs ou vides dans les fichiers JSON représentant
-> les données patients, afin de faciliter leur traitement en aval.
+> Fonctions :
+> - clean_patient_document(data: dict, trace: bool = False) -> dict | (dict, list[str])
+> 
+> Comportement :
+> 1) supprime les champs vides / non informatifs ("", "non renseigné", "null")
+> 2) supprime les champs sensibles explicitement demandés (usager + contacts)
+> 3) émonde les conteneurs (dict/list) devenus vides
+> 4) (optionnel) trace chaque suppression si trace=True
+> 
+> Entrée : dict (JSON patient)
+> Sortie :
+> - si trace=False : dict nettoyé
+> - si trace=True  : (dict nettoyé, liste des suppressions)
 
 ---
 
@@ -511,9 +551,15 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ## 📄 Module : `func.retrieve_relevant_chunks`
 
 > **Rôle :**
-> Module de récupération des extraits pertinents depuis une base ChromaDB.
-> Ce module interroge une collection vectorielle Chroma (via LangChain)
-> et retourne les passages les plus similaires à une requête, pour enrichir un prompt.
+> Outils de récupération et de formatage des extraits (“chunks”) pour le RAG.
+> 
+> Ce module interroge deux collections Chroma (DOCX prioritaire, WEB secondaire),
+> sélectionne les passages pertinents, puis garde côté WEB uniquement ceux qui
+> apportent une information complémentaire (TF-IDF “novelty”) et restent proches
+> de la requête (similarité embeddings). Les extraits sont formatés avec des
+> identifiants [DOCXn]/[WEBn], titres, sources/URLs et un fallback
+> [WEB_PERTINENCE] si aucun lien web pertinent n’est retenu. Seuils et top-K
+> sont pilotés par la configuration.
 
 ---
 
@@ -523,34 +569,42 @@ _Cette page fournit une description concise des principaux modules Python du pro
 > **Rôle :**
 > Module `run_full_indexing_pipeline.py` – Pipeline principal d’indexation documentaire pour OBY-IA.
 > 
-> Ce module exécute l’ensemble du processus de préparation de la base documentaire utilisée
-> par les agents RAG de OBY-IA, en assurant une indexation vectorielle actualisée dans ChromaDB.
+> Pipeline d'indexation ChromaDB pour OBY-IA.
 > 
-> Fonctionnalités couvertes :
-> 1. **Détection de modifications** :
->    - Identification des fichiers DOCX ou pages web récemment modifiés via calcul de hashs.
->    - Détection des changements dans la définition des sites de confiance (`trusted_sites.py`).
+> Ce module orchestre la maintenance de l’index vectoriel à partir de deux sources :
+> 1) des fiches au format DOCX (converties en JSON),
+> 2) des pages web de confiance (scrapées en JSON).
 > 
-> 2. **Conversion en JSON structuré** :
->    - Transformation des fichiers DOCX en fichiers JSON exploitables.
->    - Scraping et structuration des nouvelles pages web selon les règles définies.
+> Il a pour objectif d'être appelé au démarrage et à chaque événement Watchdog.
 > 
-> 3. **Indexation vectorielle dans ChromaDB** :
->    - Indexation incrémentale ou complète des données selon les changements détectés.
->    - Séparation des sources DOCX et web (`source_type`).
+> Fonctionnement, synthèse :
+> - Détection des changements via `detect_changes_and_get_modified_files()` :
+>   ajouts, modifications, suppressions de fichiers DOCX/WEB, changement de
+>   `trusted_web_sites_list.py`.
+> - Nettoyage :
+>   - suppression des JSON dérivés de DOCX supprimés,
+>   - purge défensive des JSON web si la configuration des sites change.
+> - Production des données :
+>   - conversion DOCX → JSON si des DOCX ont changé,
+>   - scraping complet/partiel des sites web si nécessaire.
+> - Reconstruction des index ChromaDB :
+>   - réindexation des collections à partir des dossiers JSON présents sur disque.
+> - Mise à jour du journal et pose d’un « ready flag ».
 > 
-> 4. **Journalisation des indexations** :
->    - Mise à jour du fichier de suivi (`indexed_files.json`) pour éviter les réindexations inutiles.
+> Dépendances (importées ailleurs dans le projet) :
+> - `detect_changes_and_get_modified_files`, `update_index_journal`
+> - `convert_and_save_fiches`
+> - `scrape_all_trusted_sites`
+> - `get_chroma_client`, `index_documents` (ou `rebuild_collection_from_disk`)
+> - constantes de chemins : `INPUT_DOCX`, `JSON_HEALTH_DOC_BASE`,
+>   `WEB_SITES_JSON_HEALTH_DOC_BASE`, `WEB_SITES_MODULE_PATH`, `BASE_DIR`
 > 
-> 5. **Signalement de disponibilité** :
->    - Écriture d’un fichier `index_ready.flag` permettant aux autres modules de savoir si l’index est prêt.
-> 
-> Ce pipeline peut être lancé :
-> - automatiquement (via un scheduler ou watchdog),
-> - ou manuellement (en exécutant ce fichier en tant que script).
-> 
-> Il constitue un composant critique du système OBY-IA pour garantir la fraîcheur et la cohérence
-> des bases documentaires utilisées dans les interactions LLM + RAG.
+> Notes :
+> - Les purges de répertoires sont précédées de vérifications de chemin
+>   (résolution absolue, inclusion sous `BASE_DIR`).
+> - Les erreurs critiques d’E/S sont loguées sur STDERR.
+> - Pour éviter des relances concurrentes, préférer un déclencheur
+>   « debounced + lock » côté Watchdog.
 
 ---
 
@@ -558,14 +612,14 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ## 📄 Module : `func.scrape_trusted_sites`
 
 > **Rôle :**
-> Module de scraping des sites web de confiance en santé.
+> Module de scraping des sites de confiance.
 > 
-> Ce module permet :
-> - de charger dynamiquement la liste des sites référencés,
-> - d’extraire les liens utiles à partir de pages de départ,
-> - de structurer le contenu HTML pertinent (titres, paragraphes, listes),
-> - et de sauvegarder les pages web sous forme de fichiers JSON pour indexation.
-> Utilisé pour alimenter une base documentaire de recommandations en santé.
+>     Il extrait un contenu structuré (titres h1–h4, paragraphes, listes, blockquotes, tables),
+>     enregistre les hyperliens par section, et explore en BFS (profondeur 2) limité au même
+>     domaine et à un nombre de pages par site. Les pages sont enrichies de métadonnées
+>     (titre, dates, auteur, URL canonique, source originelle) et sauvegardées en JSON dans
+>     le répertoire configuré. L’ingestion de PDF peut être activée pour des domaines autorisés,
+>     tout en conservant un format de sortie stable pour le pipeline d’indexation.
 
 ---
 
@@ -583,12 +637,15 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ## 📄 Module : `utils.chroma_client`
 
 > **Rôle :**
-> Module d’accès centralisé au client ChromaDB pour l'application OBY-IA.
-> Ce module fournit une fonction utilitaire permettant d’instancier un client ChromaDB
-> persistant, configuré pour enregistrer les données dans le répertoire défini par
-> `CHROMA_GLOBAL_DIR`. Il garantit qu’une seule instance client est utilisée
-> grâce au décorateur `lru_cache`.
-> Utilisé dans l'ensemble du projet pour interagir avec la base Chroma.
+> Point d’accès centralisé au client Chroma avec cache et reset sûrs.
+> 
+> Ce module expose `get_chroma_client()` (LRU-caché) pour créer un client
+> unique et cohérent sur tout le projet, ainsi que `reset_chroma_client_cache()`
+> pour invalider ce cache lors des resets/rebuilds. L’objectif est d’éviter
+> les handles orphelins et les états SQLite en lecture seule, en garantissant
+> une seule façon d’instancier le client (p. ex. PersistentClient) et des
+> chemins/flags unifiés via `config.config`. Peut inclure un logging de debug
+> optionnel pour tracer les appels au client pendant l’indexation.
 
 ---
 
@@ -614,15 +671,13 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ## 📄 Module : `utils.convert_json_text`
 
 > **Rôle :**
-> Module de conversion des données JSON d'un POA en texte structuré pour LLM.
-> 
-> Ce module extrait les informations pertinentes du dictionnaire JSON d’un plan
-> d’objectifs et d’actions (POA), notamment les données de la personne accompagnée,
-> ses contacts et les différentes sections thématiques (social, santé, autonomie).
-> Il génère un texte lisible destiné à être injecté dans un prompt pour un modèle LLM.
-> 
-> Utilisé pour formater proprement les données en amont d’une génération automatique
-> de synthèse ou de recommandations.
+> Convertit un dossier patient au format JSON en texte libre lisible par un LLM.
+> Parcourt dynamiquement chaque bloc (usager, contacts, aggir, social, sante, dispositifs, poa*)
+> et toutes leurs sous-branches, avec un repli récursif générique pour ne rien perdre si le schéma évolue.
+> Normalise le texte (Unicode NFKC, “smart title” français pour MAJUSCULES), ainsi que dates, booléens et nombres.
+> Gère AGGIR en ne lisant que la clé 'Resultat' (sans espace) et en aplatissant variables/sous-variables/adverbes.
+> Supporte 0..n contacts et variabilité des champs (synonymes, listes/chaînes).
+> Retourne une chaîne structurée par sections.
 
 ---
 
@@ -645,13 +700,15 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ## 📄 Module : `utils.reset_data`
 
 > **Rôle :**
-> Module de réinitialisation des données indexées de l'application OBY-IA.
-> Ce module fournit une fonction utilitaire permettant de nettoyer l’environnement
-> de travail en supprimant :
-> - les collections ChromaDB (ex. : `base_docx`, `base_web`),
-> - les fichiers JSON issus de l’extraction documentaire locale et web,
-> - le fichier journal qui suit les fichiers déjà indexés.
-> Utile pour remettre à zéro l’état de l’index avant un nouveau traitement complet.
+> Réinitialise proprement l’environnement d’indexation Chroma et les artefacts locaux.
+> 
+> Ce module fournit `reset_all_data()` qui, sous verrou inter-processus,
+> efface le dossier Chroma, nettoie les JSON générés et réinitialise le
+> journal via une écriture atomique. Il supprime le ready-flag, pose le
+> flag `.force_full_index` (écriture atomique) et recrée les répertoires
+> avec des permissions minimales sûres. Aucun client Chroma direct n’est
+> instancié ici : le cache client global est d’abord invalidé pour éviter
+> les handles orphelins et les erreurs SQLite “readonly (1032)”.
 
 ---
 
@@ -659,17 +716,15 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ## 📄 Module : `utils.scheduler`
 
 > **Rôle :**
-> Module de surveillance des fichiers pour l'indexation automatique.
+> Scheduler de réindexation Chroma : surveillance, sérialisation et relance sûres.
 > 
-> Ce module utilise Watchdog pour observer les répertoires contenant des documents à indexer
-> (docx, données web, versions de plans). Lorsqu’un changement est détecté, le pipeline
-> d’indexation complet est automatiquement relancé pour mettre à jour les bases vectorielles.
-> 
-> Fonctions :
-> - start_scheduler : Démarre la surveillance continue via Watchdog.
-> 
-> Classes :
-> - IndexingEventHandler : Handler personnalisé déclenchant l’indexation à chaque événement.
+> Ce module démarre un watchdog des dossiers d’entrée, scrute le flag
+> `.force_full_index` et lance le pipeline via `_run_pipeline_safely()`,
+> sous verrou inter-processus. Il effectue une probe d’écriture sans
+> embedder, n’exécute le pipeline que si la base est utilisable, et ne
+> pose le `index_ready.flag` qu’en cas de succès, en consommant le flag
+> de forçage ensuite. Il évite les accès concurrents à Chroma pendant
+> les resets/rebuilds et peut appliquer un backoff sur les relances.
 
 ---
 
@@ -677,12 +732,15 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ## 📄 Module : `utils.vector_db_utils`
 
 > **Rôle :**
-> Module utilitaire pour la gestion de l'état de l'indexation ChromaDB.
-> Ce module contient des fonctions permettant de :
-> - Vérifier si l'indexation ChromaDB est terminée (via un fichier flag).
-> - Créer ou supprimer ce flag selon les besoins.
-> Ce mécanisme permet à l'application (ex. interface Dash) de savoir si les bases
-> vectorielles sont prêtes à être interrogées par les utilisateurs.
+> Utilitaires pour la base vectorielle (Chroma) : flags et E/S atomiques.
+> 
+> Ce module regroupe des helpers pour gérer les drapeaux de statut
+> (`index_ready.flag`, `.force_full_index`), avec des écritures atomiques
+> et une suppression tolérante aux erreurs. Il peut fournir des fonctions
+> comme `mark_index_ready_flag()` et `clear_index_ready_flag()` basées
+> sur les chemins centralisés de `config.config`. L’objectif est d’éviter
+> les états incohérents pendant les resets/rebuilds et d’offrir une API
+> simple et sûre aux autres modules (scheduler, UI, pipelines).
 
 ---
 
@@ -690,15 +748,21 @@ _Cette page fournit une description concise des principaux modules Python du pro
 ## 📄 Module : `llm_user_session.model`
 
 > **Rôle :**
-> Initialisation des modèles de langage utilisés dans l'application OBY-IA.
-> Ce module charge les clés API depuis le fichier `.env` et instancie un modèle
-> de langage compatible avec LangChain, en fonction de la configuration disponible.
-> Actuellement :
-> - Le modèle `ChatOpenAI` (GPT-4.1) est utilisé par défaut, en raison de la limitation
->   de tokens rencontrée avec Mistral lors du traitement de documents volumineux.
-> - Le modèle `ChatMistralAI` reste présent en commentaire à des fins de test ou migration future.
-> Variables :
->     llm_model : Instance unique du modèle LLM utilisé pour répondre aux requêtes utilisateur.
+> Module de configuration du modèle LLM pour l'application OBY-IA.
+> 
+> Ce module initialise un modèle de langage basé sur les clés API disponibles dans
+> les variables d'environnement. L'ordre de priorité est le suivant :
+>     1. Mistral (ChatMistralAI)
+>     2. OpenAI (ChatOpenAI) en fallback si Mistral n'est pas disponible
+> 
+> Il gère la sécurisation via des blocs try/except afin d'éviter un plantage en cas
+> d'erreur d'initialisation (clé manquante, modèle indisponible, etc.). Tous les
+> événements importants sont journalisés via le module standard `logging`.
+> 
+> Attributs:
+>     llm_model (ChatMistralAI | ChatOpenAI | None): 
+>         Instance unique du modèle de langage, ou None si aucune initialisation
+>         n'a pu être réalisée.
 
 ---
 

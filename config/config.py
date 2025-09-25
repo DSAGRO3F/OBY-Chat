@@ -52,14 +52,20 @@ PATIENT_FILES_DIR = SRC_DIR / "data" / "input" / "poa_patients"
 CHROMA_GLOBAL_DIR = BASE_DIR / "vector_db" / "chromadb"
 
 # Embedding model
-EMBEDDING_MODEL_NAME = "BAAI/bge-large-en-v1.5"
+EMBEDDING_MODEL_NAME = "BAAI/bge-m3"
 NORMALIZE_EMBEDDINGS = True
 
+# Cheminns des flags
 # --- Flag 'index ready' (fallback possible via env en prod) ---
 INDEX_READY_FLAG_PATH = Path(os.environ.get(
     "OBY_FLAG_PATH",
     str(SRC_DIR / "vector_db" / "index_ready.flag")
 ))
+
+FORCE_FULL_INDEX_FLAG = Path(CHROMA_GLOBAL_DIR) / ".force_full_index"
+INDEXING_FLAG_FILE = Path(CHROMA_GLOBAL_DIR).parent / "indexing.lock"
+INDEX_IPC_LOCK_PATH = "/tmp/oby_index.lock"      # inter-process (commun avec reset_all_data)
+
 
 # --- Exports & docs ---
 MARKDOWN_CHAT_EXPORTS = SRC_DIR / "outputs" / "chat_exports"
@@ -93,3 +99,7 @@ USER_DATABASE = {
 int_1 = 5
 int_2 = 3
 
+# Valeur de mesure de complémentarité des textes web vs. docx
+sim_threshold = 0.60
+nov_min = 0.30
+nov_max = 0.75

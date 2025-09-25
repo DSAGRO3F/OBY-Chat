@@ -13,8 +13,6 @@ des sessions de chat dans l'application OBY-IA.
 
 from pathlib import Path
 from datetime import datetime
-from fpdf import FPDF
-from docx import Document
 import os
 from config.config import MARKDOWN_CHAT_EXPORTS
 
@@ -55,11 +53,13 @@ def export_llm_responses(session_manager_instance, session_id, patient_name, fig
 
     final_text = ""
     for user_msg, llm_msg in chat_history:
+        user_msg = (user_msg or "").strip()
+        llm_msg = (llm_msg or "").strip()
         formatted = (
-            f"{icon_user} **Utilisateur :**\n"
-            f"<span style='color:#2ecc71'>{user_msg.strip()}</span>\n\n"
-            f"{icon_llm} **Réponse OBY :**\n"
-            f"{llm_msg.strip()}"
+            f"### {icon_user} Utilisateur\n\n"
+            f"> {user_msg}\n\n"
+            f"**{icon_llm} Réponse OBY :**\n\n"
+            f"{llm_msg}"
         )
         formatted_exchanges.append(formatted)
 
