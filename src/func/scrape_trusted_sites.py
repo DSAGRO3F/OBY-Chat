@@ -86,8 +86,8 @@ PDF_MAX_PAGES = 20
 # Profondeur max pour l'exploration (BFS)
 DEFAULT_MAX_DEPTH = 2
 
-# Nombre max de pages à traiter par site: permet de traiter les 270 pages de Cerba
-DEFAULT_MAX_PAGES_PER_SITE = 6000
+# Nombre max de pages à traiter. Limite fixée pour chaque start_page
+DEFAULT_MAX_PAGES_PER_SITE = 200
 
 # Réseau
 REQUESTS_TIMEOUT_S = 20
