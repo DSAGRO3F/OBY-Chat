@@ -29,11 +29,25 @@ from chromadb.api import ClientAPI
 import hashlib
 from pathlib import Path
 from urllib.parse import urlparse, urljoin, urldefrag
+import re, unicodedata
 
 from chromadb.utils import embedding_functions
 from src.utils.chroma_client import get_chroma_client
 
 from config.config import EMBEDDING_MODEL_NAME
+
+# ======================== #
+# --- Normaliser texte --- #
+# ======================== #
+
+def _norm_for_eq(s: str) -> str:
+    s = "" if s is None else str(s)
+    s = unicodedata.normalize("NFKC", s)
+    # supprime zero-width chars les plus courants
+    s = s.replace("\u200b", "").replace("\ufeff", "")
+    # compresse tous les espaces unicode
+    s = re.sub(r"\s+", " ", s, flags=re.UNICODE)
+    return s.strip().casefold()
 
 # ============================================================#
 # --- Pour éviter de remonter des None dans metadata/chroma---#
@@ -248,9 +262,8 @@ def index_documents(source_dir: str, source_type: str, client: ClientAPI):
         fiches = data if isinstance(data, list) else [data]
 
         for fiche in fiches:
-            print(
-                f"➡️ Titre fiche : {fiche.get('titre', 'Sans titre')} - Source : {fiche.get('source_url', 'inconnue')}")
 
+            # ✅ DOCX
             if source_type == "docx":
                 chunk_text = (fiche.get("texte_complet") or "").strip()
                 if not chunk_text:
@@ -285,21 +298,33 @@ def index_documents(source_dir: str, source_type: str, client: ClientAPI):
                 except Exception as e:
                     print(f"❌ Erreur d’ajout depuis {file} : {e}\n[DEBUG meta]={meta}")
 
+                print(f"➡️ Titre fiche : {titre} - Source : {source}")
+
+            # ✅ WEB
             elif source_type == "web":
                 sections = fiche.get("sections") or []
                 if not sections:
                     print(f"⚠️ Aucune section trouvée dans le fichier {file}, source_type : {source_type}")
                     continue
 
-                # 1) extraire une URL brute parmis plusieurs clés possibles
+                # 1. extraire une URL brute parmi plusieurs clés possibles
                 raw_url = _first_key(fiche, CANDIDATE_URL_KEYS)
 
-                # 2) calculer une URL absolue + domaine
+                # 2. calculer une URL absolue + domaine
                 url_val, domain = _normalize_abs_url(raw_url, file=file, fiche=fiche)
 
-                titre = _safe_str(fiche.get("titre"), "Sans titre")
+                titre = (
+                        _safe_str(fiche.get("titre"), None)
+                        or _safe_str(fiche.get("page_title"), None)
+                        or _safe_str(fiche.get("title"), None)
+                        or _safe_str((fiche.get("metadata") or {}).get("title"), "Sans titre")
+                )
+                titre = _norm_for_eq(titre)
+
                 type_document = _safe_str(fiche.get("type_document"), "page_web")
                 source_for_histo = url_val or "Source inconnue"
+
+                print(f"➡️ Titre fiche : {titre} - Source : {source_for_histo}")
 
                 if not url_val:
                     # log pour debug: quelles clés présentait la fiche ?

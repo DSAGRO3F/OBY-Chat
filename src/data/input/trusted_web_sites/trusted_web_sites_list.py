@@ -22,7 +22,8 @@ trusted_sites = [
         "https://www.has-sante.fr/jcms/c_1718248/fr/comment-prendre-en-charge-les-personnes-agees-fragiles-en-ambulatoire",
         "https://www.has-sante.fr/jcms/c_1718876/fr/fiche-points-cles-et-solutions-prendre-en-charge-les-personnes-agees-fragiles-en-ambulatoire",
         "https://www.has-sante.fr/jcms/c_1718882/fr/note-methodologique-et-de-synthese-documentaire-prendre-en-charge-les-personnes-agees-fragiles-en-ambulatoire"
-        ]
+        ],
+        "max_pages": 50
     },
     {
         "name": "HAS – Personne âgée : Repérage de la perte d’autonomie (volet domicile)",
@@ -32,7 +33,8 @@ trusted_sites = [
             "https://www.has-sante.fr/jcms/c_2835142/fr/l-outil-de-reperage-des-risques-de-perte-d-autonomie-ou-de-son-aggravation",
             "https://www.has-sante.fr/jcms/c_2835108/fr/anesm-rbpp-reperage-des-risques-personnes-agees-a5-bat-pdf-interactif",
             "https://www.has-sante.fr/jcms/c_2911284/fr/fiche-outil-reperage-perte-autonomie"
-        ]
+        ],
+        "max_pages": 50
     },
     {
         "name": "HAS – Personne âgée : Prévention des chutes & capacités motrices",
@@ -44,7 +46,8 @@ trusted_sites = [
             "https://www.has-sante.fr/jcms/c_793371/fr/evaluation-et-prise-en-charge-des-personnes-agees-faisant-des-chutes-repetees",
             "https://www.has-sante.fr/jcms/p_3222464/fr/pied-de-la-personne-agee-fiche-outil-n3-le-patient-a-risque-de-chutes",
             "https://www.has-sante.fr/jcms/c_2876862/fr/consultation-et-prescription-medicale-d-activite-physique-a-des-fins-de-sante"
-        ]
+        ],
+        "max_pages": 50
     },
     {
         "name": "HAS – Personne âgée : Dénutrition (diagnostic & prise en charge 70+)",
@@ -54,7 +57,8 @@ trusted_sites = [
             "https://www.has-sante.fr/jcms/p_3165944/fr/diagnostic-de-la-denutrition-chez-la-personne-de-70-ans-et-plus",
             "https://www.has-sante.fr/jcms/p_3297885/fr/diagnostic-de-la-denutrition-chez-l-enfant-l-adulte-et-la-personne-de-70-ans-et-plus-fiche-outil",
             "https://www.has-sante.fr/jcms/r_1495743/fr/strategie-de-prise-en-charge-en-cas-de-denutrition-proteino-energetique-chez-la-personne-agee"
-        ]
+        ],
+        "max_pages": 50
     },
     {
         "name": "HAS – Personne âgée : Médicaments & iatrogénie au domicile",
@@ -66,7 +70,8 @@ trusted_sites = [
             "https://www.has-sante.fr/jcms/c_1771482/fr/ameliorer-la-qualite-et-la-securite-des-prescriptions-de-medicaments-chez-la-personne-agee-fiche-points-cles",
             "https://www.has-sante.fr/jcms/c_946211/fr/outils-de-securisation-et-d-auto-evaluation-de-l-administration-des-medicaments",
             "https://www.has-sante.fr/jcms/c_2618396/fr/interruptions-de-tache-lors-de-l-administration-des-medicaments"
-        ]
+        ],
+        "max_pages": 50
     },
     {
         "name": "HAS – Personne âgée : Fin de vie à domicile (soins palliatifs)",
@@ -79,7 +84,8 @@ trusted_sites = [
             "https://www.has-sante.fr/jcms/c_2834390/fr/comment-mettre-en-oeuvre-une-sedation-profonde-et-continue-maintenue-jusqu-au-deces-guide-parcours-de-soins",
             "https://www.has-sante.fr/jcms/p_3151633/fr/sedation-profonde-jusqu-au-deces-une-decision-collegiale",
             "https://www.has-sante.fr/jcms/c_2655084/fr/fiche-points-cles-organisation-des-parcours-comment-favoriser-le-maintien-a-domicile-des-patients-adultes-relevant-de-soins-palliatifs"
-        ]
+        ],
+        "max_pages": 50
     },
     {
         "name": "Pour les personnes âgées – Prévention des chutes à domicile",
@@ -88,7 +94,8 @@ trusted_sites = [
             "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/comment-prevenir-les-risques-de-chutes-chez-les-personnes-agees",
             "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/prevenir-les-chutes-des-conseils-en-video",
             "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/prevenir-les-chutes"
-        ]
+        ],
+        "max_pages": 50
     },
     {
         "name": "Pour les personnes âgées – Dénutrition & alimentation (prévenir la perte d’autonomie)",
@@ -97,7 +104,8 @@ trusted_sites = [
             "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/denutrition-des-personnes-agees-la-reperer-et-la-prevenir",
             "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/denutrition-comment-veiller-a-une-bonne-alimentation",
             "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/les-consequences-de-la-denutrition-pour-les-personnes-agees"
-        ]
+        ],
+        "max_pages": 50
     },
     {
         "name": "Pour les personnes âgées – Aménager le logement & aides techniques",
@@ -109,7 +117,8 @@ trusted_sites = [
             "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/amenager-son-logement-et-s-equiper/ou-trouver-des-informations-et-des-conseils-sur-les-aides-techniques",
             "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/amenager-son-logement-et-s-equiper/les-aides-financieres-pour-adapter-son-logement",
             "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/amenager-son-logement-et-s-equiper/choisir-un-professionnel-pour-amenager-son-logement"
-        ]
+        ],
+        "max_pages": 50
     },
     {
         "name": "Pour les personnes âgées – Aides & soins à domicile (services autonomie, SSIAD, SPASAD)",
@@ -118,14 +127,16 @@ trusted_sites = [
             "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-d-aide-a-domicile/les-services-d-aide-a-domicile",
             "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-de-soins-a-domicile/les-ssiad-services-de-soins-infirmiers-a-domicile",
             "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-de-soins-a-domicile"
-        ]
+        ],
+        "max_pages": 50
     },
     {
         "name": "Pour les personnes âgées – Hospitalisation à domicile (HAD)",
         "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
         "start_pages": [
             "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-de-soins-a-domicile/l-had-hospitalisation-a-domicile"
-        ]
+        ],
+        "max_pages": 50
     },
     {
         "name": "Pour les personnes âgées – Organiser la sortie d’hospitalisation / retour à domicile",
@@ -136,7 +147,8 @@ trusted_sites = [
             "https://www.pour-les-personnes-agees.gouv.fr/annuaires-et-services/fiches-pratiques/fiches-pratiques-sortie-d-hospitalisation",
             "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/etre-hospitalise/etre-hospitalise-ce-qu-il-faut-savoir",
             "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/etre-hospitalise"
-        ]
+        ],
+        "max_pages": 50
     },
     {
         "name": "Pour les personnes âgées – Téléassistance (sécuriser le domicile)",
@@ -145,7 +157,8 @@ trusted_sites = [
             "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-d-aide-a-domicile/la-teleassistance",
             "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/aides-financieres/les-aides-financieres-pour-installer-une-teleassistance",
             "https://www.pour-les-personnes-agees.gouv.fr/annuaires-et-services/facile-a-lire-et-a-comprendre/la-teleassistance-comment-ca-marche"
-        ]
+        ],
+        "max_pages": 50
     },
     {
         "name": "Pour les personnes âgées – Prévenir la déshydratation & vagues de chaleur",
@@ -153,7 +166,8 @@ trusted_sites = [
         "start_pages": [
             "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/deshydratation-conseils-de-prevention-en-prevision-des-fortes-chaleurs",
             "https://www.pour-les-personnes-agees.gouv.fr/actualites/conseils-et-gestes-simples-a-adopter-pour-se-proteger-des-fortes-chaleurs"
-        ]
+        ],
+        "max_pages": 50
     },
     {
         "name": "Pour les personnes âgées – Aides financières à domicile (APA & démarches)",
@@ -162,7 +176,8 @@ trusted_sites = [
             "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/aides-financieres/l-apa-a-domicile",
             "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-d-aide-a-domicile",
             "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-d-aide-a-domicile/j-ai-besoin-d-etre-aide-a-domicile-comment-faire"
-        ]
+        ],
+        "max_pages": 50
     },
     {
       "name": "MSD Manuals – Soins à domicile & organisation du maintien",
@@ -175,7 +190,8 @@ trusted_sites = [
         "https://www.msdmanuals.com/fr/professional/gériatrie/problèmes-sociaux-chez-les-personnes-âgées/auto-négligence-chez-les-personnes-âgées",
         "https://www.msdmanuals.com/fr/professional/gériatrie/prise-en-charge-du-patient-gériatrique/évaluation-gériatrique-standardisée",
         "https://www.msdmanuals.com/fr/professional/gériatrie/soins-aux-personnes-âgées/revue-générale-des-soins-gériatriques"
-        ]
+        ],
+        "max_pages": 20
     },
     {
         "name": "MSD Manuals – Prévention des chutes & blessures à domicile",
@@ -186,7 +202,8 @@ trusted_sites = [
             "https://www.msdmanuals.com/fr/professional/gériatrie/prise-en-charge-du-patient-gériatrique/anamnèse-chez-les-personnes-âgées",  # inclut la check-list de sécurité du domicile
             "https://www.msdmanuals.com/fr/professional/gériatrie/troubles-de-la-marche-chez-les-personnes-âgées/troubles-de-la-marche-chez-les-personnes-âgées",
             "https://www.msdmanuals.com/fr/professional/troubles-cardiovasculaires/symptômes-des-maladies-cardiovasculaires/hypotension-orthostatique"
-        ]
+        ],
+        "max_pages": 20
     },
     {
         "name": "MSD Manuals – Médicaments & iatrogénie (ambulatoire)",
@@ -197,7 +214,8 @@ trusted_sites = [
             "https://www.msdmanuals.com/fr/professional/gériatrie/traitement-pharmacologique-chez-les-personnes-âgées/pharmacodynamie-chez-les-sujets-âgés",
             "https://www.msdmanuals.com/fr/professional/gériatrie/traitement-pharmacologique-chez-les-personnes-âgées/catégories-de-médicaments-qui-méritent-une-vigilance-chez-le-patient-âgé",
             "https://www.msdmanuals.com/fr/professional/gériatrie/prévention-des-maladies-et-du-handicap-chez-la-personne-âgée/prévention-des-complications-iatrogènes-chez-les-personnes-âgées"
-        ]
+        ],
+        "max_pages": 20
     },
     {
         "name": "MSD Manuals – Dépistage fonctionnel & nutrition (domicile)",
@@ -207,7 +225,8 @@ trusted_sites = [
             "https://www.msdmanuals.com/fr/professional/gériatrie/prise-en-charge-du-patient-gériatrique/revue-générale-de-l-évaluation-des-personnes-âgées",
             "https://www.msdmanuals.com/fr/professional/sujets-spéciaux/symptômes-non-spécifiques/perte-de-poids-involontaire",
             "https://www.msdmanuals.com/fr/professional/troubles-gastro-intestinaux/troubles-œsophagiens-et-de-la-déglutition/dysphagie"
-        ]
+        ],
+        "max_pages": 20
     },
     {
         "name": "MSD Manuals – Troubles fréquents impactant le maintien à domicile",
@@ -216,7 +235,8 @@ trusted_sites = [
             "https://www.msdmanuals.com/fr/professional/troubles-génito-urinaires/troubles-de-la-miction/incontinence-urinaire-chez-l-adulte",
             "https://www.msdmanuals.com/fr/professional/troubles-neurologiques/syndrome-confusionnel-et-démence/confusion",  # prévention/prise en charge du delirium
             "https://www.msdmanuals.com/fr/professional/troubles-neurologiques/symptômes-des-troubles-neurologiques/faiblesse-musculaire"
-        ]
+        ],
+        "max_pages": 20
     },
     {
       "name": "SFGG – Recommandations",
@@ -239,7 +259,8 @@ trusted_sites = [
         "https://sfgg.org/recommandations/services-daide-et-de-soins-a-domicile-accompagnement-des-personnes-atteintes-de-maladie-neurodegenerative/",
         "https://sfgg.org/recommandations/24483-2/",
         "https://sfgg.org/recommandations/reperage-plus-precoce-de-la-dmla/"
-        ]
+        ],
+        "max_pages": 20
     },
     {
       "name": "SFC – Documents professionnels (accès libre)",
@@ -251,7 +272,8 @@ trusted_sites = [
         "https://www.sfcardio.fr/publication/echocardiographie-transoesophagienne-anesthesie-generale/",
         "https://www.sfcardio.fr/publication/echocardiographie-transoesophagienne-anesthesie-locale/",
         "https://www.sfcardio.fr/publication/fermeture-percutanee-de-foramen-ovale-permeable-fop/"
-        ]
+        ],
+        "max_pages": 20
     },
     {
         "name": "SFC – Documents de consensus (accès libre)",
@@ -261,7 +283,8 @@ trusted_sites = [
             "https://www.sfcardio.fr/publication/cardiac-rehabilitation-recommendations-2023-update/",
             "https://www.sfcardio.fr/publication/appareils-de-mesure-de-la-pression-arterielle-sans-brassard-cuffless-et-methode-de-validation/",
             "https://www.sfcardio.fr/publication/disponibilite-des-tritherapies-fixes-dantihypertenseurs-pour-contribuer-a-un-meilleur-controle-tensionnel-des-hypertendus-prise-de-position-de-la-societe-francaise-dhypertension-ar/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "SFNV – Recommandations ESO (accès public)",
@@ -269,7 +292,8 @@ trusted_sites = [
       "start_pages": [
         "https://www.societe-francaise-neurovasculaire.fr/recommandations-eso",
         "https://www.societe-francaise-neurovasculaire.fr/_files/ugd/c1feba_b43a23c398584f2ba444d45b11e481d0.pdf"
-        ]
+        ],
+        "max_pages": 20
     },
     {
       "name": "SPLF – Recommandations (accès libre)",
@@ -278,7 +302,8 @@ trusted_sites = [
         "https://splf.fr/les-recommandations-splf/",
         "https://splf.fr/actualisation-des-recommandations-de-prise-en-charge-des-pneumonies-aigues-communautaires-chez-ladulte/",
         "https://docs.splf.fr/divers/docs-gen/recos/actualisation-PAC2025.pdf"
-        ]
+        ],
+        "max_pages": 20
     },
     {
       "name": "INCa – cancer.fr : types de cancers",
@@ -308,7 +333,8 @@ trusted_sites = [
         "https://www.cancer.fr/personnes-malades/les-cancers/testicule",
         "https://www.cancer.fr/personnes-malades/les-cancers/thyroide",
         "https://www.cancer.fr/personnes-malades/les-cancers/vessie"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "SPILF – Recommandations (accès public)",
@@ -319,13 +345,17 @@ trusted_sites = [
         "https://www.infectiologie.com/UserFiles/File/spilf/recos/duree-traitement-pac-29-nov.pdf",
         "https://www.infectiologie.com/UserFiles/File/spilf/recos/reco-perf-continue-2025.pdf",
         "https://www.infectiologie.com/UserFiles/File/spilf/recos/saisine-dgs-atb-critique-9-fev-22-v3.pdf"
-        ]
+        ],
+        "max_pages": 20
     },
 {
     "name": "Lab Cerba – Catalogue d’examens",
     "base_url": "https://www.lab-cerba.com",
     "start_pages": [f"https://www.lab-cerba.com/fr/catalogue?exams_page={i}" for i in range(1, 271)],
-    "max_pages": 6000,
+    "max_pages": 2800, # au niveau du site
+    "max_depth": 1,
+    "allow_path_regex": r"^/fr/examen/",
+    "deny_query_regex": r"(^|&)exams_page=",
 },
     {
     "name": "MedG",
@@ -355,33 +385,37 @@ trusted_sites = [
         "https://www.medg.fr/items-r2c/ecni-128-troubles-de-la-marche-et-de-lequilibre/",
         "https://www.medg.fr/items-r2c/ecni-129-troubles-cognitifs-du-sujet-age/",
         "https://www.medg.fr/items-r2c/ecni-130-autonomie-et-dependance-chez-le-sujet-age/"
-        ]
+        ],
+        "max_pages": 20
     },
     {
     "name": "RecoMedicales – Addictologie",
     "base_url": "https://recomedicales.fr",
     "start_pages": [
-      "https://recomedicales.fr/recommandations/arret-tabac/",
-      "https://recomedicales.fr/recommandations/sevrage-alcool/",
-      "https://recomedicales.fr/recommandations/substituts-nicotiniques/"
-        ]
+        "https://recomedicales.fr/recommandations/arret-tabac/",
+        "https://recomedicales.fr/recommandations/sevrage-alcool/",
+        "https://recomedicales.fr/recommandations/substituts-nicotiniques/"
+    ],
+    "max_pages": 20
+
     },
     {
-      "name": "RecoMedicales – Allergologie",
-      "base_url": "https://recomedicales.fr",
-      "start_pages": [
+    "name": "RecoMedicales – Allergologie",
+    "base_url": "https://recomedicales.fr",
+    "start_pages": [
         "https://recomedicales.fr/recommandations/allergies-croisees/",
         "https://recomedicales.fr/recommandations/asthme/",
         "https://recomedicales.fr/recommandations/dermatite-atopique/",
         "https://recomedicales.fr/recommandations/intolerance-lactose/",
         "https://recomedicales.fr/recommandations/rhinite-allergique/",
         "https://recomedicales.fr/recommandations/urticaire/"
-        ]
+        ],
+        "max_pages": 20
     },
     {
-      "name": "RecoMedicales – Biologie",
-      "base_url": "https://recomedicales.fr",
-      "start_pages": [
+    "name": "RecoMedicales – Biologie",
+    "base_url": "https://recomedicales.fr",
+    "start_pages": [
         "https://recomedicales.fr/recommandations/anomalies-tp-tca/",
         "https://recomedicales.fr/recommandations/augmentation-gamma-gt/",
         "https://recomedicales.fr/recommandations/hypereosinophilie/",
@@ -390,12 +424,13 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/hypocalcemie/",
         "https://recomedicales.fr/recommandations/hyponatremie/",
         "https://recomedicales.fr/recommandations/cibles-biologiques/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
-      "name": "RecoMedicales – Cardiologie",
-      "base_url": "https://recomedicales.fr",
-      "start_pages": [
+    "name": "RecoMedicales – Cardiologie",
+    "base_url": "https://recomedicales.fr",
+    "start_pages": [
         "https://recomedicales.fr/recommandations/anevrysme-aorte-abdominale/",
         "https://recomedicales.fr/recommandations/avk/",
         "https://recomedicales.fr/recommandations/arteriopathie-obliterante-membres-inferieurs/",
@@ -419,7 +454,8 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/tensiometres-electroniques-valides/",
         "https://recomedicales.fr/recommandations/thrombose-veineuse-profonde/",
         "https://recomedicales.fr/recommandations/thrombose-veineuse-superficielle/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "RecoMedicales – Endocrinologie",
@@ -445,7 +481,8 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/syndrome-cushing/",
         "https://recomedicales.fr/recommandations/syndrome-ovaires-polykystiques-sopk/",
         "https://recomedicales.fr/recommandations/vitamine-d/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "RecoMedicales – Hématologie",
@@ -466,7 +503,8 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/gammapathie-monoclonale-mgus/",
         "https://recomedicales.fr/recommandations/polyglobulie/",
         "https://recomedicales.fr/recommandations/splenomegalie/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "RecoMedicales – Hépato-gastro-entérologie",
@@ -515,7 +553,8 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/steatose-hepatique-et-nash/",
         "https://recomedicales.fr/recommandations/syndrome-intestin-irritable/",
         "https://recomedicales.fr/recommandations/tenia/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "RecoMedicales – Infectiologie",
@@ -555,7 +594,8 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/vaccination/",
         "https://recomedicales.fr/recommandations/voyage/",
         "https://recomedicales.fr/recommandations/zona/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "RecoMedicales – Médecine du sommeil",
@@ -565,7 +605,8 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/narcolepsie/",
         "https://recomedicales.fr/recommandations/syndrome-apnees-obstructives-sommeil/",
         "https://recomedicales.fr/recommandations/syndrome-jambes-sans-repos/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "RecoMedicales – Neurologie",
@@ -586,7 +627,8 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/syndrome-canal-carpien/",
         "https://recomedicales.fr/recommandations/traumatisme-cranien-enfant/",
         "https://recomedicales.fr/recommandations/tremblement-essentiel/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "RecoMedicales – Néphrologie",
@@ -599,7 +641,8 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/insuffisance-renale-aigue/",
         "https://recomedicales.fr/recommandations/insuffisance-renale-chronique/",
         "https://recomedicales.fr/recommandations/polykystose-renale/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "RecoMedicales – Ophtalmologie",
@@ -613,7 +656,8 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/orgelet/",
         "https://recomedicales.fr/recommandations/urgences-ophtalmologiques/",
         "https://recomedicales.fr/recommandations/zona/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "RecoMedicales – ORL",
@@ -634,7 +678,8 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/sinusite-chronique/",
         "https://recomedicales.fr/recommandations/sinusite/",
         "https://recomedicales.fr/recommandations/vertiges-positionnels-vppb/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "RecoMedicales – Orthopédie",
@@ -647,7 +692,8 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/inegalite-longueur-membres-inferieurs/",
         "https://recomedicales.fr/recommandations/maladie-osgood-schlatter/",
         "https://recomedicales.fr/recommandations/maladie-dupuytren/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "RecoMedicales – Pneumologie",
@@ -663,7 +709,8 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/pneumonie-aigue-communautaire/",
         "https://recomedicales.fr/recommandations/toux-chronique/",
         "https://recomedicales.fr/recommandations/tuberculose/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "RecoMedicales – Psychiatrie",
@@ -681,7 +728,8 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/trouble-obsessionnel-compulsif-toc/",
         "https://recomedicales.fr/recommandations/trouble-oppositionnel-provocation-top/",
         "https://recomedicales.fr/recommandations/trouble-panique/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "RecoMedicales – Pédiatrie",
@@ -724,7 +772,8 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/verrues/",
         "https://recomedicales.fr/recommandations/vitamine-d/",
         "https://recomedicales.fr/recommandations/vitamine-k/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "RecoMedicales – Rhumatologie",
@@ -747,7 +796,8 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/scoliose/",
         "https://recomedicales.fr/recommandations/spondylarthrite-ankylosante/",
         "https://recomedicales.fr/recommandations/syndrome-canal-carpien/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "RecoMedicales – Social",
@@ -756,7 +806,8 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/aides-sociales/",
         "https://recomedicales.fr/recommandations/allocation-personnalisee-autonomie/",
         "https://recomedicales.fr/recommandations/remboursement-soins-etranger/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "RecoMedicales – Thérapeutique",
@@ -781,7 +832,8 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/vaccination/",
         "https://recomedicales.fr/recommandations/vitamine-d/",
         "https://recomedicales.fr/recommandations/vitamine-k/"
-          ]
+          ],
+        "max_pages": 20
     },
     {
       "name": "RecoMedicales – Urologie",
@@ -806,7 +858,19 @@ trusted_sites = [
         "https://recomedicales.fr/recommandations/infection-urinaire-enfant/",
         "https://recomedicales.fr/recommandations/infertilite-couple/",
         "https://recomedicales.fr/recommandations/phimosis/"
-          ]
+          ],
+        "max_pages": 20
+    },
+    {
+        "name": "SFNDT – Recommandations pour la pratique clinique",
+        "base_url": "https://www.sfndt.org",
+        "start_pages": [
+            "https://www.sfndt.org/professionnels/recommandations-pour-la-pratique-clinique",
+            "https://www.sfndt.org/professionnels/recommandations-pour-la-pratique-clinique?page=2",
+            "https://www.sfndt.org/professionnels/recommandations-pour-la-pratique-clinique?page=3",
+            "https://www.sfndt.org/professionnels/recommandations-pour-la-pratique-clinique?page=4",
+        ],
+        "max_pages": 50
     },
 
 ]

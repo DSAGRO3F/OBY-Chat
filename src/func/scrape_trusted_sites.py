@@ -21,7 +21,7 @@ import logging
 import importlib.util
 from pathlib import Path
 from typing import Iterable, List, Tuple, Dict, Optional, Any
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urlparse, urljoin, unquote
 from datetime import datetime
 import requests
 import hashlib
@@ -382,13 +382,17 @@ def _collect_same_site_links(soup: BeautifulSoup, base_url: str) -> List[str]:
 # Extraction contenu    #
 # ===================== #
 
-def extract_structured_content(page_url: str) -> Tuple[str, List[Dict[str, str]]]:
+def extract_structured_content(page_url: str, soup: BeautifulSoup | None = None) -> Tuple[str, List[Dict[str, str]]]:
     """
-    Prend une URL, renvoie (title, sections).
-    - Si HTML : extraction actuelle.
-    - Si PDF autorisé : extraction texte PDF → sections 'p'.
+    Prend une URL et (optionnellement) un soup déjà téléchargé.
+    - Si soup est fourni: on NE refait PAS de GET.
+    - Sinon: on fait _request_soup(page_url).
+    Retourne (title, sections).
     """
-    # 1) Si c’est un PDF explicite et domaine autorisé
+
+    _log_print("info", "[extractFcn] url=%s | soup_given=%s", page_url, "YES" if soup is not None else "NO")
+
+    # 1. ✅ Si c’est un PDF explicite et domaine autorisé (inchangé)
     if ALLOW_PDF and (_is_pdf_url(page_url) or (_head_content_type(page_url) == "application/pdf")):
         if not _is_allowed_pdf_domain(page_url):
             _log_print("info", "[PDF] Domaine non autorisé, skip: %s", page_url)
@@ -402,10 +406,24 @@ def extract_structured_content(page_url: str) -> Tuple[str, List[Dict[str, str]]
             pass
         return title or "Titre non disponible", sections
 
-    # 2) Sinon, HTML (chemin actuel)
-    soup, final_url = _request_soup(page_url)
+    # 2. ✅ HTML: NE faire un GET que si soup n'est pas fourni
+    final_url = None
     if soup is None:
-        return "Titre non disponible", []
+        soup, final_url = _request_soup(page_url)
+        if soup is None:
+            return "Titre non disponible", []
+
+    if _is_cerba_exam(page_url):
+        _log_print("info", "[extract-cerba] HIT for %s", page_url)
+        try:
+            sections_cerba = _extract_sections_cerba(soup)
+        except Exception as e:
+            _log_print("🟧 warning", "[extract-cerba] fail %s -> %s", page_url, e)
+            sections_cerba = []
+        title = _extract_title(soup)
+        _log_print("info", "[extract-cerba] url=%s | sections=%d", page_url, len(sections_cerba))
+        if sections_cerba:
+            return (title or "Titre non disponible"), sections_cerba
 
     root = _pick_root(soup)
     sections: List[Dict[str, str]] = []
@@ -428,7 +446,7 @@ def extract_structured_content(page_url: str) -> Tuple[str, List[Dict[str, str]]
 
     sections = [s for s in sections if s.get("texte") and s["texte"].strip()]
     title = _extract_title(soup)
-    return title or "Titre non disponible", sections
+    return (title or "Titre non disponible"), sections
 
 
 def _extract_minimal_sections_for_bfs(soup: BeautifulSoup) -> List[Dict[str, str]]:
@@ -580,6 +598,7 @@ def _try_parse_date(raw: Optional[str]) -> Optional[str]:
         return raw
     return raw  # on renvoie brut si non parsable
 
+
 def _extract_from_jsonld(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
     meta: Dict[str, Optional[str]] = {"published": None, "modified": None, "author": None, "title": None, "site_name": None}
     try:
@@ -690,7 +709,8 @@ def save_page_as_json(base_url: str,
                       title: str,
                       sections: list,
                       outlinks: list,
-                      output_dir: Optional[str] = None) -> Optional[Path]:
+                      output_dir: Optional[str] = None,
+                      soup: BeautifulSoup | None = None) -> Optional[Path]:
     """Sauvegarde la page en JSON (métadonnées + liens par section).
 
     - Format de `sections` conservé ; on ajoute la clé `links` au moment de l’écriture JSON.
@@ -698,42 +718,47 @@ def save_page_as_json(base_url: str,
     - Retourne le chemin du fichier écrit (Path) ou None si échec.
     """
     try:
-        # 1) Normaliser le répertoire de sortie
+        # 1. ✅ Normaliser le répertoire de sortie
         if not output_dir:
             output_dir = os.path.join("outputs", "web_pages_json")
         os.makedirs(output_dir, exist_ok=True)
 
-        # 2) Résoudre l’URL finale et récupérer des métadonnées HTML
-        #    Pas de parsing lourd si ça échoue : resolved_url = page_url, metadata = {}
+        # 2. ✅ URL finale + récupération métadonnées HTML
         resolved_url = page_url
         metadata = {}
-        soup, maybe_final = _request_soup(page_url)
-        if maybe_final:
-            resolved_url = maybe_final
-        if soup is not None:
+        local_soup = soup
+        if local_soup is None:
+            local_soup, maybe_final = _request_soup(page_url)
+            if maybe_final:
+                resolved_url = maybe_final
+        else:
+            # ✅ Si on fournit le soup initial, resolved_url peut rester page_url
+            pass
+
+        if local_soup is not None:
             try:
-                metadata = _extract_metadata(soup, page_url) or {}
+                metadata = _extract_metadata(local_soup, page_url) or {}
             except Exception as e:
                 _log_print("warning", "[save_page_as_json] _extract_metadata KO pour %s -> %s", page_url, e)
                 metadata = {}
         else:
             metadata = {}
 
-        # 3) Calculer les liens par section (alignés sur l’ordre de extract_structured_content)
+        # 3. ✅ Calculer les liens par section (alignés sur l’ordre de extract_structured_content)
         sections_links: List[List[Dict[str, str]]] = []
-        if soup is not None:
+        if local_soup is not None:
             try:
-                sections_links = _collect_links_per_section_from_dom(soup, resolved_url)
+                sections_links = _collect_links_per_section_from_dom(local_soup, resolved_url)
             except Exception as e:
                 _log_print("warning", "[save_page_as_json] collect links per section KO (%s) -> %s", page_url, e)
                 sections_links = []
 
         # Sécuriser l’alignement (même longueur que sections)
         if not sections_links or len(sections_links) != len(sections):
-            # Fallback simple : pas de liens par section (on ne casse rien)
+            # Fallback simple : pas de liens par section
             sections_links = [[] for _ in sections]
 
-        # 4) Construire un nom de fichier
+        # 4. ✅ Construire un nom de fichier
         parsed = urlparse(page_url)
         safe_path = (parsed.path or "/").rstrip("/").replace("/", "_")
         if not safe_path:
@@ -741,22 +766,100 @@ def save_page_as_json(base_url: str,
         fname = f"{parsed.netloc}{safe_path}.json"
         dest_path = Path(output_dir) / fname
 
-        # 5) Construire le payload
+        # 5. ✅ Construire un titre robuste
+        computed_title = (title or "").strip()
+
+        # a) Essayer via _extract_title (h1, og:title, <title>)
+        if (not computed_title) and (local_soup is not None):
+            try:
+                t = (_extract_title(local_soup) or "").strip()
+                if t:
+                    computed_title = t
+            except Exception as e:
+                _log_print("🟨 info", "[title] _extract_title KO pour %s -> %s", page_url, e)
+
+        # b) Fallback metadata.title
+        if not computed_title:
+            try:
+                t = ((metadata or {}).get("title") or "").strip()
+                if t:
+                    computed_title = t
+            except Exception as e:
+                _log_print("🟨 info", "[title] metadata.title KO pour %s -> %s", page_url, e)
+
+        # c) Fallback twitter:title
+        if (not computed_title or computed_title == "Sans titre") and (local_soup is not None):
+            try:
+                tw = local_soup.select_one("meta[name='twitter:title']")
+                t = (tw.get("content") or "").strip() if tw else ""
+                if t:
+                    computed_title = t
+            except Exception as e:
+                _log_print("🟨 info", "[title] twitter:title KO pour %s -> %s", page_url, e)
+
+        # d) Fallback depuis l’URL (slug)
+        if (not computed_title) or (computed_title == "Sans titre"):
+            try:
+                p = urlparse(resolved_url or page_url)
+                seg = (p.path or "/").rstrip("/").split("/")[-1]
+                seg = unquote(seg)
+                seg = re.sub(r"-\d+$", "", seg)  # retire suffixe numérique
+                seg = re.sub(r"[-_]+", " ", seg).strip()  # tirets -> espaces
+                if seg and seg.lower() not in {"", "examen", "fr", "en"}:
+                    computed_title = seg[:1].upper() + seg[1:]
+            except Exception as e:
+                _log_print("🟨 info", "[title] slug fallback KO pour %s -> %s", page_url, e)
+
+        # e) Ultime Fallback
+        if not computed_title:
+            computed_title = "Sans titre"
+
+        if metadata is None:
+            metadata = {}
+        if not metadata.get("title"):
+            metadata["title"] = computed_title
+
+
+        # 6. ✅ Construire le payload
+        effective_source = resolved_url or page_url or (metadata or {}).get("source_url") or (metadata or {}).get("url")
+
+
+        # vérifier que metadata.source_url est présent
+        if effective_source and (metadata is not None) and not metadata.get("source_url"):
+            metadata["source_url"] = effective_source
+
+        # normaliser les sections + dupliquer text -> texte
+        sections_norm = []
+        for i, sec in enumerate(sections or []):
+            sec = sec or {}
+            if not isinstance(sec, dict):
+                continue
+            name = sec.get("name") or sec.get("titre") or sec.get("heading") or ""
+            text = sec.get("text") or sec.get("texte") or sec.get("content") or ""
+            links = sections_links[i] if i < len(sections_links) else []
+            sections_norm.append({
+                "name": name,
+                "text": text,
+                "texte": text,  # si jamais "text" existe
+                "links": links,
+            })
+
         payload = {
             "base_url": base_url,
             "page_url": page_url,
             "resolved_url": resolved_url,
-            "title": title or "Titre non disponible",
-            "metadata": metadata,
-            "sections": [
-                {**sec, "links": sections_links[i] if i < len(sections_links) else []}
-                for i, sec in enumerate(sections)
-            ],
+            "source_url": effective_source,
+            "source": effective_source,
+            "title": computed_title,
+            "page_title": computed_title,
+            "titre": computed_title,
+            "metadata": metadata or {},
+            "sections": sections_norm,  # avec "text" ET "texte"
             "outlinks": outlinks or [],
             "saved_at": datetime.utcnow().isoformat() + "Z",
         }
 
-        # 6) Écrire
+        # 7. ✅ Écrire
         with open(dest_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
 
@@ -794,20 +897,110 @@ def load_trusted_sites(module_path: str) -> List[Dict]:
 # Fonction principale (wrapper)   #
 # =============================== #
 
+def _is_same_site(url: str, base_netloc: str) -> bool:
+    pu = urlparse(url)
+    return pu.netloc == "" or pu.netloc == base_netloc
+
+
+def _is_allowed_to_traverse(url: str,
+                            base_netloc: str,
+                            allow_path_re: re.Pattern | None,
+                            deny_query_re: re.Pattern | None,
+                            depth: int,
+                            is_seed: bool,
+                            max_depth: int) -> bool:
+    if depth > max_depth:
+        return False
+    pu = urlparse(url)
+
+    # même site
+    if not _is_same_site(url, base_netloc):
+        return False
+
+    # les seeds peuvent avoir une query « interdite » (exams_page=), mais on ne propage pas ce motif
+    if not is_seed and deny_query_re and deny_query_re.search(pu.query or ""):
+        return False
+
+    # Pour TRAVERSER, on exige le allow_path à partir de depth>=1 (pour éviter « nos valeurs », etc.)
+    # Les seeds (depth=0) sont autorisées pour amorcer la découverte.
+    if depth >= 1 and allow_path_re and not allow_path_re.search(pu.path or ""):
+        return False
+
+    return True
+
+
+def _is_allowed_to_save(url: str, allow_path_re: re.Pattern | None) -> bool:
+    # On SAUVEGARDE uniquement si le path matche allow_path (si présent).
+    if not allow_path_re:
+        return True
+    pu = urlparse(url)
+    return bool(allow_path_re.search(pu.path or ""))
+
+
+
+# ----------- Fonction spécifique à Cerba
+# --- Détecter une fiche Cerba ---
+def _is_cerba_exam(url: str) -> bool:
+    pu = urlparse(url)
+    host = pu.netloc.lower()
+    if host.startswith("www."): host = host[4:]
+    return host == "lab-cerba.com" and (pu.path.startswith("/fr/examen/") or pu.path.startswith("/en/examen/"))
+
+
+
+# --- Extracteur Cerba (H2/H3 → siblings) ---
+def _extract_sections_cerba(soup) -> list[dict]:
+    root = soup.select_one("main") or soup  # on reste prudent
+    sections: list[dict] = []
+
+    # Titre principal
+    h1 = root.select_one("h1")
+    if h1:
+        t = h1.get_text(" ", strip=True)
+        if t:
+            sections.append({"name": "Titre", "texte": t})
+
+    # Parcours des H2/H3 et agrégation du contenu jusqu'au prochain H2/H3
+    for h in root.select("h2, h3"):
+        name = h.get_text(" ", strip=True)
+        buf = []
+        # Prendre les siblings jusqu'au prochain H2/H3
+        sib = h.next_sibling
+        while sib is not None:
+            tagname = getattr(sib, "name", None)
+            if tagname in ("h2", "h3"):
+                break
+            if tagname in ("p", "ul", "ol", "table", "blockquote"):
+                buf.append(sib.get_text(" ", strip=True))
+            elif tagname == "div":
+                # beaucoup de contenus sont packés dans des divs
+                buf.append(sib.get_text(" ", strip=True))
+            sib = sib.next_sibling
+
+        text = "\n".join(x for x in buf if x and x.strip())
+        if name and text:
+            sections.append({"name": name, "text": text})
+
+    # Bonus: lister les PDF évoqués sur la fiche
+    pdfs = []
+    for a in root.select("a[href$='.pdf']"):
+        label = a.get_text(" ", strip=True) or a.get("href", "").strip()
+        if label:
+            pdfs.append(label)
+    if pdfs:
+        sections.append({"name": "Documents", "text": "\n".join(pdfs)})
+
+    return sections
+# ---
+
+
 def scrape_all_trusted_sites(trusted_sites: Optional[List[Dict]] = None,
                              output_dir: Optional[str] = None) -> None:
-    """
-    Scrape l’ensemble des sites de confiance et sauvegarde chaque page utile en JSON.
+    same_host = 0
+    deny_q = 0
+    deny_path = 0
+    enqueued = 0
 
-    Args:
-        trusted_sites (list[dict] | None): Liste de sites à scruter (name, base_url, start_pages).
-            Si None, la liste est chargée depuis la configuration.
-        output_dir (str | pathlib.Path | None): Dossier de sortie des JSON ; si None, utilise
-            le chemin configuré (WEB_SITES_JSON_HEALTH_DOC_BASE).
-
-    Returns:
-        list[pathlib.Path]: La liste des chemins des fichiers JSON écrits (vide si rien n’a été produit).
-    """
     if trusted_sites is None:
         trusted_sites = load_trusted_sites(WEB_SITES_MODULE_PATH)
     if output_dir is None:
@@ -815,47 +1008,147 @@ def scrape_all_trusted_sites(trusted_sites: Optional[List[Dict]] = None,
 
     os.makedirs(output_dir, exist_ok=True)
 
-    written: List[str] = []
+    written_count_total = 0
 
     for site in trusted_sites or []:
         name = site.get("name", "unknown")
         base_url = site.get("base_url") or site.get("domain") or ""
         start_pages = site.get("start_pages") or site.get("start_urls") or []
+        max_pages_for_site = int(site.get("max_pages", DEFAULT_MAX_PAGES_PER_SITE))
+        max_depth = int(site.get("max_depth", 1))
+        allow_path_re = re.compile(site["allow_path_regex"]) if site.get("allow_path_regex") else None
+        deny_query_re = re.compile(site["deny_query_regex"]) if site.get("deny_query_regex") else None
 
         if not base_url or not start_pages:
             _log_print("🟧 warning", "[site] %s: base_url ou start_pages manquant — skip", name)
             continue
 
-        _log_print("info", "[site] Traitement du site : %s (%s)", name, base_url)
+        base_netloc = urlparse(base_url).netloc
+        _log_print("info", "[site] %s (%s) — cap: %d, depth: %d", name, base_url, max_pages_for_site, max_depth)
+        if allow_path_re:
+            _log_print("info", "      allow_path_regex: %s", allow_path_re.pattern)
+        if deny_query_re:
+            _log_print("info", "      deny_query_regex: %s", deny_query_re.pattern)
 
+        seen_pages: set[str] = set()
+        enqueued_pages: set[str] = set()
+        processed_for_site = 0
+
+        # ---- BFS multi-seeds avec (url, depth) ----
+        q = deque()
+        # Enqueue des seeds à depth=0 (exemptées du deny_query pour démarrer)
         for sp in start_pages:
-            _log_print("info", "  > Page de départ : %s", sp)
-            # BFS pour collecter des pages utiles du même site
-            links = extract_useful_links(sp, base_url)
+            q.append((sp, 0, True))  # (url, depth, is_seed=True)
 
-            # inclure la start_page en priorité si utile
-            pages = []
-            if sp not in links:
-                pages.append(sp)
-            pages.extend(links)
+        while q and processed_for_site < max_pages_for_site:
+            page_url, depth, is_seed = q.popleft()
+            if page_url in seen_pages:
+                continue
+            seen_pages.add(page_url)
 
-            # Limité à la contrainte fixée plus haut
-            pages = pages[: site.get("max_pages", DEFAULT_MAX_PAGES_PER_SITE)]
+            # 1. 🟩 Télécharger la page et extraire son contenu (uniquement si on veut potentiellement sauver)
+            should_save_here = _is_allowed_to_save(page_url, allow_path_re)
+            try:
+                # on fait la requête une seule fois
+                soup, _resp = _request_soup(page_url)
 
-            for page_url in pages:
-                try:
-                    title, sections = extract_structured_content(page_url)
-                    # collecte des outlinks pour contexte (limités au même site)
-                    soup, _ = _request_soup(page_url)
-                    outlinks = _collect_same_site_links(soup, base_url) if soup else []
-                    dest = save_page_as_json(base_url, page_url, title, sections, outlinks, output_dir)
+                title, sections = (None, None)
+                if should_save_here:
+                    # IMPORTANT: appeler la version soup-aware (pas de 2e GET)
+                    title, sections = extract_structured_content(page_url, soup=soup)
+
+                    _log_print("info", "[extract] savable=%s | url=%s | sections_len=%s",
+                               should_save_here, page_url, 0 if not sections else len(sections))
+                    if sections:
+                        # log des clés du premier bloc pour détecter un schéma incompatible
+                        keys0 = list(sections[0].keys())
+                        _log_print("info", "[extract] first_section_keys=%s", keys0)
+                    else:
+                        _log_print("🟨 info", "[extract] sections vides (avant fallback) : %s", page_url)
+
+                if should_save_here and sections:
+                    dest = save_page_as_json(
+                        base_url,
+                        page_url,
+                        title,
+                        sections,
+                        _collect_same_site_links(soup, page_url) if soup else [],
+                        str(output_dir),
+                        soup=soup,
+                    )
+
+                    processed_for_site += 1
                     if dest:
-                        written.append(dest)
-                except Exception as e:
-                    _log_print("🟧 warning", "[page] Skip %s -> %s", page_url, e)
+                        _log_print("info", "    ✓ écrit: %s", dest)
+                    else:
+                        _log_print("info", "    ✓ écrit (chemin inconnu): %s", page_url)
+                else:
+                    _log_print("🟨 info", "[page] non enregistrée (filtre ou vide): %s", page_url)
 
-    _log_print("info", "[done] %d fichiers JSON écrits", len(written))
+                # 2. 🟩 Si on peut descendre encore d'un niveau, collecter les liens
+                if depth < max_depth and soup is not None:
+                    # ⚠️ utiliser page_url pour bien résoudre les URLs relatives
+                    outlinks = _collect_same_site_links(soup, page_url) or []
+
+                    # ✅ compteurs RÉINITIALISÉS à chaque page
+                    total = len(outlinks)
+                    same_host = deny_q = deny_path = enqueued = 0
+
+                    for u in outlinks:
+                        # déjà traité ou déjà en file → skip
+                        if u in seen_pages or u in enqueued_pages:
+                            continue
+
+                        # même site (avec normalisation de www.)
+                        if not _is_same_site(u, base_netloc):
+                            continue
+                        same_host += 1
+
+                        pu = urlparse(u)
+                        puq = pu.query or ""
+                        pupath = pu.path or ""
+
+                        # bloquer la pagination (exams_page=) dans les liens sortants
+                        if deny_query_re and deny_query_re.search(puq):
+                            deny_q += 1
+                            continue
+
+                        # n’enqueue QUE les fiches ciblées (ex. ^/(fr|en)/examen/)
+                        if not (allow_path_re and allow_path_re.search(pupath)):
+                            deny_path += 1
+                            continue
+
+                        # 👉 priorité aux fiches : traite-les avant le reste
+                        q.appendleft((u, depth + 1, False))
+                        enqueued_pages.add(u)
+                        enqueued += 1
+
+                    _log_print(
+                        "info",
+                        "    outlinks: %d | same_host: %d | deny_q: %d | deny_path: %d | enqueued: %d",
+                        total, same_host, deny_q, deny_path, enqueued
+                    )
+
+            except Exception as e:
+                _log_print("🟧 warning", "[page] Skip %s -> %s", page_url, e)
+                # pas d'incrément du compteur si erreur
+
+            if processed_for_site >= max_pages_for_site:
+                _log_print("info", "  ⏹ Cap atteint (%d) — arrêt du site", max_pages_for_site)
+                break
+
+        _log_print(
+            "info",
+            "[site done] %s — pages écrites: %d (vus: %d)",
+            name,
+            processed_for_site,
+            len(seen_pages),
+        )
+        written_count_total += processed_for_site
+
+    _log_print("info", "[done] Total fichiers JSON écrits: %d", written_count_total)
     return
+
 
 # ===================== #
 # Exécution directe     #

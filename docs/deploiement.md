@@ -36,15 +36,21 @@ Ne pas activer en environnement d’intégration.
 - 🟢 Lancer avec une image fournie (.tar)
 - Pré-requis
   - Fichiers transmis : 
-    - oby-ia_v2025.09.25.tar
-    - oby-ia_v2025.09.25.tar.sha256
+    - oby-ia_v2025.09.30.tar
+    - oby-ia_v2025.09.30.tar.sha256
     - docker-compose.yml
     - deploiement.md
   - Docker / Docker Compose installés
 
 #### Vérifier l’intégrité & charger l’image
-shasum -a 256 -c oby-ia_v2025.09.25.tar.sha256
-docker load -i oby-ia_v2025.09.25.tar
+```
+shasum -a 256 -c oby-ia_v2025.09.30.tar.sha256
+docker load -i oby-ia_v2025.09.30.tar
+```
+```
+docker images | grep oby-ia
+```
+doit afficher v2025.09.30
 
 #### Préparer l’environnement
 **1. Remplacer les clés OPENAI_API_KEY, MISTRAL_API_KEY et autres clés par celles de BVIDF (ou BlueSoft) dans .env**
@@ -52,17 +58,22 @@ docker load -i oby-ia_v2025.09.25.tar
 
 #### Démarrer (mode APP par défaut)
 - **dans un terminal :**
+  - si app
+  - si API
+  - si docs
 ```
-docker compose up -d
-docker compose logs --tail 200
+docker compose up -d                  
+docker compose --profile api up -d    
+docker compose --profile doc up -d
 
+docker compose logs --tail 200
 ```
 - **docker-compose.yml (runtime, sans build)**
 ```
   services:
   # === Application Dash (UI) ===
   obyia-app:
-    image: oby-ia:v2025.09.25
+    image: oby-ia:v2025.09.30
     container_name: obyia-app
     command: ["./start.sh", "app"]
     ports:
@@ -75,7 +86,7 @@ docker compose logs --tail 200
 
   # === API (Uvicorn) — lancer avec: docker compose --profile api up -d obyia-api
   obyia-api:
-    image: oby-ia:v2025.09.25
+    image: oby-ia:v2025.09.30
     container_name: obyia-api
     command: ["./start.sh", "api"]
     ports:
@@ -86,7 +97,7 @@ docker compose logs --tail 200
 
   # === DOC (MkDocs) — lancer avec: docker compose --profile doc up -d obyia-doc
   obyia-doc:
-    image: oby-ia:v2025.09.25
+    image: oby-ia:v2025.09.30
     container_name: obyia-doc
     command: ["./start.sh", "doc"]
     ports:
