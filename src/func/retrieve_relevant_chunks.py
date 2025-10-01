@@ -189,16 +189,16 @@ def _format_results_with_ids(
     docx_limit = DOCX_TOPK if docx_limit is None else docx_limit # obj. chunks capturés pour docx
     web_limit = WEB_TOPK if web_limit is None else web_limit # obj. chunks capturés pour web
 
-    # 1) Limiter le volume dès l’entrée pour docx
+    # 1. Limiter le volume dès l’entrée pour docx
     results_docx = (results_docx or [])[:max(0, docx_limit)]
 
-    # 2) Texte de référence DOCX (pour la mesure de complémentarité)
+    # 2. Texte de référence DOCX (pour la mesure de complémentarité)
     docx_text_agg = " ".join([(getattr(d, "page_content", "") or "") for d in results_docx])
 
     blocks: list[str] = []
     counters = {"DOCX": 0, "WEB": 0}
 
-    # 3) DOCX -> on considère ces documents comme les textes de référence
+    # 3. DOCX -> on considère ces documents comme les textes de référence
     # La mesure de complémentarité est mesurée par rapport à ces textes
     for doc in results_docx:
         meta = getattr(doc, "metadata", {}) or {}
@@ -218,7 +218,7 @@ def _format_results_with_ids(
             f"extrait: {extrait}"
         )
 
-    # 4) WEB -> y a t-il dans ces textes un vocabulaire complémentaire ?
+    # 4. WEB -> y a t-il dans ces textes un vocabulaire complémentaire ?
     # on ne garde que les documents web qui apportent une information nouvelle par rapport à docx
     # la décision se fait par la bande [nov_min, nov_max] + la sim au query.
     # if sim(query, web) >= 0.70 and 0.30 <= novelty(docx_agg, web) <= 0.75: --> garder(web)

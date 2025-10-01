@@ -348,15 +348,15 @@ trusted_sites = [
         ],
         "max_pages": 20
     },
-{
-    "name": "Lab Cerba – Catalogue d’examens",
-    "base_url": "https://www.lab-cerba.com",
-    "start_pages": [f"https://www.lab-cerba.com/fr/catalogue?exams_page={i}" for i in range(1, 271)],
-    "max_pages": 2800, # au niveau du site
-    "max_depth": 1,
-    "allow_path_regex": r"^/fr/examen/",
-    "deny_query_regex": r"(^|&)exams_page=",
-},
+# {
+#     "name": "Lab Cerba – Catalogue d’examens",
+#     "base_url": "https://www.lab-cerba.com",
+#     "start_pages": [f"https://www.lab-cerba.com/fr/catalogue?exams_page={i}" for i in range(1, 271)],
+#     "max_pages": 2800, # au niveau du site
+#     "max_depth": 1,
+#     "allow_path_regex": r"^/fr/examen/",
+#     "deny_query_regex": r"(^|&)exams_page=",
+# },
     {
     "name": "MedG",
     "base_url": "https://medg.fr",
