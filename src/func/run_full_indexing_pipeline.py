@@ -41,7 +41,6 @@
 from pathlib import Path
 import os, sys, shutil
 import json
-
 from src.utils.convert_fiches_docx_to_json import convert_and_save_fiches
 from config.config import INPUT_DOCX, JSON_HEALTH_DOC_BASE, WEB_SITES_JSON_HEALTH_DOC_BASE, BASE_DIR
 from src.func.indexed_health_related_files import (
@@ -154,6 +153,33 @@ def run_full_indexing_pipeline():
     # S'assurer que c'est bien un Path
     docx_dir = Path(INPUT_DOCX)
 
+    #--- Si pas de modification dans les fiches docx
+    # donc pas de lancement de conversion docx vers json
+    # donc pas d'existence de la directory de sortie et des json
+    # Or fichiers json réclamés pour embedding plus tard...
+    docx_dir = Path(INPUT_DOCX)
+    out_dir  = Path(JSON_HEALTH_DOC_BASE)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    docx_count = len(list(docx_dir.glob("*.docx")))
+    json_count = len(list(out_dir.glob("*.json")))
+    print(f"[BOOT] DOCX={docx_count} | JSON(docx)={json_count} -> {out_dir}")
+
+    if docx_count == 0:
+        print(f"[BOOT] Aucun DOCX trouvé dans {docx_dir} — on passera l'étape DOCX.")
+    elif json_count == 0:
+        print("[BOOT] JSON(docx) absent → conversion DOCX → JSON…")
+        try:
+            convert_and_save_fiches(str(docx_dir), str(out_dir))
+        except Exception as e:
+            # on log l'erreur mais on laisse vivre le pipeline (web/chroma peuvent continuer)
+            print(f"🔴 Erreur conversion DOCX→JSON : {type(e).__name__}: {e}")
+        else:
+            json_count = len(list(out_dir.glob("*.json")))
+            print(f"[BOOT] JSON(docx) après conversion = {json_count}")
+
+    # ---
+
     # Vérification ---
     print("🟡 Vérification existence dossier d'entrée DOCX...")
     if docx_dir.exists():
@@ -222,8 +248,27 @@ def run_full_indexing_pipeline():
             for docx_file in docx_files_to_index:
                 print(f"🟡 docx_file: {docx_file}")
                 convert_and_save_fiches(str(docx_file), JSON_HEALTH_DOC_BASE)
+
         else:
             print("🟡 Aucun DOCX modifié — conversion non nécessaire.")
+
+            # --- sortie absente/vide ⇒ conversion forcée ---
+            out_dir = Path(JSON_HEALTH_DOC_BASE)
+            needs_force = (not out_dir.exists()) or (not any(out_dir.glob("*.json")))
+            if needs_force:
+                print("[BOOT] Sortie DOCX JSON absente/vide → conversion forcée.")
+                out_dir.mkdir(parents=True, exist_ok=True)
+                try:
+                    # Ici on convertit depuis le DOSSIER d'entrée (docx_dir),
+                    # pour (re)générer l'ensemble des JSON attendus.
+                    convert_and_save_fiches(str(docx_dir), str(out_dir))
+                    print(f"[BOOT] JSON(docx) maintenant = {len(list(out_dir.glob('*.json')))}")
+                except Exception as e:
+                    print(f"🔴 Erreur conversion forcée DOCX→JSON : {type(e).__name__}: {e}")
+            else:
+                print("[BOOT] Sortie déjà présente → on applique l’heuristique 'pas modifié'.")
+            # ---
+
 
 
 
@@ -271,9 +316,36 @@ def run_full_indexing_pipeline():
     print("[DEBUG] Audit JSON web avant indexation :")
     debug_check_web_json(WEB_SITES_JSON_HEALTH_DOC_BASE)
 
+    # --- ✅ Préparation des sources à indexer ---
+    docx_json_dir = Path(JSON_HEALTH_DOC_BASE)
+    web_json_dir = Path(WEB_SITES_JSON_HEALTH_DOC_BASE)
 
-    # Construction index vectoriel si nécessaire
+    # DOCX JSON
+    if not docx_json_dir.exists():
+        print(f"[INDEX] {docx_json_dir} n’existe pas — skip DOCX cette passe.")
+        docx_json_files = []
+    else:
+        docx_json_files = sorted(docx_json_dir.glob("*.json"))
+        if not docx_json_files:
+            print(f"[INDEX] Aucun JSON DOCX trouvé dans {docx_json_dir} — skip DOCX.")
 
+    # WEB JSON
+    if not web_json_dir.exists():
+        print(f"[INDEX] {web_json_dir} n’existe pas — skip WEB cette passe.")
+        web_json_files = []
+    else:
+        web_json_files = sorted(web_json_dir.glob("*.json"))
+        if not web_json_files:
+            print(f"[INDEX] Aucun JSON WEB trouvé dans {web_json_dir} — skip WEB.")
+
+    # Rien à indexer ? on sort proprement (et on laissera le scheduler relancer plus tard)
+    if not docx_json_files and not web_json_files:
+        print("[INDEX] Rien à indexer (sources vides) — fin de la passe.")
+        return
+    # ---
+
+
+    # --- ✅ Construction index vectoriel si nécessaire
     needs_reindex = (
             bool(docx_files_to_index)
             or bool(web_content_changed)
