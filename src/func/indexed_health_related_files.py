@@ -80,6 +80,8 @@ def detect_changes_and_get_modified_files() -> Dict[str, List[Path]]:
 
     journal = load_indexed_files_journal()
     modified_docx_files: List[Path] = []
+    docx_deleted_files:  List[Path] = []
+    web_deleted_files:   List[Path] = []
     modified_web_files: List[Path] = []
     trusted_sites_changed = False
 
@@ -87,9 +89,11 @@ def detect_changes_and_get_modified_files() -> Dict[str, List[Path]]:
     current_docx_files = list(Path(INPUT_DOCX).glob("*.docx"))
     current_docx_hashes = {f.name: compute_file_hash(f) for f in current_docx_files}
     prev_docx_hashes = journal.get("docx_files", {}) or {}
+
     # --- si la sortie JSON DOCX est absente/vide, il faut la construire
     out_dir = Path(JSON_HEALTH_DOC_BASE)
     json_docx_present = out_dir.exists() and any(out_dir.glob("*.json"))
+
     if current_docx_files and not json_docx_present:
         # --- fichier input docx présent mais dossier output json vide
         modified_docx_files = current_docx_files[:]
@@ -129,6 +133,8 @@ def detect_changes_and_get_modified_files() -> Dict[str, List[Path]]:
         current_py_hash = compute_file_hash(Path(WEB_SITES_MODULE_PATH))
         if journal.get("trusted_sites_py") != current_py_hash:
             trusted_sites_changed = True
+
+
 
     return {
         "docx_files_to_index": modified_docx_files,
