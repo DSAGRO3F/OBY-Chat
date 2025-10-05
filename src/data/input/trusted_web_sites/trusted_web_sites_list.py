@@ -13,18 +13,18 @@ Chaque site est représenté par :
 Cette liste est utilisée par les modules de scraping et d’indexation.
 """
 trusted_sites = [
-    {
-      "name": "HAS – Personne âgée : Fragilité (repérage & ambulatoire)",
-      "base_url": "https://www.has-sante.fr",
-      "start_pages": [
-        "https://www.has-sante.fr/jcms/c_1602972/fr/fiche-points-cles-et-solutions-comment-reperer-la-fragilite-en-soins-ambulatoire",
-        "https://www.has-sante.fr/jcms/c_1602973/fr/note-methodologique-et-de-synthese-documentaire-reperer-la-fragilite-en-soins-ambulatoires",
+    # {
+    #   "name": "HAS – Personne âgée : Fragilité (repérage & ambulatoire)",
+    #   "base_url": "https://www.has-sante.fr",
+    #   "start_pages": [
+    #     "https://www.has-sante.fr/jcms/c_1602972/fr/fiche-points-cles-et-solutions-comment-reperer-la-fragilite-en-soins-ambulatoire",
+    #     "https://www.has-sante.fr/jcms/c_1602973/fr/note-methodologique-et-de-synthese-documentaire-reperer-la-fragilite-en-soins-ambulatoires",
         # "https://www.has-sante.fr/jcms/c_1718248/fr/comment-prendre-en-charge-les-personnes-agees-fragiles-en-ambulatoire",
         # "https://www.has-sante.fr/jcms/c_1718876/fr/fiche-points-cles-et-solutions-prendre-en-charge-les-personnes-agees-fragiles-en-ambulatoire",
         # "https://www.has-sante.fr/jcms/c_1718882/fr/note-methodologique-et-de-synthese-documentaire-prendre-en-charge-les-personnes-agees-fragiles-en-ambulatoire"
-        ],
-        "max_pages": 50
-    },
+    #     ],
+    #     "max_pages": 50
+    # },
     # {
     #     "name": "HAS – Personne âgée : Repérage de la perte d’autonomie (volet domicile)",
     #     "base_url": "https://www.has-sante.fr",
@@ -97,88 +97,88 @@ trusted_sites = [
         ],
         "max_pages": 50
     },
-    # {
-    #     "name": "Pour les personnes âgées – Dénutrition & alimentation (prévenir la perte d’autonomie)",
-    #     "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
-    #     "start_pages": [
-    #         "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/denutrition-des-personnes-agees-la-reperer-et-la-prevenir",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/denutrition-comment-veiller-a-une-bonne-alimentation",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/les-consequences-de-la-denutrition-pour-les-personnes-agees"
-    #     ],
-    #     "max_pages": 50
-    # },
-    # {
-    #     "name": "Pour les personnes âgées – Aménager le logement & aides techniques",
-    #     "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
-    #     "start_pages": [
-    #         "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/amenager-son-logement-et-s-equiper",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/amenager-son-logement-et-s-equiper/des-equipements-pour-faciliter-son-quotidien",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/amenager-son-logement-et-s-equiper/amenager-son-logement",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/amenager-son-logement-et-s-equiper/ou-trouver-des-informations-et-des-conseils-sur-les-aides-techniques",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/amenager-son-logement-et-s-equiper/les-aides-financieres-pour-adapter-son-logement",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/amenager-son-logement-et-s-equiper/choisir-un-professionnel-pour-amenager-son-logement"
-    #     ],
-    #     "max_pages": 50
-    # },
-    # {
-    #     "name": "Pour les personnes âgées – Aides & soins à domicile (services autonomie, SSIAD, SPASAD)",
-    #     "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
-    #     "start_pages": [
-    #         "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-d-aide-a-domicile/les-services-d-aide-a-domicile",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-de-soins-a-domicile/les-ssiad-services-de-soins-infirmiers-a-domicile",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-de-soins-a-domicile"
-    #     ],
-    #     "max_pages": 50
-    # },
-    # {
-    #     "name": "Pour les personnes âgées – Hospitalisation à domicile (HAD)",
-    #     "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
-    #     "start_pages": [
-    #         "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-de-soins-a-domicile/l-had-hospitalisation-a-domicile"
-    #     ],
-    #     "max_pages": 50
-    # },
-    # {
-    #     "name": "Pour les personnes âgées – Organiser la sortie d’hospitalisation / retour à domicile",
-    #     "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
-    #     "start_pages": [
-    #         "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/etre-hospitalise/comment-organiser-sa-sortie-d-hospitalisation",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/annuaires-et-services/fiches-pratiques/fiche-pratique-sortie-d-hospitalisation-a-qui-s-adresser-en-cas-de-perte-d-autonomie",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/annuaires-et-services/fiches-pratiques/fiches-pratiques-sortie-d-hospitalisation",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/etre-hospitalise/etre-hospitalise-ce-qu-il-faut-savoir",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/etre-hospitalise"
-    #     ],
-    #     "max_pages": 50
-    # },
-    # {
-    #     "name": "Pour les personnes âgées – Téléassistance (sécuriser le domicile)",
-    #     "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
-    #     "start_pages": [
-    #         "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-d-aide-a-domicile/la-teleassistance",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/aides-financieres/les-aides-financieres-pour-installer-une-teleassistance",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/annuaires-et-services/facile-a-lire-et-a-comprendre/la-teleassistance-comment-ca-marche"
-    #     ],
-    #     "max_pages": 50
-    # },
-    # {
-    #     "name": "Pour les personnes âgées – Prévenir la déshydratation & vagues de chaleur",
-    #     "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
-    #     "start_pages": [
-    #         "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/deshydratation-conseils-de-prevention-en-prevision-des-fortes-chaleurs",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/actualites/conseils-et-gestes-simples-a-adopter-pour-se-proteger-des-fortes-chaleurs"
-    #     ],
-    #     "max_pages": 50
-    # },
-    # {
-    #     "name": "Pour les personnes âgées – Aides financières à domicile (APA & démarches)",
-    #     "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
-    #     "start_pages": [
-    #         "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/aides-financieres/l-apa-a-domicile",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-d-aide-a-domicile",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-d-aide-a-domicile/j-ai-besoin-d-etre-aide-a-domicile-comment-faire"
-    #     ],
-    #     "max_pages": 50
-    # },
+    {
+        "name": "Pour les personnes âgées – Dénutrition & alimentation (prévenir la perte d’autonomie)",
+        "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
+        "start_pages": [
+            "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/denutrition-des-personnes-agees-la-reperer-et-la-prevenir",
+            "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/denutrition-comment-veiller-a-une-bonne-alimentation",
+            "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/les-consequences-de-la-denutrition-pour-les-personnes-agees"
+        ],
+        "max_pages": 50
+    },
+    {
+        "name": "Pour les personnes âgées – Aménager le logement & aides techniques",
+        "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
+        "start_pages": [
+            "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/amenager-son-logement-et-s-equiper",
+            "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/amenager-son-logement-et-s-equiper/des-equipements-pour-faciliter-son-quotidien",
+            "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/amenager-son-logement-et-s-equiper/amenager-son-logement",
+            "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/amenager-son-logement-et-s-equiper/ou-trouver-des-informations-et-des-conseils-sur-les-aides-techniques",
+            "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/amenager-son-logement-et-s-equiper/les-aides-financieres-pour-adapter-son-logement",
+            "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/amenager-son-logement-et-s-equiper/choisir-un-professionnel-pour-amenager-son-logement"
+        ],
+        "max_pages": 50
+    },
+    {
+        "name": "Pour les personnes âgées – Aides & soins à domicile (services autonomie, SSIAD, SPASAD)",
+        "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
+        "start_pages": [
+            "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-d-aide-a-domicile/les-services-d-aide-a-domicile",
+            "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-de-soins-a-domicile/les-ssiad-services-de-soins-infirmiers-a-domicile",
+            "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-de-soins-a-domicile"
+        ],
+        "max_pages": 50
+    },
+    {
+        "name": "Pour les personnes âgées – Hospitalisation à domicile (HAD)",
+        "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
+        "start_pages": [
+            "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-de-soins-a-domicile/l-had-hospitalisation-a-domicile"
+        ],
+        "max_pages": 50
+    },
+    {
+        "name": "Pour les personnes âgées – Organiser la sortie d’hospitalisation / retour à domicile",
+        "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
+        "start_pages": [
+            "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/etre-hospitalise/comment-organiser-sa-sortie-d-hospitalisation",
+            "https://www.pour-les-personnes-agees.gouv.fr/annuaires-et-services/fiches-pratiques/fiche-pratique-sortie-d-hospitalisation-a-qui-s-adresser-en-cas-de-perte-d-autonomie",
+            "https://www.pour-les-personnes-agees.gouv.fr/annuaires-et-services/fiches-pratiques/fiches-pratiques-sortie-d-hospitalisation",
+            "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/etre-hospitalise/etre-hospitalise-ce-qu-il-faut-savoir",
+            "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/etre-hospitalise"
+        ],
+        "max_pages": 50
+    },
+    {
+        "name": "Pour les personnes âgées – Téléassistance (sécuriser le domicile)",
+        "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
+        "start_pages": [
+            "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-d-aide-a-domicile/la-teleassistance",
+            "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/aides-financieres/les-aides-financieres-pour-installer-une-teleassistance",
+            "https://www.pour-les-personnes-agees.gouv.fr/annuaires-et-services/facile-a-lire-et-a-comprendre/la-teleassistance-comment-ca-marche"
+        ],
+        "max_pages": 50
+    },
+    {
+        "name": "Pour les personnes âgées – Prévenir la déshydratation & vagues de chaleur",
+        "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
+        "start_pages": [
+            "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/deshydratation-conseils-de-prevention-en-prevision-des-fortes-chaleurs",
+            "https://www.pour-les-personnes-agees.gouv.fr/actualites/conseils-et-gestes-simples-a-adopter-pour-se-proteger-des-fortes-chaleurs"
+        ],
+        "max_pages": 50
+    },
+    {
+        "name": "Pour les personnes âgées – Aides financières à domicile (APA & démarches)",
+        "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
+        "start_pages": [
+            "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/aides-financieres/l-apa-a-domicile",
+            "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-d-aide-a-domicile",
+            "https://www.pour-les-personnes-agees.gouv.fr/vivre-a-domicile/beneficier-d-aide-a-domicile/j-ai-besoin-d-etre-aide-a-domicile-comment-faire"
+        ],
+        "max_pages": 50
+    },
     # {
     #   "name": "MSD Manuals – Soins à domicile & organisation du maintien",
     #   "base_url": "https://www.msdmanuals.com",

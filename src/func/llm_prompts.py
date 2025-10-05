@@ -553,9 +553,9 @@ def medical_prompt_template(system_prompt, user_prompt_template):
     return prompt_template
 
 
-"""
--------------------------------
-"""
+# """
+# -------------------------------
+# """
 
 
 def medical_response_from_llm(prompt_template, user_input, poa_content):
@@ -582,10 +582,8 @@ def medical_response_from_llm(prompt_template, user_input, poa_content):
 
 
 
-"""
-------------------------------- Fonctions utilisées appelées par module src/func/generate_structured_medical_plan.py
-------------------------------- Recherche de contenu associé au patient
-"""
+# ------------------------------- Fonctions utilisées appelées par module src/func/generate_structured_medical_plan.py
+# ------------------------------- Recherche de contenu associé au patient
 
 
 # ==============================================================================

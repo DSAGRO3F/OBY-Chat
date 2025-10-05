@@ -2,7 +2,37 @@
   "docx_files": {
     "Fiche_RBPP_regroupees_de_000_a_104_clean.docx": "a44f69f8c3f89a0a770287589ddf3df795927cd344fe3de91dd5c2aed8e0638d"
   },
-  "json_web_files": {},
-  "trusted_sites_py": "df4892247b634fd9209ac48d9ff05f4cdd852cc5dca4ab586b4e850125a8fde6",
-  "last_update": "2025-10-05T12:39:42.808573"
+  "json_web_files": {
+    "www.pour-les-personnes-agees.gouv.fr_actualites_conseils-et-gestes-simples-a-adopter-pour-se-proteger-des-fortes-chaleurs.json": "23cae90556815e9e10538a3a4d8b0026ab8f6c3cbe48744c8d03420edbbc2300",
+    "www.pour-les-personnes-agees.gouv.fr_preserver-son-autonomie_preserver-son-autonomie-et-sa-sante_prevenir-les-chutes.json": "8bd209aa3312c5cb16c57a7140d7242d7a8354df67aebc061e3dfe933675c6ec",
+    "www.pour-les-personnes-agees.gouv.fr_preserver-son-autonomie_preserver-son-autonomie-et-sa-sante_deshydratation-conseils-de-prevention-en-prevision-des-fortes-chaleurs.json": "e2f7db6021a6b6c0e7564e743e9403abb8f75c36932a3984831baae2129d9e73",
+    "www.pour-les-personnes-agees.gouv.fr_annuaires-et-services_facile-a-lire-et-a-comprendre_la-teleassistance-comment-ca-marche.json": "35d2ff0a5d3cfc8b46e37976f3a783341bc8100d9f201cacdaded19ecd62e140",
+    "www.pour-les-personnes-agees.gouv.fr_preserver-son-autonomie_amenager-son-logement-et-s-equiper_des-equipements-pour-faciliter-son-quotidien.json": "3f06a08741a3370b201b760c86c574f0d709ea374a6f04759f73508e7be6e892",
+    "www.pour-les-personnes-agees.gouv.fr_preserver-son-autonomie_preserver-son-autonomie-et-sa-sante_denutrition-des-personnes-agees-la-reperer-et-la-prevenir.json": "0d80466a9fa6e7884b8c954a9a7a925eed6eda61ae53f528a28329d7f818e7a5",
+    "www.pour-les-personnes-agees.gouv.fr_vivre-a-domicile_etre-hospitalise_etre-hospitalise-ce-qu-il-faut-savoir.json": "9c2e1b0c56cc7b0a39da169ba5b583ff62ee9a8684849707c9aa0010fb5b2b49",
+    "www.pour-les-personnes-agees.gouv.fr_preserver-son-autonomie_amenager-son-logement-et-s-equiper_amenager-son-logement.json": "e1804cdd37646f3fba4f0f617b933c933d6b46480ee5b4623f23342d91701509",
+    "www.pour-les-personnes-agees.gouv.fr_vivre-a-domicile_beneficier-de-soins-a-domicile_l-had-hospitalisation-a-domicile.json": "f8f68e2a34bbafc9e24566e0f42e0eb8b86a5a58a9d47dd9a371b9379451bb40",
+    "www.pour-les-personnes-agees.gouv.fr_preserver-son-autonomie_amenager-son-logement-et-s-equiper_les-aides-financieres-pour-adapter-son-logement.json": "870c346db1a12f32c2213fa076cee1762e3584325a1bd05f97e4ea2c5ecedfb1",
+    "www.pour-les-personnes-agees.gouv.fr_preserver-son-autonomie_amenager-son-logement-et-s-equiper.json": "d1e1295c0104e04cda6b669206e5b90012f9662b80a3a556777906ea68021e86",
+    "www.pour-les-personnes-agees.gouv.fr_preserver-son-autonomie_amenager-son-logement-et-s-equiper_choisir-un-professionnel-pour-amenager-son-logement.json": "dddd54c49b4b2cdae9039b9479a63cec8df4adc6501b0e60e784c69362b429c6",
+    "www.pour-les-personnes-agees.gouv.fr_vivre-a-domicile_beneficier-d-aide-a-domicile_la-teleassistance.json": "973ec181b4bbccf561b1d0e90ffc83a6417b9ee1dba93257cbe58c6077a2a988",
+    "www.pour-les-personnes-agees.gouv.fr_vivre-a-domicile_beneficier-d-aide-a-domicile.json": "3bb3a90bb8e9c886383f0f56c9eb284da2ec06e8c90415c34ac0be86c326499d",
+    "www.pour-les-personnes-agees.gouv.fr_vivre-a-domicile_etre-hospitalise.json": "3dfd78935677c242368d2d56966cbd148a8b6fb40d118a4c4a312f3e8fe94654",
+    "www.pour-les-personnes-agees.gouv.fr_annuaires-et-services_fiches-pratiques_fiches-pratiques-sortie-d-hospitalisation.json": "93214240a66b1a1843671ec6df54e7b52babbc04123da28c3fc3f9e2fd6fe678",
+    "www.pour-les-personnes-agees.gouv.fr_vivre-a-domicile_aides-financieres_les-aides-financieres-pour-installer-une-teleassistance.json": "426dc14141b561ee61ad422d4af9ae6fa0546268c3fe05f0dbd4994c27832f7d",
+    "www.pour-les-personnes-agees.gouv.fr_preserver-son-autonomie_preserver-son-autonomie-et-sa-sante_comment-prevenir-les-risques-de-chutes-chez-les-personnes-agees.json": "ec9157e1e0c3e4a4b9d1f8adaa2a988f43d979805a66924b19e3da8378597ee1",
+    "www.pour-les-personnes-agees.gouv.fr_vivre-a-domicile_etre-hospitalise_comment-organiser-sa-sortie-d-hospitalisation.json": "2ad3c1b1b9d5f7d613bcb57db46adc1406982e2db66e68f8c1b36830bfbb4287",
+    "www.pour-les-personnes-agees.gouv.fr_vivre-a-domicile_beneficier-de-soins-a-domicile.json": "d0a0bf2b1713be948355d1e6aa9a1024af5a7a9bdd5974aae593f86ef2a94dd3",
+    "www.pour-les-personnes-agees.gouv.fr_vivre-a-domicile_beneficier-de-soins-a-domicile_les-ssiad-services-de-soins-infirmiers-a-domicile.json": "57447337b4272a77dee07d86f94bef62f503ad8078af305f33190c44b5f62b61",
+    "www.pour-les-personnes-agees.gouv.fr_vivre-a-domicile_beneficier-d-aide-a-domicile_les-services-d-aide-a-domicile.json": "21c7c06e78b4d18a16679cc72d6594d4bb6a12e4ab4769ae9cc5a10d0d385662",
+    "www.pour-les-personnes-agees.gouv.fr_preserver-son-autonomie_amenager-son-logement-et-s-equiper_ou-trouver-des-informations-et-des-conseils-sur-les-aides-techniques.json": "2c69215a863556f24d4d971d1f834ed07f7e971a4a8ff4154665f4a9b18dbdb6",
+    "www.pour-les-personnes-agees.gouv.fr_preserver-son-autonomie_preserver-son-autonomie-et-sa-sante_les-consequences-de-la-denutrition-pour-les-personnes-agees.json": "b35563e85ed5fb7a6011ff2d451d3380525eb05555d9488b4fb7fa7bec379151",
+    "www.pour-les-personnes-agees.gouv.fr_vivre-a-domicile_beneficier-d-aide-a-domicile_j-ai-besoin-d-etre-aide-a-domicile-comment-faire.json": "15ad495272d9ab527a8d1749c50db30c493b679718a610991f11f23c4e4926ad",
+    "www.pour-les-personnes-agees.gouv.fr_preserver-son-autonomie_preserver-son-autonomie-et-sa-sante_prevenir-les-chutes-des-conseils-en-video.json": "f95fa1be78ddb8878066c26b3029bdd2c474687c7e0e05d88dff9a2d6d1d8b50",
+    "www.pour-les-personnes-agees.gouv.fr_annuaires-et-services_fiches-pratiques_fiche-pratique-sortie-d-hospitalisation-a-qui-s-adresser-en-cas-de-perte-d-autonomie.json": "fe6db66d8fde76cb7f96a94a156c2bd276abee191bf543f643b8f98693e1a0fb",
+    "www.pour-les-personnes-agees.gouv.fr_preserver-son-autonomie_preserver-son-autonomie-et-sa-sante_denutrition-comment-veiller-a-une-bonne-alimentation.json": "017eaece4562294eee9d26080f7acb3319dc695373aa8af7a83d21a5e30e4d2f",
+    "www.pour-les-personnes-agees.gouv.fr_vivre-a-domicile_aides-financieres_l-apa-a-domicile.json": "06384038e3d019dd02b39bd77d7f2591cf8ec42d94d16944bdb75aa5b8987240"
+  },
+  "trusted_sites_py": "7fcd45e599345aa359b8c1a5d625d7c28619344a8812105e2ae67969755b0a82",
+  "last_update": "2025-10-05T16:24:42.861386"
 }
