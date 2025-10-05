@@ -87,16 +87,16 @@ trusted_sites = [
     #     ],
     #     "max_pages": 50
     # },
-    # {
-    #     "name": "Pour les personnes âgées – Prévention des chutes à domicile",
-    #     "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
-    #     "start_pages": [
-    #         "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/comment-prevenir-les-risques-de-chutes-chez-les-personnes-agees",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/prevenir-les-chutes-des-conseils-en-video",
-    #         "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/prevenir-les-chutes"
-    #     ],
-    #     "max_pages": 50
-    # },
+    {
+        "name": "Pour les personnes âgées – Prévention des chutes à domicile",
+        "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
+        "start_pages": [
+            "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/comment-prevenir-les-risques-de-chutes-chez-les-personnes-agees",
+            "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/prevenir-les-chutes-des-conseils-en-video",
+            "https://www.pour-les-personnes-agees.gouv.fr/preserver-son-autonomie/preserver-son-autonomie-et-sa-sante/prevenir-les-chutes"
+        ],
+        "max_pages": 50
+    },
     # {
     #     "name": "Pour les personnes âgées – Dénutrition & alimentation (prévenir la perte d’autonomie)",
     #     "base_url": "https://www.pour-les-personnes-agees.gouv.fr",
