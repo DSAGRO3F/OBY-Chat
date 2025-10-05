@@ -28,7 +28,7 @@ PRESERVE_NULL_PATHS = {
 }
 
 # --- Debug
-DEBUG_CLEANING = True  # passe à False quand tu as fini de tracer
+DEBUG_CLEANING = False  # passer à False si plus besoin
 
 def _dbg(path: str, msg: str):
     if DEBUG_CLEANING:
@@ -385,15 +385,15 @@ def clean_patient_document(
 
     changes: List[str] | None = [] if trace else None
 
-    # 1) nettoyage générique (vides / "non renseigné" / "null")
+    # 1) nettoyage (vides / "non renseigné" / "null")
     cleaned = _clean_rec(data, changes, "")
 
-    # 2) retrait ciblé des champs sensibles
+    # 2) retrait champs sensibles
     if isinstance(cleaned, dict):
         _remove_usager_sensitive_fields(cleaned, changes)
         _remove_contacts_sensitive_fields(cleaned, changes)
 
-    # 3) élagage des conteneurs désormais vides
+    # 3) enlever conteneurs désormais vides
     cleaned = _prune_empty_containers(cleaned, changes, "")
 
     if trace:

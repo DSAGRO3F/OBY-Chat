@@ -159,8 +159,6 @@ def pick(options: Sequence[T], debug: bool = False) -> T:
         'Bob'
     """
     choice = secrets.choice(options)
-    if debug:
-        print(f"[DEBUG] Picked value: {choice}")
     return choice
 
 # ------
@@ -246,15 +244,15 @@ def _sample_dob_from_age(age: int, today: dt.date | None = None) -> dt.date:
 # -------- I.a Date naissance usager -----------
 def _anonymize_usager_dob_full(doc: dict, path: list[str], mapping: dict[str, str], debug: bool = False) -> None:
     original = _get_at_path(doc, path, debug=debug)
-    if debug:
-        print(f"[DEBUG] DOB original at {path}: {original!r}")
+    # if debug:
+    #     print(f"[DEBUG] DOB original at {path}: {original!r}")
 
     age = _sample_age()
     dob = _sample_dob_from_age(age)
     anon_value = dob.isoformat()
 
-    if debug:
-        print(f"[DEBUG] DOB full -> {anon_value!r} (âge simulé ≈ {age})")
+    # if debug:
+    #     print(f"[DEBUG] DOB full -> {anon_value!r} (âge simulé ≈ {age})")
 
     _replace_and_map(
         doc=doc,
@@ -274,13 +272,13 @@ def _anonymize_contact_dob_full(
     debug: bool = False
 ) -> None:
     original = _get_at_path(doc, path, debug=debug)
-    if debug:
-        print(f"[DEBUG] Contact DOB original at {path}: {original!r}")
+    # if debug:
+    #     print(f"[DEBUG] Contact DOB original at {path}: {original!r}")
 
     age = _sample_age()
     dob = _sample_dob_from_age(age).isoformat()
-    if debug:
-        print(f"[DEBUG] Contact DOB full -> {dob!r} (âge simulé ≈ {age})")
+    # if debug:
+    #     print(f"[DEBUG] Contact DOB full -> {dob!r} (âge simulé ≈ {age})")
 
     _replace_and_map(
         doc=doc,
@@ -344,8 +342,8 @@ def build_usager_persona(
         "mobile": "mobile_1",
         "mail": "mail_1"
     }
-    if debug:
-        print(f"[DEBUG] build_usager_persona(gender={gender}, sexe={sexe}, civilite={civilite}) -> {persona}")
+    # if debug:
+    #     print(f"[DEBUG] build_usager_persona(gender={gender}, sexe={sexe}, civilite={civilite}) -> {persona}")
     return persona
 
 
@@ -444,8 +442,8 @@ def build_contact_persona(
         "last_name": last,
         "dob": dob,
     }
-    if debug:
-        print(f"[DEBUG] build_contact_persona(gender={gender}, sexe={sexe}, civilite={civilite}) -> {persona}")
+    # if debug:
+    #     print(f"[DEBUG] build_contact_persona(gender={gender}, sexe={sexe}, civilite={civilite}) -> {persona}")
     return persona
 
 
@@ -541,11 +539,11 @@ def _get_at_path(d: Dict[str, Any], path: List[str], debug: bool = False) -> Any
                     print(f"[DEBUG] _get_at_path: invalid list index at segment '{p}' for path={path}")
                 return None
         else:
-            if debug:
-                print(f"[DEBUG] _get_at_path: path not found at segment '{p}' for path={path}")
+            # if debug:
+            #     print(f"[DEBUG] _get_at_path: path not found at segment '{p}' for path={path}")
             return None
-    if debug:
-        print(f"[DEBUG] _get_at_path({path}) -> {cur!r}")
+    # if debug:
+    #     print(f"[DEBUG] _get_at_path({path}) -> {cur!r}")
     return cur
 
 
@@ -568,8 +566,8 @@ def _set_at_path(d: Dict[str, Any], path: List[str], new_value: Any, debug: bool
     """
 
     if not path:
-        if debug:
-            print("[DEBUG] _set_at_path: empty path")
+        # if debug:
+        #     print("[DEBUG] _set_at_path: empty path")
         return False
     cur: Any = d
     for i, p in enumerate(path):
@@ -577,34 +575,34 @@ def _set_at_path(d: Dict[str, Any], path: List[str], new_value: Any, debug: bool
         if isinstance(cur, dict):
             if is_last:
                 cur[p] = new_value
-                if debug:
-                    print(f"[DEBUG] _set_at_path: set {path} = {new_value!r}")
+                # if debug:
+                #     print(f"[DEBUG] _set_at_path: set {path} = {new_value!r}")
                 return True
             if p not in cur:
-                if debug:
-                    print(f"[DEBUG] _set_at_path: missing key '{p}' in path={path}")
+                # if debug:
+                #     print(f"[DEBUG] _set_at_path: missing key '{p}' in path={path}")
                 return False
             cur = cur[p]
         elif isinstance(cur, list):
             try:
                 idx = int(p.strip("[]"))
             except Exception:
-                if debug:
-                    print(f"[DEBUG] _set_at_path: invalid list index token '{p}' in path={path}")
+                # if debug:
+                #     print(f"[DEBUG] _set_at_path: invalid list index token '{p}' in path={path}")
                 return False
             if idx < 0 or idx >= len(cur):
-                if debug:
-                    print(f"[DEBUG] _set_at_path: list index out of range [{idx}] in path={path}")
+                # if debug:
+                #     print(f"[DEBUG] _set_at_path: list index out of range [{idx}] in path={path}")
                 return False
             if is_last:
                 cur[idx] = new_value
-                if debug:
-                    print(f"[DEBUG] _set_at_path: set {path} = {new_value!r}")
+                # if debug:
+                #     print(f"[DEBUG] _set_at_path: set {path} = {new_value!r}")
                 return True
             cur = cur[idx]
         else:
-            if debug:
-                print(f"[DEBUG] _set_at_path: non-container encountered at '{p}' for path={path}")
+            # if debug:
+            #     print(f"[DEBUG] _set_at_path: non-container encountered at '{p}' for path={path}")
             return False
     return False
 
@@ -636,8 +634,8 @@ def _replace_and_map(
         while anon in mapping_anon_to_orig and mapping_anon_to_orig[anon] != orig:
             anon = f"{base}#{i}"
             i += 1
-        if debug:
-            print(f"[DEBUG] Collision détectée : '{base}' déjà utilisé. Nouvelle valeur : '{anon}'")
+        # if debug:
+        #     print(f"[DEBUG] Collision détectée : '{base}' déjà utilisé. Nouvelle valeur : '{anon}'")
 
     # écrire la valeur suffixée (le cas échéant) dans le document
     _set_at_path(doc, path, anon, debug=debug)
@@ -645,8 +643,8 @@ def _replace_and_map(
     # enregistrer la correspondance
     mapping_anon_to_orig[anon] = orig
 
-    if debug:
-        print(f"[DEBUG] Map: '{anon}' -> '{orig}'")
+    # if debug:
+    #     print(f"[DEBUG] Map: '{anon}' -> '{orig}'")
 
 
 """Section: ANONYMISATION USAGER (champs listés)
@@ -739,8 +737,8 @@ def anonymize_usager_fields(
             - Le mapping {valeur_anonymisée: valeur_originale}.
     """
 
-    if debug:
-        print("[DEBUG] anonymize_usager_fields: start")
+    # if debug:
+    #     print("[DEBUG] anonymize_usager_fields: start")
 
     mapping: Dict[str, str] = {}
 
@@ -804,10 +802,10 @@ def anonymize_usager_fields(
         _replace_with_original(doc, USAGER_PATHS["contactInfosPersonnels_mail"], persona["mail"], mapping, debug)
 
 
-    if debug:
-        preview = list(mapping.items())[:10]
-        print(f"[DEBUG] Mapping preview (first 10): {preview}")
-        print("[DEBUG] anonymize_usager_fields: done")
+    # if debug:
+    #     preview = list(mapping.items())[:10]
+    #     print(f"[DEBUG] Mapping preview (first 10): {preview}")
+    #     print("[DEBUG] anonymize_usager_fields: done")
 
     return doc, mapping
 
@@ -823,14 +821,14 @@ def anonymize_contacts_fields(
 ) -> Dict[str, Any]:
     contacts = doc.get("contacts")
     if not isinstance(contacts, list) or not contacts:
-        if debug:
-            print("[DEBUG] Aucun contact à anonymiser.")
+        # if debug:
+        #     print("[DEBUG] Aucun contact à anonymiser.")
         return doc
 
     for i, contact in enumerate(contacts):
         if not isinstance(contact, dict):
-            if debug:
-                print(f"[DEBUG] Contact index {i} non dict, on ignore.")
+            # if debug:
+            #     print(f"[DEBUG] Contact index {i} non dict, on ignore.")
             continue
 
         paths = _contact_paths(i)
@@ -844,10 +842,10 @@ def anonymize_contacts_fields(
         )
 
         # log de contrôle
-        if debug:
-            g_detected = detect_genre_contact(contact)
-            print(f"[DEBUG] Contact[{i}] genre détecté (source doc): {g_detected!r}")
-            print(f"[DEBUG] Contact[{i}] persona -> {persona}")
+        # if debug:
+        #     g_detected = detect_genre_contact(contact)
+        #     print(f"[DEBUG] Contact[{i}] genre détecté (source doc): {g_detected!r}")
+        #     print(f"[DEBUG] Contact[{i}] persona -> {persona}")
 
         # Remplacements des champs anonymisés
         # civilité : pour conserver l'originale, commenter ligne ci-dessous
@@ -860,9 +858,9 @@ def anonymize_contacts_fields(
         _anonymize_contact_dob_full(doc, paths["dateNaissance"], mapping, debug)
 
         # Champs marqués (*) : ne pas remplacer (on les log pour contrôle)
-        if debug:
-            kept = {k: _get_at_path(doc, v, debug=False) for k, v in paths.items() if k in CONTACTS_STATIC_KEEP}
-            print(f"[DEBUG] Contact[{i}] champs conservés (*) -> {kept}")
+        # if debug:
+        #     kept = {k: _get_at_path(doc, v, debug=False) for k, v in paths.items() if k in CONTACTS_STATIC_KEEP}
+        #     print(f"[DEBUG] Contact[{i}] champs conservés (*) -> {kept}")
 
     return doc
 
@@ -915,8 +913,8 @@ def deanonymize_fields(
         def _sub_other(m):
             k = m.group(0)
             original = mapping_anon_to_orig.get(k, k)
-            if debug:
-                print(f"[DEBUG] Remplacement '{k}' -> '{original}'")
+            # if debug:
+            #     print(f"[DEBUG] Remplacement '{k}' -> '{original}'")
             return original
         text = pattern_other.sub(_sub_other, text)
 
@@ -929,8 +927,8 @@ def deanonymize_fields(
         def _sub_word(m):
             k = m.group(1)
             original = mapping_anon_to_orig.get(k, k)
-            if debug:
-                print(f"[DEBUG] Remplacement '{k}' -> '{original}'")
+            # if debug:
+            #     print(f"[DEBUG] Remplacement '{k}' -> '{original}'")
             return original
         text = pattern_word.sub(_sub_word, text)
 

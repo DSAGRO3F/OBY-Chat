@@ -1,3 +1,8 @@
+from src.utils.memlog import start_trace, log_mem
+start_trace()
+
+
+
 """
 Module de génération de prompts pour produire des Plans Personnalisés d’Accompagnement (PPA) ou des recommandations médicales,
 à partir du POA d’un patient et d’une requête utilisateur. Intègre également la version RAG avec enrichissement par des documents issus de ChromaDB.
@@ -435,22 +440,22 @@ En fin de réponse, propose si possible **3 recommandations personnalisées** po
 """
 
 # Docstring pour system_prompt_medical_plan
-"""
-Construit dynamiquement un template de prompt à partir d’un prompt système et d’un template utilisateur.
-
-Args:
-    system_prompt (str): Prompt système décrivant le rôle et les règles du modèle.
-    user_prompt_template (PromptTemplate): Template structuré pour le message utilisateur.
-
-Returns:
-    ChatPromptTemplate: Prompt structuré pour le LLM.
-"""
-
-
-"""
-------------------------------- Prompt utilisé pour génération des recommandations associées au contexte patient
-------------------------------- Recherche de contenu associé au patient
-"""
+# """
+# Construit dynamiquement un template de prompt à partir d’un prompt système et d’un template utilisateur.
+#
+# Args:
+#     system_prompt (str): Prompt système décrivant le rôle et les règles du modèle.
+#     user_prompt_template (PromptTemplate): Template structuré pour le message utilisateur.
+#
+# Returns:
+#     ChatPromptTemplate: Prompt structuré pour le LLM.
+# """
+#
+#
+# """
+# ------------------------------- Prompt utilisé pour génération des recommandations associées au contexte patient
+# ------------------------------- Recherche de contenu associé au patient
+# """
 
 system_prompt_medical_plan = """
 Vous êtes un professionnel médical assistant à la décision clinique.
@@ -694,7 +699,11 @@ def rag_medical_response_from_llm(prompt_template, user_input, poa_content):
     """
 
     print("✅ 1. récupération des chunks")
+    log_mem("before_retrieve")
+    print(f"[RAG] len_poa_content={len(poa_content)}")
     retrieved_chunks = retrieve_relevant_chunks(query=poa_content, top_k_docx=int_1, top_k_web=int_2, separator="\n\n")
+    log_mem("after_retrieve")
+    print(f"[RAG] len_retrieved={len(retrieved_chunks)}")
     print("✅ retrieved_chunks OK")
 
 
@@ -713,13 +722,15 @@ def rag_medical_response_from_llm(prompt_template, user_input, poa_content):
     print("✅ 3. Envoi au modèle")
 
     try:
-        print("\n====== MESSAGE FINAL ENVOYÉ AU LLM ======\n")
-        print(messages)
-        print("=========================================\n")
+        total_chars = sum(len(getattr(m, "content", "") or "") for m in messages)
+        print(f"[RAG] messages_count={len(messages)} total_chars≈{total_chars}")
 
         response = llm_model.invoke(messages).content
         response = ensure_sources_footer(response, retrieved_chunks)
         print("✅ 4. Réponse modèle OK")
+        print("[RAG] LLM ok")
+        log_mem("after_llm")
+
         return response
 
 

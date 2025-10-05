@@ -25,4 +25,7 @@ src/vector_db/chromadb/
 # Base des constantes
 # constantes_sante.db
 
+# Fichiers tests
+src/tests
+
 

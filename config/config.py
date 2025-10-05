@@ -54,6 +54,14 @@ CHROMA_GLOBAL_DIR = BASE_DIR / "vector_db" / "chromadb"
 # Embedding model
 EMBEDDING_MODEL_NAME = "BAAI/bge-m3"
 NORMALIZE_EMBEDDINGS = True
+EMBEDDING_DEVICE = "cpu"   # au lieu de "mps" ou auto
+# === Provider d'embeddings ===
+EMBEDDING_PROVIDER = "openai"  # "openai" | "huggingface"
+OPENAI_EMBEDDING_MODEL = "text-embedding-3-small"  # (1536 dims) ou "text-embedding-3-large" (3072)
+BASE_DOCX_COLLECTION = "base_docx"
+BASE_WEB_COLLECTION  = "base_web"
+
+
 
 # Cheminns des flags
 # --- Flag 'index ready' (fallback possible via env en prod) ---
@@ -103,3 +111,8 @@ int_2 = 3
 sim_threshold = 0.60
 nov_min = 0.30
 nov_max = 0.75
+
+MAX_CHARS_PER_PASSAGE = 800
+MAX_PASSAGES_FINAL     = 8
+MAX_PASSAGES_PER_SRC   = 2
+CANDIDATE_WEB_CAP      = 30

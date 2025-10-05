@@ -1,24 +1,16 @@
 """
-Outils de récupération et de formatage des extraits (“chunks”) pour le RAG.
+Récupération et formatage des passages pertinents pour RAG depuis ChromaDB.
 
-Ce module interroge deux collections Chroma (DOCX prioritaire, WEB secondaire),
-sélectionne les passages pertinents, puis garde côté WEB uniquement ceux qui
-apportent une information complémentaire (TF-IDF “novelty”) et restent proches
-de la requête (similarité embeddings). Les extraits sont formatés avec des
-identifiants [DOCXn]/[WEBn], titres, sources/URLs et un fallback
-[WEB_PERTINENCE] si aucun lien web pertinent n’est retenu. Seuils et top-K
-sont pilotés par la configuration.
+Ce module interroge d’abord la collection DOCX prioritaire puis, en option,
+sélectionne des passages WEB complémentaires (filtrés par similarité requête
+et « nouveauté » TF-IDF vs DOCX). Les extraits sont normalisés et assemblés
+en texte injecté au prompt LLM. Des messages d’erreur clairs sont fournis
+(collection manquante, incompatibilité d’embeddings).
 """
 
+from functools import lru_cache
 from langchain_chroma import Chroma
 from langchain.schema import Document
-
-try:
-    from langchain_huggingface import HuggingFaceEmbeddings
-except Exception:
-    from langchain_community.embeddings import (
-        HuggingFaceBgeEmbeddings as HuggingFaceEmbeddings
-    )
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -27,20 +19,31 @@ import unicodedata
 
 from typing import Any, Dict, List, Tuple
 from urllib.parse import urlparse
-
-from src.utils.chroma_client import get_chroma_client
+from src.utils.chroma_client import get_chroma_client, get_embedding_model, get_collection_names
 from src.utils.vector_db_utils import is_chroma_index_ready
 
 from config.config import int_1 as DOCX_TOPK, int_2 as WEB_TOPK
-from config.config import EMBEDDING_MODEL_NAME, NORMALIZE_EMBEDDINGS
 from config.config import (
-                           sim_threshold as SIM_THRESHOLD,
-                           nov_min as NOV_MIN,
-                           nov_max as NOV_MAX,
-)
+                            sim_threshold as SIM_THRESHOLD,
+                            nov_min as NOV_MIN,
+                            nov_max as NOV_MAX,
+                            MAX_CHARS_PER_PASSAGE,
+                            )
 
-
-
+# --- 🟨 VectorStores, collection (base_docx, base_web)
+@lru_cache(maxsize=2)
+def _get_vectorstore(collection_name: str) -> Chroma:
+    """
+    Un seul vectorstore par collection (cache process).
+    Évite de recréer le modèle d’embedding et l’objet Chroma à chaque requête.
+    """
+    client = get_chroma_client()
+    emb = get_embedding_model()   # OpenAIEmbeddings si EMBEDDING_PROVIDER="openai"
+    return Chroma(
+        client=client,
+        collection_name=collection_name,
+        embedding_function=emb,
+    )
 
 # --- 🟨 Sécurisation fonctions ---
 # Garder la clé "embedding mismatch" en anglais dans le message pour que les tests la retrouvent.
@@ -101,11 +104,39 @@ def _display_domain(url: str) -> str:
     except Exception:
         return ""
 
-def _shorten(text: str, max_chars: int = 900) -> str:
+
+def _cap_text(t: str, max_chars: int) -> str:
+    if not t:
+        return ""
+    t = " ".join(t.split())
+    return t[:max_chars]
+
+
+def _shorten(text: str, max_chars: int | None = None) -> str:
+    """
+    Coupe le passage à MAX_CHARS_PER_PASSAGE,
+    en essayant de terminer sur un espace avant d'ajouter '…'.
+    """
     if not text:
         return ""
+    if max_chars is None:
+        max_chars = MAX_CHARS_PER_PASSAGE
+    if max_chars <= 1:
+        return "…" if text else ""
+
+    # normalisation espaces
     t = " ".join(text.split())
-    return (t[:max_chars-1] + "…") if len(t) > max_chars else t
+
+    if len(t) <= max_chars:
+        return t
+
+    # coupe sur le dernier espace avant la limite (fallback: cut dur)
+    cut = t.rfind(" ", 0, max_chars - 1)
+    if cut == -1 or cut < int(0.6 * max_chars):  # évite de trop reculer
+        cut = max_chars - 1
+
+    return t[:cut].rstrip() + "…"
+
 
 def _pick_title(meta: dict, source: str, is_web: bool) -> str:
     title = meta.get("titre") or meta.get("title") or meta.get("doc_title")
@@ -155,7 +186,7 @@ def _tfidf_novelty_scores(docx_text_agg: str, web_texts: list[str]) -> np.ndarra
         strip_accents='unicode',
         ngram_range=(1, 2),
         min_df=1,
-        max_features=30000,
+        max_features=12000,
         token_pattern=r"(?u)\b\w[\w’']+\b",
     )
     X = vec.fit_transform(corpus)  # row 0 = docx_agg, rows 1.. = webs
@@ -182,10 +213,33 @@ def _format_results_with_ids(
         nov_max: float = NOV_MAX,
 ) -> str:
     """
-    - DOCX en premier, bornés à docx_limit.
-    - WEB complémentaires uniquement (score de nouveauté >= seuil), bornés à web_limit.
-    - Si aucun web pertinent retenu: insère un message explicite.
-    """
+        Formate les passages DOCX et WEB en un texte unique prêt à être injecté au LLM.
+
+        Les résultats DOCX (prioritaires) sont limités puis assemblés. Les résultats WEB
+        sont filtrés pour ne conserver que les extraits complémentaires : ils doivent
+        être suffisamment similaires à la requête (seuil de similarité) et présenter
+        une « nouveauté » TF-IDF par rapport à l’agrégat DOCX comprise dans l’intervalle
+        [nov_min, nov_max]. Chaque extrait est tronqué, étiqueté ([DOCXn]/[WEBn]) et
+        accompagné de ses métadonnées (titre, source, url/site si disponible).
+
+        Args:
+            results_docx: Liste d’objets `Document` (ou équivalents) issus de la collection DOCX.
+            results_web: Liste d’objets `Document` (ou équivalents) issus de la collection WEB.
+            docx_limit: Nombre maximal d’extraits DOCX à conserver (par défaut: DOCX_TOPK).
+            web_limit: Nombre maximal d’extraits WEB à conserver après filtrage (par défaut: WEB_TOPK).
+            separator: Chaîne utilisée pour séparer les blocs formatés dans la sortie.
+            query: Requête utilisateur utilisée pour calculer la similarité requête↔WEB.
+            embedding_model: Modèle d’embedding (optionnel) pour la similarité requête↔WEB.
+            sim_threshold: Seuil minimal de similarité requête↔WEB pour garder un extrait WEB.
+            nov_min: Borne inférieure de l’intervalle de « nouveauté » TF-IDF (complémentarité minimale).
+            nov_max: Borne supérieure de l’intervalle de « nouveauté » TF-IDF (évite les hors-sujet).
+
+        Returns:
+            str: Un texte concaténé contenant, dans l’ordre, les extraits DOCX retenus
+            puis les extraits WEB complémentaires. Si aucun lien WEB pertinent n’est retenu
+            et que `web_limit > 0`, un bloc d’information l’indique explicitement.
+        """
+
     docx_limit = DOCX_TOPK if docx_limit is None else docx_limit # obj. chunks capturés pour docx
     web_limit = WEB_TOPK if web_limit is None else web_limit # obj. chunks capturés pour web
 
@@ -194,6 +248,7 @@ def _format_results_with_ids(
 
     # 2. Texte de référence DOCX (pour la mesure de complémentarité)
     docx_text_agg = " ".join([(getattr(d, "page_content", "") or "") for d in results_docx])
+    docx_text_agg = _cap_text(docx_text_agg, 12000)
 
     blocks: list[str] = []
     counters = {"DOCX": 0, "WEB": 0}
@@ -203,8 +258,12 @@ def _format_results_with_ids(
     for doc in results_docx:
         meta = getattr(doc, "metadata", {}) or {}
         source = meta.get("source") or meta.get("source_url") or meta.get("resolved_url") or "Source inconnue"
+        text = (getattr(doc, "page_content", "") or "").strip()
+        if not text:
+            continue
+        text = _cap_text(text, MAX_CHARS_PER_PASSAGE)
         title = _pick_title(meta, source, is_web=False)
-        extrait = _shorten((getattr(doc, "page_content", "") or "").strip())
+        extrait = _shorten(text)
 
         fiche_num = meta.get("fiche_numero") or meta.get("fiche")
         display_title = f"Fiche {fiche_num} — {title}" if fiche_num and not title.lower().startswith(
@@ -232,6 +291,7 @@ def _format_results_with_ids(
         text = (getattr(doc, "page_content", "") or "").strip()
         if not text:
             continue
+        text = _cap_text(text, MAX_CHARS_PER_PASSAGE)
         candidate_metas.append((meta, source, text))
         candidate_texts.append(text)
 
@@ -317,10 +377,12 @@ def _format_results_with_ids(
     if selected_web_blocks:
         blocks.extend(selected_web_blocks)
     else:
+        # 👉 si le web est désactivé (web_limit == 0), ne pas afficher le fallback
+        if web_limit == 0:
+            return separator.join(blocks)
         blocks.append("[WEB_PERTINENCE] Aucun lien web pertinent pour cette recherche.")
 
     return separator.join(blocks)
-
 
 
 
@@ -332,78 +394,101 @@ def retrieve_relevant_chunks(
     separator: str = "\n\n"
 ) -> str:
     """
-    Récupère et formatte les passages les plus pertinents à partir d'une requête utilisateur.
+        Récupère et formate les passages les plus pertinents depuis ChromaDB pour une requête.
 
-    Cette fonction interroge deux collections ChromaDB :
-    - d'abord la collection "base_docx" (prioritaire),
-    - puis la collection "base_web" (secondaire).
+        La fonction interroge deux collections Chroma (« base_docx » en priorité puis « base_web »),
+        à l’aide du modèle d’embedding centralisé, puis assemble les extraits via
+        `_format_results_with_ids`. Les passages WEB sont filtrés pour ne conserver que ceux
+        complémentaires aux DOCX selon la similarité et un score de « nouveauté » TF-IDF.
 
-    Les extraits les plus proches de la requête sont sélectionnés par similarité vectorielle,
-    puis concaténés et formatés pour être injectés dans le prompt du modèle LLM.
+        Args:
+            query: Requête utilisateur en texte libre.
+            top_k_docx: Nombre d’extraits à récupérer dans la collection DOCX.
+            top_k_web: Nombre d’extraits à récupérer dans la collection WEB (avant filtrage).
+            separator: Séparateur de blocs dans la chaîne finale.
 
-    Args:
-        query: Requête utilisateur ou texte à rechercher.
-        top_k_docx: Nombre d'extraits à récupérer depuis la base documentaire "docx".
-        top_k_web: Nombre d'extraits à récupérer depuis la base documentaire "web".
-        separator: Chaîne utilisée pour séparer les extraits dans le résultat final.
+        Returns:
+            str: Un texte prêt à l’injection dans le prompt LLM, contenant d’abord les extraits
+            DOCX retenus puis, si disponibles et pertinents, des extraits WEB étiquetés.
 
-    Returns:
-        Une chaîne de texte formatée contenant les extraits les plus pertinents,
-        chacun précédé de son titre et de sa source.
-    """
+        Raises:
+            RuntimeError: Si l’index Chroma n’est pas prêt ou si le modèle d’embedding ne
+                correspond pas à celui utilisé pour construire l’index (mismatch).
+            ValueError: Si une collection demandée est introuvable.
+        """
 
     if not is_chroma_index_ready():
         raise RuntimeError("Index ChromaDB indisponible : (ré)indexation en cours.")
 
     client = get_chroma_client()
-    embedding_model = HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL_NAME,
-        encode_kwargs={"normalize_embeddings": NORMALIZE_EMBEDDINGS},
-    )
+    embedding_model = get_embedding_model()
 
-    # Extraction des Documents (format langchain.Schema.Documents)
     def search_collection(collection_name: str, top_k: int) -> list[Document]:
-
         try:
-            collection = client.get_collection(collection_name)
-            print(f"✅ Collection trouvée : {collection_name}")
-        except Exception as e:
-            msg = missing_collection_message(collection_name)
-            print(f"❌ {msg}")
-            raise ValueError(msg) from e
-
-        vectorstore = Chroma(
-            client=client,
-            collection_name=collection_name,
-            embedding_function=embedding_model,
-        )
-
-        try:
+            # ✅ Pas d’appel préalable à client.get_collection()
+            vectorstore = _get_vectorstore(collection_name)
             return vectorstore.similarity_search(query=query, k=top_k)
+
         except Exception as e:
             emsg = str(e).lower()
+
+            # Collection manquante (messages typiques renvoyés par Chroma)
+            if ("not found" in emsg) or ("does not exist" in emsg) or ("no such collection" in emsg):
+                raise ValueError(missing_collection_message(collection_name)) from e
+
+            # Mismatch d'embeddings / dimension
             if any(key in emsg for key in ("dimension", "dimensions", "dimensionality", "shape", "embedding")):
-                # Si c'est déjà l'InvalidArgumentError de Chroma, on la re-propage telle quelle
-                try:
-                    from chromadb.errors import InvalidArgumentError as ChromaInvalidArgumentError
-                except Exception:
-                    ChromaInvalidArgumentError = None
-                if ChromaInvalidArgumentError and isinstance(e, ChromaInvalidArgumentError):
-                    raise
-                # Sinon on wrap en RuntimeError (accepté par le test)
                 raise RuntimeError(EMBEDDING_MISMATCH_MESSAGE) from e
+
+            # Autres erreurs: re-propager
             raise
 
-    # Recherche dans base_docx (prioritaire)
-    results_docx = search_collection("base_docx", top_k_docx)
-    print(f"🟧 Résultats pour 'base_docx' - {len(results_docx)} documents trouvés.")
 
+
+    # # Extraction des Documents (format langchain.Schema.Documents)
+    # def search_collection(collection_name: str, top_k: int) -> list[Document]:
+    #
+    #     try:
+    #         collection = client.get_collection(collection_name)
+    #         print(f"✅ Collection trouvée : {collection_name}")
+    #     except Exception as e:
+    #         msg = missing_collection_message(collection_name)
+    #         print(f"❌ {msg}")
+    #         raise ValueError(msg) from e
+    #
+    #     vectorstore = Chroma(
+    #         client=client,
+    #         collection_name=collection_name,
+    #         embedding_function=embedding_model,
+    #     )
+    #
+    #     try:
+    #         return vectorstore.similarity_search(query=query, k=top_k)
+    #     except Exception as e:
+    #         emsg = str(e).lower()
+    #         if any(key in emsg for key in ("dimension", "dimensions", "dimensionality", "shape", "embedding")):
+    #             # Si c'est déjà l'InvalidArgumentError de Chroma, on la re-propage telle quelle
+    #             try:
+    #                 from chromadb.errors import InvalidArgumentError as ChromaInvalidArgumentError
+    #             except Exception:
+    #                 ChromaInvalidArgumentError = None
+    #             if ChromaInvalidArgumentError and isinstance(e, ChromaInvalidArgumentError):
+    #                 raise
+    #             # Sinon on wrap en RuntimeError (accepté par le test)
+    #             raise RuntimeError(EMBEDDING_MISMATCH_MESSAGE) from e
+    #         raise
+
+    # Recherche dans base_docx (prioritaire)
+    results_docx = search_collection(get_collection_names("docx"), top_k_docx)
+    print(f"🟧 Résultats pour '{get_collection_names('docx')}' - {len(results_docx)} documents trouvés.")
 
     # Recherche dans base_web (secondaire)
     # on s'autorise à aller au delaà de la limte, on filtrera après
-    results_web = search_collection("base_web", max(1, top_k_web * 3))
-    print(f"🟧 Résultats pour 'base_web' - {len(results_web)} documents trouvés.")
-
+    if top_k_web > 0:
+        results_web = search_collection(get_collection_names("web"), max(1, top_k_web * 3))
+    else:
+        results_web = []
+    print(f"🟧 Résultats pour '{get_collection_names('web')}' - {len(results_web)} documents trouvés.")
 
     # Appel _format_results_with_ids(...)
     retrieved_chunks = _format_results_with_ids(

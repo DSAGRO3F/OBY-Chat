@@ -1,25 +1,36 @@
 """
-    Outils d’indexation ChromaDB pour OBY-IA.
+Indexation des sources (DOCX & WEB) dans ChromaDB.
 
-    Ce module expose des utilitaires pour (ré)indexer des collections ChromaDB
-    à partir de répertoires de JSON structurés :
-    - `base_docx` : documents dérivés de fiches DOCX,
-    - `base_web`  : documents dérivés du scraping de sites de confiance.
+Ce module parcourt un répertoire de fichiers JSON structurés et alimente deux
+collections ChromaDB persistantes :
+- BASE_DOCX_COLLECTION (contenus "docx" : fiches/chapitres, champ `texte_complet`)
+- BASE_WEB_COLLECTION  (contenus "web" : sections de pages, champ `sections[].texte`)
 
-    Fournit notamment une fonction de reconstruction qui
-    supprime la collection ciblée puis la reconstruit à partir des fichiers
-    présents sur disque, garantissant l’absence de documents « fantômes »
-    lorsqu’il y a des suppressions ou des changements de configuration.
+Caractéristiques :
+- Utilise un VectorStore LangChain (`langchain_chroma.Chroma`) connecté à un client
+  Chroma persistant fourni par `src.utils.chroma_client.get_chroma_client`.
+- Les embeddings sont centralisés par `src.utils.chroma_client.get_embedding_model`
+  (OpenAI ou HuggingFace selon la configuration). Cela garantit que l’indexation et
+  la recherche utilisent exactement le même modèle d’embedding.
+- Insertion par lots (batching) pour de bonnes performances et une utilisation
+  mémoire maîtrisée.
+- Métadonnées nettoyées/normalisées (titres, types, sources, URL absolues/domaines
+  pour le web, identifiants, etc.).
+- Journalisation simple (progression, erreurs d’E/S ou d’indexation).
 
-    Fonctions attendues dans ce module (ou importées) :
-    - `index_documents(source_dir, source_type, client)`: effectue l’indexation
-      à partir d’un répertoire JSON (crée la collection si nécessaire).
-    - `collection_name_for(source_type)`: mappe 'docx'/'web' vers le nom
-      de collection ChromaDB (p. ex. 'base_docx' / 'base_web').
-    - `rebuild_collection_from_disk(client, source_type, source_dir)`: supprime
-      la collection puis réindexe depuis le disque (cf. docstring ci-dessous).
+Prérequis :
+- Les chemins de persistance Chroma et les noms de collections sont définis dans
+  la configuration (cf. `config.config`).
+- Si EMBEDDING_PROVIDER="openai", l’environnement doit contenir la clé
+  `OPENAI_API_KEY`.
 
+Exemple minimal :
+    from src.utils.chroma_client import get_chroma_client
+    client = get_chroma_client()
+    index_documents("data/input/poa_docx", "docx", client)
+    index_documents("data/input/web_pages", "web", client)
 """
+
 
 
 from uuid import uuid4
@@ -30,11 +41,10 @@ import hashlib
 from pathlib import Path
 from urllib.parse import urlparse, urljoin, urldefrag
 import re, unicodedata
+from langchain_chroma import Chroma
 
-from chromadb.utils import embedding_functions
-from src.utils.chroma_client import get_chroma_client
+from src.utils.chroma_client import get_chroma_client, get_embedding_model, get_collection_names
 
-from config.config import EMBEDDING_MODEL_NAME
 
 # ======================== #
 # --- Normaliser texte --- #
@@ -142,55 +152,24 @@ def _normalize_abs_url(raw_url: str | None, *, file: str, fiche: dict) -> tuple[
     return None, None
 
 
+def rebuild_collection_from_disk(client: ClientAPI, source_type: str, source_dir: str) -> None:
+    """Reconstruit intégralement une collection Chroma à partir d’un répertoire local.
 
-def _collection_name_for(source_type: str) -> str:
-    """Retourne le nom de collection ChromaDB pour un `source_type` donné.
+        Supprime/réinitialise la collection associée à `source_type`, puis relance
+        l’indexation de tous les fichiers JSON présents dans `source_dir`. À utiliser
+        après un changement de modèle d’embedding, une évolution du schéma de
+        métadonnées ou pour repartir d’un index propre.
 
         Args:
-            source_type: 'docx' ou 'web'.
+            client: Instance du client Chroma persistant.
+            source_type: Type de source à (re)construire. Doit valoir "docx" ou "web".
+            source_dir: Chemin du répertoire contenant les fichiers JSON à indexer.
 
         Returns:
-            Nom de collection (p. ex. 'base_docx' ou 'base_web').
+            None. La progression et les éventuelles erreurs sont journalisées.
+        """
 
-        Raises:
-            ValueError: si `source_type` n’est pas 'docx' ni 'web'.
-    """
-
-    if source_type not in {"docx", "web"}:
-        raise ValueError(f"source_type invalide: {source_type!r} (attendus: 'docx' ou 'web')")
-    return "base_docx" if source_type == "docx" else "base_web"
-
-
-
-def rebuild_collection_from_disk(client: ClientAPI, source_type: str, source_dir: str) -> None:
-    """
-    Reconstruit entièrement la collection ChromaDB d’un type donné.
-
-    Objectif: garantir la cohérence parfaite entre l’état
-    disque (répertoire JSON) et l’index ChromaDB (par ex. après suppressions
-    de fichiers, changements de configuration des sites, migration d’embedding,
-    etc.).
-
-    1) supprime la collection ciblée (si elle existe),
-    2) (re)crée et réindexe la collection en appelant `index_documents`
-       à partir des JSON présents dans `source_dir`.
-
-    Args:
-        client: instance ChromaDB (ClientAPI) déjà initialisée.
-        source_type: 'docx' ou 'web' (détermine la collection à reconstruire).
-        source_dir: chemin du répertoire contenant les JSON à indexer.
-
-    Raises:
-        ValueError: si `source_type` n’est pas 'docx' ni 'web'.
-        Exception: si la suppression ou la réindexation échoue (erreurs du client
-            ChromaDB ou d’E/S remontées telles quelles).
-
-    Returns:
-        None
-
-    """
-
-    name = _collection_name_for(source_type)
+    name = get_collection_names(source_type)
     try:
         client.delete_collection(name=name)
         print(f"🔴 Collection supprimée : {name}")
@@ -201,29 +180,25 @@ def rebuild_collection_from_disk(client: ClientAPI, source_type: str, source_dir
     print(f"✅ Collection reconstruite : {name}")
 
 
-def index_documents(source_dir: str, source_type: str, client: ClientAPI):
-    """
-    Indexe les documents JSON contenus dans un répertoire dans une collection ChromaDB.
+def index_documents(source_dir: str, source_type: str, client: "ClientAPI|None"):
+    """Indexe des fichiers JSON dans la collection Chroma correspondant au type de source.
 
-    Chaque document est découpé en sections (ou chunk unique dans le cas d'un fichier DOCX complet),
-    puis inséré dans une base vectorielle avec ses métadonnées.
+        Pour `source_type="docx"`, lit `texte_complet` et ses métadonnées par fiche,
+        puis ajoute les passages à la collection DOCX. Pour `source_type="web"`, lit
+        les `sections[].texte`, normalise l’URL/le domaine si disponibles, puis ajoute
+        les passages à la collection WEB. L’embedding utilisé est centralisé afin
+        d’assurer la cohérence avec la phase de recherche.
 
-    Args:
-        source_dir (str): Chemin du dossier contenant les fichiers JSON à indexer.
-        source_type (str): Type de document à indexer, soit 'docx' soit 'web'.
-        client (Client): Instance du client ChromaDB utilisée pour la persistance des données.
+        Args:
+            source_dir: Chemin du répertoire contenant les fichiers JSON à indexer.
+            source_type: Type de contenu à indexer ("docx" ou "web").
+            client: Client Chroma persistant. S’il est None, un client sera obtenu
+                via la fabrique interne.
 
-    Entrées :
-        - source_dir (str) : Dossier contenant les fichiers JSON.
-        - source_type (str) : 'docx' ou 'web' (détermine la collection cible).
-
-    Sorties :
-        - Indexation des chunks dans une collection nommée selon la source.
-
-
-    Raises:
-        ValueError: Si le type de source est invalide (autre que 'docx' ou 'web').
-    """
+        Returns:
+            None. La progression, le nombre d’éléments indexés et les erreurs éventuelles
+            sont journalisés.
+        """
 
     print("🟡 Lancement fonction -> index_documents()... ")
     if client is None:
@@ -232,23 +207,44 @@ def index_documents(source_dir: str, source_type: str, client: ClientAPI):
     if source_type not in ("docx", "web"):
         raise ValueError("source_type doit être 'docx' ou 'web'.")
 
-    collection_name = "base_docx" if source_type == "docx" else "base_web"
+    collection_name = get_collection_names(source_type)
+    print(f"🟡Initialisation de la collection {collection_name}...")
 
-    # 🔹 Initialisation collection
-    print(f'🟡Initialisation de la collection {collection_name}...')
-    embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
-        model_name=EMBEDDING_MODEL_NAME
+    # 1) Vectorstore LangChain avec embedding centralisé (OpenAIEmbeddings si config openai)
+    vectorstore = Chroma(
+        client=client,
+        collection_name=collection_name,
+        embedding_function=get_embedding_model(),
     )
-
-    collection = client.get_or_create_collection(name=collection_name, embedding_function=embedding_fn)
 
     print(f"🟡Indexation des documents depuis : {source_dir} (type: {source_type})")
 
     total_files, indexed_chunks = 0, 0
 
+    BATCH = 128
+    batch_texts: list[str] = []
+    batch_metas: list[dict] = []
+    batch_ids: list[str] = []
+
+    def _flush_batch():
+        nonlocal batch_texts, batch_metas, batch_ids, indexed_chunks
+        if not batch_texts:
+            return
+        try:
+            vectorstore.add_texts(texts=batch_texts, metadatas=batch_metas, ids=batch_ids)
+            indexed_chunks += len(batch_texts)
+            print(f"   ↳ batch ajouté : {len(batch_texts)} docs (total indexés: {indexed_chunks})")
+        except Exception as e:
+            print(f"❌ Erreur d’ajout batch ({len(batch_texts)} docs) : {e}")
+        finally:
+            batch_texts.clear()
+            batch_metas.clear()
+            batch_ids.clear()
+
     for file in os.listdir(source_dir):
         if not file.endswith(".json"):
             continue
+        total_files += 1
         print(f"🟡 Traitement du fichier JSON : {file}")
 
         file_path = os.path.join(source_dir, file)
@@ -263,7 +259,7 @@ def index_documents(source_dir: str, source_type: str, client: ClientAPI):
 
         for fiche in fiches:
 
-            # ✅ DOCX
+            # ✅ docx
             if source_type == "docx":
                 chunk_text = (fiche.get("texte_complet") or "").strip()
                 if not chunk_text:
@@ -289,16 +285,20 @@ def index_documents(source_dir: str, source_type: str, client: ClientAPI):
                     "section_index": 0,
                     "source_type": "docx",
                     "date_indexation": datetime.now().strftime("%Y-%m-%d"),
+                    "id": chunk_id,  # utile pour traçabilité
                 }
                 meta = _sanitize_meta(meta)
 
-                try:
-                    collection.add(documents=[chunk_text], ids=[chunk_id], metadatas=[meta])
-                    indexed_chunks += 1
-                except Exception as e:
-                    print(f"❌ Erreur d’ajout depuis {file} : {e}\n[DEBUG meta]={meta}")
+                batch_texts.append(chunk_text)
+                batch_metas.append(meta)
+                batch_ids.append(chunk_id)
 
                 print(f"➡️ Titre fiche : {titre} - Source : {source}")
+
+            if len(batch_texts) >= BATCH:
+                _flush_batch()
+
+
 
             # ✅ WEB
             elif source_type == "web":
@@ -307,10 +307,10 @@ def index_documents(source_dir: str, source_type: str, client: ClientAPI):
                     print(f"⚠️ Aucune section trouvée dans le fichier {file}, source_type : {source_type}")
                     continue
 
-                # 1. extraire une URL brute parmi plusieurs clés possibles
+                # 1) URL candidate
                 raw_url = _first_key(fiche, CANDIDATE_URL_KEYS)
 
-                # 2. calculer une URL absolue + domaine
+                # 2) Normalisation URL absolue + domaine
                 url_val, domain = _normalize_abs_url(raw_url, file=file, fiche=fiche)
 
                 titre = (
@@ -327,9 +327,12 @@ def index_documents(source_dir: str, source_type: str, client: ClientAPI):
                 print(f"➡️ Titre fiche : {titre} - Source : {source_for_histo}")
 
                 if not url_val:
-                    # log pour debug: quelles clés présentait la fiche ?
-                    print(f"🟡 [WEB] Pas d'URL exploitable pour {file} ; clés dispo: "
-                          f"{[k for k in ['source_url', 'url', 'page_url', 'canonical_url', 'canonical', 'href', 'permalink', 'base_url'] if fiche.get(k)]}")
+                    print(
+                        f"🟡 [WEB] Pas d'URL exploitable pour {file} ; clés dispo: "
+                        f"{[k for k in ['source_url', 'url', 'page_url', 'canonical_url', 'canonical', 'href', 'permalink', 'base_url'] if fiche.get(k)]}"
+                    )
+
+                basename = Path(file).name
 
                 for i, section in enumerate(sections):
                     chunk_text = (section.get("texte") or "").strip()
@@ -346,6 +349,9 @@ def index_documents(source_dir: str, source_type: str, client: ClientAPI):
                         "section_index": int(i),
                         "source_type": "web",
                         "date_indexation": datetime.now().strftime("%Y-%m-%d"),
+                        "source_path": str(file),
+                        "source_basename": basename,
+                        "id": chunk_id,
                     }
                     if url_val:
                         meta["url"] = url_val
@@ -354,13 +360,14 @@ def index_documents(source_dir: str, source_type: str, client: ClientAPI):
 
                     meta = _sanitize_meta(meta)
 
-                    try:
-                        collection.add(documents=[chunk_text], ids=[chunk_id], metadatas=[meta])
-                        indexed_chunks += 1
-                    except Exception as e:
-                        print(f"❌ Erreur d'ajout d'une section depuis {file}, section {i} : {e}\n[DEBUG meta]={meta}")
+                    batch_texts.append(chunk_text)
+                    batch_metas.append(meta)
+                    batch_ids.append(chunk_id)
 
-        total_files += 1
+                    if len(batch_texts) >= BATCH:
+                        _flush_batch()
 
-    print(f"✅ {indexed_chunks} sections indexées à partir de {total_files} fichiers.")
+            # 🟠 flush final — une seule fois pour DOCX/WEB
+            _flush_batch()
 
+            print(f"✅ {indexed_chunks} sections indexées à partir de {total_files} fichiers.")
