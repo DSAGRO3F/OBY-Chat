@@ -10,7 +10,7 @@ en texte injecté au prompt LLM. Des messages d’erreur clairs sont fournis
 
 from functools import lru_cache
 from langchain_chroma import Chroma
-from langchain.schema import Document
+from langchain_core.documents import Document
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
