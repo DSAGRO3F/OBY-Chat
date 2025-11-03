@@ -543,25 +543,36 @@ pour éviter tout mélange d’historiques entre patients, et une vue prête à 
 ---
 
 <!---
-    Outils d’indexation ChromaDB pour OBY-IA.
+Indexation des sources (DOCX & WEB) dans ChromaDB.
 
-    Ce module expose des utilitaires pour (ré)indexer des collections ChromaDB
-    à partir de répertoires de JSON structurés :
-    - `base_docx` : documents dérivés de fiches DOCX,
-    - `base_web`  : documents dérivés du scraping de sites de confiance.
+Ce module parcourt un répertoire de fichiers JSON structurés et alimente deux
+collections ChromaDB persistantes :
+- BASE_DOCX_COLLECTION (contenus "docx" : fiches/chapitres, champ `texte_complet`)
+- BASE_WEB_COLLECTION  (contenus "web" : sections de pages, champ `sections[].texte`)
 
-    Fournit notamment une fonction de reconstruction qui
-    supprime la collection ciblée puis la reconstruit à partir des fichiers
-    présents sur disque, garantissant l’absence de documents « fantômes »
-    lorsqu’il y a des suppressions ou des changements de configuration.
+Caractéristiques :
+- Utilise un VectorStore LangChain (`langchain_chroma.Chroma`) connecté à un client
+  Chroma persistant fourni par `src.utils.chroma_client.get_chroma_client`.
+- Les embeddings sont centralisés par `src.utils.chroma_client.get_embedding_model`
+  (OpenAI ou HuggingFace selon la configuration). Cela garantit que l’indexation et
+  la recherche utilisent exactement le même modèle d’embedding.
+- Insertion par lots (batching) pour de bonnes performances et une utilisation
+  mémoire maîtrisée.
+- Métadonnées nettoyées/normalisées (titres, types, sources, URL absolues/domaines
+  pour le web, identifiants, etc.).
+- Journalisation simple (progression, erreurs d’E/S ou d’indexation).
 
-    Fonctions attendues dans ce module (ou importées) :
-    - `index_documents(source_dir, source_type, client)`: effectue l’indexation
-      à partir d’un répertoire JSON (crée la collection si nécessaire).
-    - `collection_name_for(source_type)`: mappe 'docx'/'web' vers le nom
-      de collection ChromaDB (p. ex. 'base_docx' / 'base_web').
-    - `rebuild_collection_from_disk(client, source_type, source_dir)`: supprime
-      la collection puis réindexe depuis le disque (cf. docstring ci-dessous).
+Prérequis :
+- Les chemins de persistance Chroma et les noms de collections sont définis dans
+  la configuration (cf. `config.config`).
+- Si EMBEDDING_PROVIDER="openai", l’environnement doit contenir la clé
+  `OPENAI_API_KEY`.
+
+Exemple minimal :
+    from src.utils.chroma_client import get_chroma_client
+    client = get_chroma_client()
+    index_documents("data/input/poa_docx", "docx", client)
+    index_documents("data/input/web_pages", "web", client)
 --->
 
 ::: func.index_documents_chromadb
@@ -637,15 +648,13 @@ Ce module permet de localiser et lire un fichier patient stocké dans le dossier
 ---
 
 <!---
-Outils de récupération et de formatage des extraits (“chunks”) pour le RAG.
+Récupération et formatage des passages pertinents pour RAG depuis ChromaDB.
 
-Ce module interroge deux collections Chroma (DOCX prioritaire, WEB secondaire),
-sélectionne les passages pertinents, puis garde côté WEB uniquement ceux qui
-apportent une information complémentaire (TF-IDF “novelty”) et restent proches
-de la requête (similarité embeddings). Les extraits sont formatés avec des
-identifiants [DOCXn]/[WEBn], titres, sources/URLs et un fallback
-[WEB_PERTINENCE] si aucun lien web pertinent n’est retenu. Seuils et top-K
-sont pilotés par la configuration.
+Ce module interroge d’abord la collection DOCX prioritaire puis, en option,
+sélectionne des passages WEB complémentaires (filtrés par similarité requête
+et « nouveauté » TF-IDF vs DOCX). Les extraits sont normalisés et assemblés
+en texte injecté au prompt LLM. Des messages d’erreur clairs sont fournis
+(collection manquante, incompatibilité d’embeddings).
 --->
 
 ::: func.retrieve_relevant_chunks
@@ -738,15 +747,12 @@ et de les décoder pour affichage ultérieur dans l'application.
 ## 📁 Module : `utils`
 
 <!---
-Point d’accès centralisé au client Chroma avec cache et reset sûrs.
+Utilitaires centralisés pour la couche vecteur (ChromaDB).
 
-Ce module expose `get_chroma_client()` (LRU-caché) pour créer un client
-unique et cohérent sur tout le projet, ainsi que `reset_chroma_client_cache()`
-pour invalider ce cache lors des resets/rebuilds. L’objectif est d’éviter
-les handles orphelins et les états SQLite en lecture seule, en garantissant
-une seule façon d’instancier le client (p. ex. PersistentClient) et des
-chemins/flags unifiés via `config.config`. Peut inclure un logging de debug
-optionnel pour tracer les appels au client pendant l’indexation.
+Fournit un client Chroma persistant (avec cache LRU) pointant vers le dossier
+global de l’index, ainsi que des helpers pour réinitialiser le cache et tracer
+les appels (mode debug). Ce module sert de point d’entrée unique pour obtenir
+le client utilisé à l’indexation et à la recherche, afin d’assurer la cohérence.
 --->
 
 ::: utils.chroma_client

@@ -24,76 +24,76 @@
 # """
 
 # ✅ --- A utiliser si image fournie
-#services:
-#  # === Mode APP (Dash)
-#  obyia-app:
-#    image: oby-ia:v2025.10.05
-#    container_name: obyia-app
-#    command: ["./start.sh", "app"]
-#    ports:
-#      - "8050:8050"
-#    volumes:
-#      - ./outputs:/app/outputs
-#      - ./assets:/app/assets
-#    # environment:
-#    #   - APP_DEBUG=1
-#
-#  # === Mode API (Uvicorn)
-#  obyia-api:
-#    image: oby-ia:v2025.10.05
-#    container_name: obyia-api
-#    command: ["./start.sh", "api"]
-#    ports:
-#      - "8000:8000"
-#    profiles: ["api"]
-#
-#  # === Mode DOC (MkDocs)
-#  obyia-doc:
-#    image: oby-ia:v2025.10.05
-#    container_name: obyia-doc
-#    command: ["./start.sh", "doc"]
-#    ports:
-#      - "8080:8080"
-#    profiles: ["doc"]
-
-
-
-# ✅ --- A utiliser si image non fournie
 services:
-  # === Mode APP (Dash) — démarre par défaut avec: docker compose up -d
+  # === Mode APP (Dash)
   obyia-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: oby-ia:v2025.10.05
     container_name: obyia-app
-    command: ["./start.sh", "app"]   # <-- argument à start.sh
+    command: ["./start.sh", "app"]
     ports:
-      - "8050:8050"                  # hôte:conteneur
+      - "8050:8050"
     volumes:
       - ./outputs:/app/outputs
       - ./assets:/app/assets
-    # Optionnel: activer le debug Dash en local
     # environment:
     #   - APP_DEBUG=1
 
-  # === Mode API (Uvicorn) — lancer avec: docker compose --profile api up -d obyia-api
+  # === Mode API (Uvicorn)
   obyia-api:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: oby-ia:v2025.10.05
     container_name: obyia-api
-    command: ["./start.sh", "api"]   # <-- argument à start.sh
+    command: ["./start.sh", "api"]
     ports:
       - "8000:8000"
     profiles: ["api"]
 
-  # === Mode DOC (MkDocs) — lancer avec: docker compose --profile doc up -d obyia-doc
+  # === Mode DOC (MkDocs)
   obyia-doc:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: oby-ia:v2025.10.05
     container_name: obyia-doc
-    command: ["./start.sh", "doc"]   # <-- argument à start.sh
+    command: ["./start.sh", "doc"]
     ports:
       - "8080:8080"
     profiles: ["doc"]
+
+
+
+# ✅ --- A utiliser si image non fournie
+#services:
+#  # === Mode APP (Dash) — démarre par défaut avec: docker compose up -d
+#  obyia-app:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    container_name: obyia-app
+#    command: ["./start.sh", "app"]   # <-- argument à start.sh
+#    ports:
+#      - "8050:8050"                  # hôte:conteneur
+#    volumes:
+#      - ./outputs:/app/outputs
+#      - ./assets:/app/assets
+#    # Optionnel: activer le debug Dash en local
+#    # environment:
+#    #   - APP_DEBUG=1
+#
+#  # === Mode API (Uvicorn) — lancer avec: docker compose --profile api up -d obyia-api
+#  obyia-api:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    container_name: obyia-api
+#    command: ["./start.sh", "api"]   # <-- argument à start.sh
+#    ports:
+#      - "8000:8000"
+#    profiles: ["api"]
+#
+#  # === Mode DOC (MkDocs) — lancer avec: docker compose --profile doc up -d obyia-doc
+#  obyia-doc:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    container_name: obyia-doc
+#    command: ["./start.sh", "doc"]   # <-- argument à start.sh
+#    ports:
+#      - "8080:8080"
+#    profiles: ["doc"]

@@ -9,7 +9,7 @@ Module de génération de prompts pour produire des Plans Personnalisés d’Acc
 """
 
 
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 
 system_prompt = """
 
@@ -493,7 +493,7 @@ Votre réponse doit pouvoir être copiée telle quelle dans un rapport médical 
 ------------------------------- Construction du PPA
 """
 
-from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 
 def llm_prompt_template_medical_plan():
     """

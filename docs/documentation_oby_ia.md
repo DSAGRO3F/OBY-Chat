@@ -1556,18 +1556,19 @@
           - **Module appelé: retrieve_relevant_chunks.py (src/func/retrieve_relevant_chunks.py)**
             - **Fonction principale:**
               - retrieve_relevant_chunks
-                - Récupère et formatte les passages les plus pertinents à partir d'une requête utilisateur.
-                - Cette fonction interroge deux collections ChromaDB :
-                  - d'abord la collection "base_docx" (prioritaire),
-                  - puis la collection "base_web" (secondaire).
-                - Les extraits les plus proches de la requête sont sélectionnés par similarité vectorielle, puis concaténés et formatés pour être injectés dans le prompt du modèle LLM. 
+                - Récupère et formate les passages les plus pertinents depuis ChromaDB pour une requête.
+                - La fonction interroge deux collections Chroma (« base_docx » en priorité puis « base_web »), à l’aide du modèle d’embedding centralisé, puis assemble les extraits via `_format_results_with_ids`.
+                - Les passages WEB sont filtrés pour ne conserver que ceux complémentaires aux DOCX selon la similarité et un score de « nouveauté » TF-IDF.
                 - Args:
-                  - query: Requête utilisateur ou texte à rechercher.
-                  - top_k_docx: Nombre d'extraits à récupérer depuis la base documentaire "docx".
-                  - top_k_web: Nombre d'extraits à récupérer depuis la base documentaire "web".
-                  - separator: Chaîne utilisée pour séparer les extraits dans le résultat final.
+                  - query: Requête utilisateur en texte libre.
+                  - top_k_docx: Nombre d’extraits à récupérer dans la collection DOCX.
+                  - top_k_web: Nombre d’extraits à récupérer dans la collection WEB (avant filtrage).
+                  - separator: Séparateur de blocs dans la chaîne finale.
                 - Returns:
-                  - Une chaîne de texte formatée contenant les extraits les plus pertinents, chacun précédé de son titre et de sa source.
+                  - str: Un texte prêt à l’injection dans le prompt LLM, contenant d’abord les extraits DOCX retenus puis, si disponibles et pertinents, des extraits WEB étiquetés.
+                - Raises:
+                  - RuntimeError: Si l’index Chroma n’est pas prêt ou si le modèle d’embedding ne correspond pas à celui utilisé pour construire l’index (mismatch).
+                  - ValueError: Si une collection demandée est introuvable.
 
             - **Fonctions appelées:**
               - _url_norm
@@ -1587,9 +1588,24 @@
                 - Plus c'est proche de 1, plus le web est 'différent' des DOCX -> donc complémentaire.
 
               - _format_results_with_ids
-                - DOCX en premier, bornés à docx_limit.
-                - WEB complémentaires uniquement (score de nouveauté >= seuil), bornés à web_limit.
-                - Si aucun web pertinent retenu: insère un message explicite.
+                - Formate les passages DOCX et WEB en un texte unique prêt à être injecté au LLM.
+                - Les résultats DOCX (prioritaires) sont limités puis assemblés.
+                - Les résultats WEB sont filtrés pour ne conserver que les extraits complémentaires : ils doivent être suffisamment similaires à la requête (seuil de similarité) et présenter une « nouveauté » TF-IDF par rapport à l’agrégat DOCX comprise dans l’intervalle [nov_min, nov_max].
+                - Chaque extrait est tronqué, étiqueté ([DOCXn]/[WEBn]) et accompagné de ses métadonnées (titre, source, url/site si disponible).
+                - Args:
+                  - results_docx: Liste d’objets `Document` (ou équivalents) issus de la collection DOCX.
+                  - results_web: Liste d’objets `Document` (ou équivalents) issus de la collection WEB.
+                  - docx_limit: Nombre maximal d’extraits DOCX à conserver (par défaut: DOCX_TOPK).
+                  - web_limit: Nombre maximal d’extraits WEB à conserver après filtrage (par défaut: WEB_TOPK).
+                  - separator: Chaîne utilisée pour séparer les blocs formatés dans la sortie.
+                  - query: Requête utilisateur utilisée pour calculer la similarité requête↔WEB.
+                  - embedding_model: Modèle d’embedding (optionnel) pour la similarité requête↔WEB.
+                  - sim_threshold: Seuil minimal de similarité requête↔WEB pour garder un extrait WEB.
+                  - nov_min: Borne inférieure de l’intervalle de « nouveauté » TF-IDF (complémentarité minimale).
+                  - nov_max: Borne supérieure de l’intervalle de « nouveauté » TF-IDF (évite les hors-sujet).
+                - Returns:
+                  - str: Un texte concaténé contenant, dans l’ordre, les extraits DOCX retenus puis les extraits WEB complémentaires.
+                  - Si aucun lien WEB pertinent n’est retenu et que `web_limit > 0`, un bloc d’information l’indique explicitement.
 
       - deanonymize_fields 
         - Remplace dans 'text' toutes les valeurs anonymisées par leurs valeurs originales en utilisant le mapping {anonymisé -> original}. 
@@ -1739,7 +1755,7 @@
           - `docx_deleted_files`: liste des DOCX supprimés depuis le dernier journal
           - `web_deleted_files`: liste des JSON web supprimés depuis le dernier journal
 
-      - rebuild_collection_from_disk (src/func/index_documents_chromadb.py)
+      - **rebuild_collection_from_disk (src/func/index_documents_chromadb.py)**
         - Reconstruit entièrement la collection ChromaDB d’un type donné.
         - Objectif: 
           - garantir la cohérence parfaite entre l’état disque (répertoire JSON) et l’index ChromaDB (par ex. après suppressions de fichiers, changements de configuration des sites, migration d’embedding, etc.). 
@@ -1754,6 +1770,18 @@
           - Exception: si la suppression ou la réindexation échoue (erreurs du client ChromaDB ou d’E/S remontées telles quelles).
         - Returns:
           - None
+        - **Fonction appelée par rebuild_collection_from_disk (src/func/index_documents_chromadb.py)**
+          - index_documents(src/func/index_documents_chromadb.py)
+            - Indexe des fichiers JSON dans la collection Chroma correspondant au type de source.
+            - Pour `source_type="docx"`, lit `texte_complet` et ses métadonnées par fiche, puis ajoute les passages à la collection DOCX.
+            - Pour `source_type="web"`, lit les `sections[].texte`, normalise l’URL/le domaine si disponibles, puis ajoute les passages à la collection WEB.
+            - L’embedding utilisé est centralisé afin d’assurer la cohérence avec la phase de recherche.
+            - Args:
+              - source_dir: Chemin du répertoire contenant les fichiers JSON à indexer.
+              - source_type: Type de contenu à indexer ("docx" ou "web").
+              - client: Client Chroma persistant. S’il est None, un client sera obtenu via la fabrique interne.
+            - Returns:
+              - None. La progression, le nombre d’éléments indexés et les erreurs éventuelles sont journalisés.
 
       - convert_fiches_docx_to_json (src/utils/convert_fiches_docx_to_json.py)
         - Convertit toutes les fiches DOCX d’un répertoire en dictionnaires JSON.
@@ -1825,23 +1853,9 @@
 
       - get_chroma_client (src/utils/chroma_client.py)
         - Point d’accès centralisé au client Chroma avec cache et reset sûrs.
-        - Ce module expose `get_chroma_client()` (LRU-caché) pour créer un client unique et cohérent sur tout le projet, ainsi que `reset_chroma_client_cache()`pour invalider ce cache lors des resets/rebuilds. L’objectif est d’éviter les handles orphelins et les états SQLite en lecture seule, en garantissant une seule façon d’instancier le client (p. ex. PersistentClient) et des chemins/flags unifiés via `config.config`.
+        - Ce module expose `get_chroma_client()` (LRU-caché) pour créer un client unique et cohérent sur tout le projet, ainsi que `reset_chroma_client_cache()`pour invalider ce cache lors des resets/rebuilds.
+        - L’objectif est d’éviter les handles orphelins et les états SQLite en lecture seule, en garantissant une seule façon d’instancier le client (p. ex. PersistentClient) et des chemins/flags unifiés via `config.config`.
         - Peut inclure un logging de debug optionnel pour tracer les appels au client pendant l’indexation.
-
-      - index_documents (src/func/index_documents_chromadb.py)
-        - Indexe les documents JSON contenus dans un répertoire dans une collection ChromaDB.
-        - Chaque document est découpé en sections (ou chunk unique dans le cas d'un fichier DOCX complet), puis inséré dans une base vectorielle avec ses métadonnées.
-        - Args:
-          - source_dir (str): Chemin du dossier contenant les fichiers JSON à indexer.
-          - source_type (str): Type de document à indexer, soit 'docx' soit 'web'.
-          - client (Client): Instance du client ChromaDB utilisée pour la persistance des données.
-        - Entrées :
-          - source_dir (str) : Dossier contenant les fichiers JSON.
-          - source_type (str) : 'docx' ou 'web' (détermine la collection cible).
-          - Sorties :
-            - Indexation des chunks dans une collection nommée selon la source.
-        - Raises:
-          - ValueError: Si le type de source est invalide (autre que 'docx' ou 'web').
 
       - is_chroma_index_ready (src/utils/vector_db_utils.py)
         - Vérifie si le fichier 'index_ready.flag' existe dans le dossier vectoriel.
